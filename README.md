@@ -49,6 +49,7 @@ python -m venv .venv && .venv/Scripts/pip install -r requirements.txt   # Window
 # 4) Tests
 .venv/Scripts/python.exe -m pytest
 ```
+![Description of PNG](image/Terminal.png)
 
 ## Sessions (switch from the web UI)
 
@@ -144,7 +145,6 @@ dashboard's validation table. See the report for usage.
 * [`how_to_run.md`](how_to_run.md) — run commands
 * [`GraphRAG Insurance Claims System - Production-Ready Plan.md`](GraphRAG%20Insurance%20Claims%20System%20-%20Production-Ready%20Plan.md) — the original plan
 
-![Description of PNG](image/Terminal.png)
 
 ## Repository layout
 
