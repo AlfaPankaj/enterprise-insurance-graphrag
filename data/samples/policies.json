@@ -1,0 +1,4402 @@
+[
+  {
+    "id": "POL-0001",
+    "policy_number": "CGL-2024-0001",
+    "type": "COMMERCIAL_GENERAL_LIABILITY",
+    "start_date": "2024-11-23",
+    "end_date": "2025-11-23",
+    "premium": 52540.0,
+    "deductible": 1000.0,
+    "status": "ACTIVE",
+    "policyholder": {
+      "id": "PH-0001",
+      "name": "Shannon Ray",
+      "dob": "1960-05-05",
+      "address": "1316 Chavez Village, Franciscostad, IL 88342",
+      "phone": "719-228-3276x483",
+      "email": "lydiatrujillo@example.com",
+      "risk_score": 7.9
+    },
+    "coverages": [
+      {
+        "id": "COV-0001",
+        "code": "CGL-A",
+        "category": "LIABILITY",
+        "limit": 1000000.0,
+        "deductible": 1000.0,
+        "exclusions": [
+          "Intentional acts",
+          "War and terrorism"
+        ]
+      },
+      {
+        "id": "COV-0002",
+        "code": "CGL-B",
+        "category": "LIABILITY",
+        "limit": 2000000.0,
+        "deductible": 1000.0,
+        "exclusions": [
+          "Intentional acts"
+        ]
+      }
+    ],
+    "endorsements": []
+  },
+  {
+    "id": "POL-0002",
+    "policy_number": "CGL-2023-0002",
+    "type": "COMMERCIAL_GENERAL_LIABILITY",
+    "start_date": "2023-08-12",
+    "end_date": "2024-08-11",
+    "premium": 19247.0,
+    "deductible": 1000.0,
+    "status": "ACTIVE",
+    "policyholder": {
+      "id": "PH-0002",
+      "name": "Daniel Hahn",
+      "dob": "1977-01-09",
+      "address": "7242 Julie Plain Suite 969, Coxberg, NY 65187",
+      "phone": "801-922-6916",
+      "email": "tasha01@example.net",
+      "risk_score": 69.4
+    },
+    "coverages": [
+      {
+        "id": "COV-0005",
+        "code": "CGL-A",
+        "category": "LIABILITY",
+        "limit": 1000000.0,
+        "deductible": 1000.0,
+        "exclusions": [
+          "Intentional acts",
+          "War and terrorism"
+        ]
+      },
+      {
+        "id": "COV-0006",
+        "code": "CGL-B",
+        "category": "LIABILITY",
+        "limit": 2000000.0,
+        "deductible": 1000.0,
+        "exclusions": [
+          "Intentional acts"
+        ]
+      }
+    ],
+    "endorsements": []
+  },
+  {
+    "id": "POL-0003",
+    "policy_number": "PL-2024-0003",
+    "type": "PROFESSIONAL_LIABILITY",
+    "start_date": "2024-03-05",
+    "end_date": "2025-03-05",
+    "premium": 18446.0,
+    "deductible": 10000.0,
+    "status": "ACTIVE",
+    "policyholder": {
+      "id": "PH-0003",
+      "name": "Nicole Mack",
+      "dob": "1978-10-05",
+      "address": "70482 Monica Hills Apt. 252, New Mariotown, DE 48077",
+      "phone": "430-639-1171x8227",
+      "email": "ibrandt@example.net",
+      "risk_score": 77.8
+    },
+    "coverages": [
+      {
+        "id": "COV-0009",
+        "code": "PL-A",
+        "category": "ERRORS_OMISSIONS",
+        "limit": 3000000.0,
+        "deductible": 10000.0,
+        "exclusions": [
+          "Intentional acts",
+          "War and terrorism"
+        ]
+      }
+    ],
+    "endorsements": [
+      {
+        "id": "END-0004",
+        "endorsement_number": "END-2024-0004",
+        "policy_id": "POL-0003",
+        "type": "EXCLUSION_ADDED",
+        "effective_date": "2024-07-13",
+        "clause": "This endorsement amends policy PL-2024-0003. Exclusion Added effective 2024-07-13. All other terms and conditions remain unchanged.",
+        "premium_adjustment": -250.0
+      }
+    ]
+  },
+  {
+    "id": "POL-0004",
+    "policy_number": "CGL-2025-0004",
+    "type": "COMMERCIAL_GENERAL_LIABILITY",
+    "start_date": "2025-02-16",
+    "end_date": "2026-02-16",
+    "premium": 56810.0,
+    "deductible": 2500.0,
+    "status": "ACTIVE",
+    "policyholder": {
+      "id": "PH-0004",
+      "name": "Michelle Ross",
+      "dob": "2001-04-26",
+      "address": "713 Caleb Brooks Apt. 930, Lake Crystalbury, CA 04618",
+      "phone": "818-534-7382x99737",
+      "email": "davisryan@example.com",
+      "risk_score": 35.6
+    },
+    "coverages": [
+      {
+        "id": "COV-0013",
+        "code": "CGL-A",
+        "category": "LIABILITY",
+        "limit": 1000000.0,
+        "deductible": 2500.0,
+        "exclusions": [
+          "Intentional acts",
+          "War and terrorism"
+        ]
+      },
+      {
+        "id": "COV-0014",
+        "code": "CGL-B",
+        "category": "LIABILITY",
+        "limit": 2000000.0,
+        "deductible": 2500.0,
+        "exclusions": [
+          "Intentional acts"
+        ]
+      }
+    ],
+    "endorsements": []
+  },
+  {
+    "id": "POL-0005",
+    "policy_number": "CP-2023-0005",
+    "type": "COMMERCIAL_PROPERTY",
+    "start_date": "2023-08-09",
+    "end_date": "2024-08-08",
+    "premium": 54036.0,
+    "deductible": 5000.0,
+    "status": "ACTIVE",
+    "policyholder": {
+      "id": "PH-0005",
+      "name": "Scott Brown",
+      "dob": "2000-01-29",
+      "address": "Unit 1065 Box 1333, DPO AP 59301",
+      "phone": "(362)247-3178",
+      "email": "novaksara@example.org",
+      "risk_score": 39.2
+    },
+    "coverages": [
+      {
+        "id": "COV-0017",
+        "code": "CPP-A",
+        "category": "PROPERTY",
+        "limit": 5000000.0,
+        "deductible": 5000.0,
+        "exclusions": [
+          "Intentional acts",
+          "War and terrorism"
+        ]
+      },
+      {
+        "id": "COV-0018",
+        "code": "CPP-B",
+        "category": "PROPERTY",
+        "limit": 2000000.0,
+        "deductible": 5000.0,
+        "exclusions": [
+          "Intentional acts"
+        ]
+      }
+    ],
+    "endorsements": [
+      {
+        "id": "END-0023",
+        "endorsement_number": "END-2024-0023",
+        "policy_id": "POL-0005",
+        "type": "EXCLUSION_ADDED",
+        "effective_date": "2024-06-10",
+        "clause": "This endorsement amends policy CP-2023-0005. Exclusion Added effective 2024-06-10. All other terms and conditions remain unchanged.",
+        "premium_adjustment": 1000.0
+      }
+    ]
+  },
+  {
+    "id": "POL-0006",
+    "policy_number": "WC-2025-0006",
+    "type": "WORKERS_COMPENSATION",
+    "start_date": "2025-05-17",
+    "end_date": "2026-05-17",
+    "premium": 26541.0,
+    "deductible": 5000.0,
+    "status": "EXPIRED",
+    "policyholder": {
+      "id": "PH-0006",
+      "name": "John Lewis",
+      "dob": "1982-11-25",
+      "address": "PSC 2606, Box 4746, APO AP 96249",
+      "phone": "+1-272-734-3098",
+      "email": "williamsthomas@example.net",
+      "risk_score": 70.7
+    },
+    "coverages": [
+      {
+        "id": "COV-0021",
+        "code": "WC-A",
+        "category": "EMPLOYEE_INJURY",
+        "limit": 1000000.0,
+        "deductible": 5000.0,
+        "exclusions": [
+          "Intentional acts",
+          "War and terrorism"
+        ]
+      }
+    ],
+    "endorsements": [
+      {
+        "id": "END-0006",
+        "endorsement_number": "END-2025-0006",
+        "policy_id": "POL-0006",
+        "type": "EXCLUSION_ADDED",
+        "effective_date": "2025-11-09",
+        "clause": "This endorsement amends policy WC-2025-0006. Exclusion Added effective 2025-11-09. All other terms and conditions remain unchanged.",
+        "premium_adjustment": 1000.0
+      },
+      {
+        "id": "END-0025",
+        "endorsement_number": "END-2025-0025",
+        "policy_id": "POL-0006",
+        "type": "EXCLUSION_ADDED",
+        "effective_date": "2025-12-27",
+        "clause": "This endorsement amends policy WC-2025-0006. Exclusion Added effective 2025-12-27. All other terms and conditions remain unchanged.",
+        "premium_adjustment": 0.0
+      }
+    ]
+  },
+  {
+    "id": "POL-0007",
+    "policy_number": "PL-2023-0007",
+    "type": "PROFESSIONAL_LIABILITY",
+    "start_date": "2023-05-08",
+    "end_date": "2024-05-07",
+    "premium": 28807.0,
+    "deductible": 1000.0,
+    "status": "ACTIVE",
+    "policyholder": {
+      "id": "PH-0007",
+      "name": "Tyler Miller",
+      "dob": "1968-04-03",
+      "address": "361 Beth Canyon, South Dianeshire, NC 41968",
+      "phone": "935-334-6247x510",
+      "email": "medinawilliam@example.org",
+      "risk_score": 79.6
+    },
+    "coverages": [
+      {
+        "id": "COV-0025",
+        "code": "PL-A",
+        "category": "ERRORS_OMISSIONS",
+        "limit": 3000000.0,
+        "deductible": 1000.0,
+        "exclusions": [
+          "Intentional acts",
+          "War and terrorism"
+        ]
+      }
+    ],
+    "endorsements": []
+  },
+  {
+    "id": "POL-0008",
+    "policy_number": "PL-2025-0008",
+    "type": "PROFESSIONAL_LIABILITY",
+    "start_date": "2025-06-25",
+    "end_date": "2026-06-25",
+    "premium": 27700.0,
+    "deductible": 2500.0,
+    "status": "EXPIRED",
+    "policyholder": {
+      "id": "PH-0008",
+      "name": "Shirley Suarez",
+      "dob": "1980-10-03",
+      "address": "498 Elizabeth Plaza Suite 124, North Juliaberg, KY 37431",
+      "phone": "+1-235-234-8740x164",
+      "email": "kellie42@example.net",
+      "risk_score": 9.1
+    },
+    "coverages": [
+      {
+        "id": "COV-0029",
+        "code": "PL-A",
+        "category": "ERRORS_OMISSIONS",
+        "limit": 3000000.0,
+        "deductible": 2500.0,
+        "exclusions": [
+          "Intentional acts",
+          "War and terrorism"
+        ]
+      }
+    ],
+    "endorsements": [
+      {
+        "id": "END-0032",
+        "endorsement_number": "END-2026-0032",
+        "policy_id": "POL-0008",
+        "type": "NAMED_PARTY_ADDED",
+        "effective_date": "2026-04-23",
+        "clause": "This endorsement amends policy PL-2025-0008. Named Party Added effective 2026-04-23. All other terms and conditions remain unchanged.",
+        "premium_adjustment": 1000.0
+      }
+    ]
+  },
+  {
+    "id": "POL-0009",
+    "policy_number": "CP-2025-0009",
+    "type": "COMMERCIAL_PROPERTY",
+    "start_date": "2025-03-02",
+    "end_date": "2026-03-02",
+    "premium": 22965.0,
+    "deductible": 1000.0,
+    "status": "EXPIRED",
+    "policyholder": {
+      "id": "PH-0009",
+      "name": "Michael Hoffman",
+      "dob": "1963-03-23",
+      "address": "059 Russell Canyon, Michaelton, MH 47399",
+      "phone": "431.458.6923",
+      "email": "vjohnson@example.com",
+      "risk_score": 83.0
+    },
+    "coverages": [
+      {
+        "id": "COV-0033",
+        "code": "CPP-A",
+        "category": "PROPERTY",
+        "limit": 5000000.0,
+        "deductible": 1000.0,
+        "exclusions": [
+          "Intentional acts",
+          "War and terrorism"
+        ]
+      },
+      {
+        "id": "COV-0034",
+        "code": "CPP-B",
+        "category": "PROPERTY",
+        "limit": 2000000.0,
+        "deductible": 1000.0,
+        "exclusions": [
+          "Intentional acts"
+        ]
+      }
+    ],
+    "endorsements": [
+      {
+        "id": "END-0007",
+        "endorsement_number": "END-2025-0007",
+        "policy_id": "POL-0009",
+        "type": "NAMED_PARTY_ADDED",
+        "effective_date": "2025-04-01",
+        "clause": "This endorsement amends policy CP-2025-0009. Named Party Added effective 2025-04-01. All other terms and conditions remain unchanged.",
+        "premium_adjustment": -250.0
+      }
+    ]
+  },
+  {
+    "id": "POL-0010",
+    "policy_number": "AF-2023-0010",
+    "type": "AUTO_FLEET",
+    "start_date": "2023-10-12",
+    "end_date": "2024-10-11",
+    "premium": 33714.0,
+    "deductible": 5000.0,
+    "status": "ACTIVE",
+    "policyholder": {
+      "id": "PH-0010",
+      "name": "Jennifer Santiago",
+      "dob": "1972-07-01",
+      "address": "0733 Bailey View, East Andrew, ID 52728",
+      "phone": "641-245-8685x01429",
+      "email": "carlsonmichael@example.com",
+      "risk_score": 37.0
+    },
+    "coverages": [
+      {
+        "id": "COV-0037",
+        "code": "AF-A",
+        "category": "AUTO",
+        "limit": 1000000.0,
+        "deductible": 5000.0,
+        "exclusions": [
+          "Intentional acts",
+          "War and terrorism"
+        ]
+      },
+      {
+        "id": "COV-0038",
+        "code": "AF-B",
+        "category": "AUTO",
+        "limit": 500000.0,
+        "deductible": 5000.0,
+        "exclusions": [
+          "Intentional acts"
+        ]
+      }
+    ],
+    "endorsements": [
+      {
+        "id": "END-0047",
+        "endorsement_number": "END-2024-0047",
+        "policy_id": "POL-0010",
+        "type": "LIMIT_INCREASE",
+        "effective_date": "2024-08-07",
+        "clause": "This endorsement amends policy AF-2023-0010. Limit Increase effective 2024-08-07. All other terms and conditions remain unchanged.",
+        "premium_adjustment": 1000.0
+      }
+    ]
+  },
+  {
+    "id": "POL-0011",
+    "policy_number": "WC-2024-0011",
+    "type": "WORKERS_COMPENSATION",
+    "start_date": "2024-12-19",
+    "end_date": "2025-12-19",
+    "premium": 48796.0,
+    "deductible": 1000.0,
+    "status": "ACTIVE",
+    "policyholder": {
+      "id": "PH-0011",
+      "name": "William Wilson",
+      "dob": "1994-11-06",
+      "address": "608 Michael Cliff, Cindyville, VA 39864",
+      "phone": "646.856.4823x66299",
+      "email": "torresjason@example.net",
+      "risk_score": 20.4
+    },
+    "coverages": [
+      {
+        "id": "COV-0041",
+        "code": "WC-A",
+        "category": "EMPLOYEE_INJURY",
+        "limit": 1000000.0,
+        "deductible": 1000.0,
+        "exclusions": [
+          "Intentional acts",
+          "War and terrorism"
+        ]
+      }
+    ],
+    "endorsements": []
+  },
+  {
+    "id": "POL-0012",
+    "policy_number": "CP-2023-0012",
+    "type": "COMMERCIAL_PROPERTY",
+    "start_date": "2023-06-17",
+    "end_date": "2024-06-16",
+    "premium": 34294.0,
+    "deductible": 10000.0,
+    "status": "ACTIVE",
+    "policyholder": {
+      "id": "PH-0012",
+      "name": "Erica Ramos",
+      "dob": "2001-08-02",
+      "address": "214 Davis Terrace Apt. 433, North Brandon, NJ 80621",
+      "phone": "001-517-469-3676x32016",
+      "email": "pwilliams@example.org",
+      "risk_score": 88.3
+    },
+    "coverages": [
+      {
+        "id": "COV-0045",
+        "code": "CPP-A",
+        "category": "PROPERTY",
+        "limit": 5000000.0,
+        "deductible": 10000.0,
+        "exclusions": [
+          "Intentional acts",
+          "War and terrorism"
+        ]
+      },
+      {
+        "id": "COV-0046",
+        "code": "CPP-B",
+        "category": "PROPERTY",
+        "limit": 2000000.0,
+        "deductible": 10000.0,
+        "exclusions": [
+          "Intentional acts"
+        ]
+      }
+    ],
+    "endorsements": []
+  },
+  {
+    "id": "POL-0013",
+    "policy_number": "PL-2023-0013",
+    "type": "PROFESSIONAL_LIABILITY",
+    "start_date": "2023-08-13",
+    "end_date": "2024-08-12",
+    "premium": 48866.0,
+    "deductible": 5000.0,
+    "status": "EXPIRED",
+    "policyholder": {
+      "id": "PH-0013",
+      "name": "Robert Contreras",
+      "dob": "1993-08-24",
+      "address": "868 Merritt Summit Suite 743, Katiehaven, NM 82650",
+      "phone": "347.414.3455",
+      "email": "jessebenson@example.net",
+      "risk_score": 74.8
+    },
+    "coverages": [
+      {
+        "id": "COV-0049",
+        "code": "PL-A",
+        "category": "ERRORS_OMISSIONS",
+        "limit": 3000000.0,
+        "deductible": 5000.0,
+        "exclusions": [
+          "Intentional acts",
+          "War and terrorism"
+        ]
+      }
+    ],
+    "endorsements": []
+  },
+  {
+    "id": "POL-0014",
+    "policy_number": "CP-2025-0014",
+    "type": "COMMERCIAL_PROPERTY",
+    "start_date": "2025-04-21",
+    "end_date": "2026-04-21",
+    "premium": 6103.0,
+    "deductible": 5000.0,
+    "status": "ACTIVE",
+    "policyholder": {
+      "id": "PH-0014",
+      "name": "Jason Rivera",
+      "dob": "1987-04-26",
+      "address": "6909 Woods Knoll, Karenchester, ND 98479",
+      "phone": "001-489-937-3467x0656",
+      "email": "tinaferguson@example.com",
+      "risk_score": 11.0
+    },
+    "coverages": [
+      {
+        "id": "COV-0053",
+        "code": "CPP-A",
+        "category": "PROPERTY",
+        "limit": 5000000.0,
+        "deductible": 5000.0,
+        "exclusions": [
+          "Intentional acts",
+          "War and terrorism"
+        ]
+      },
+      {
+        "id": "COV-0054",
+        "code": "CPP-B",
+        "category": "PROPERTY",
+        "limit": 2000000.0,
+        "deductible": 5000.0,
+        "exclusions": [
+          "Intentional acts"
+        ]
+      }
+    ],
+    "endorsements": []
+  },
+  {
+    "id": "POL-0015",
+    "policy_number": "PL-2025-0015",
+    "type": "PROFESSIONAL_LIABILITY",
+    "start_date": "2025-06-16",
+    "end_date": "2026-06-16",
+    "premium": 51049.0,
+    "deductible": 5000.0,
+    "status": "ACTIVE",
+    "policyholder": {
+      "id": "PH-0015",
+      "name": "Mary Miller",
+      "dob": "1984-10-11",
+      "address": "04653 Murphy Trace Suite 464, South Andrewside, AR 46371",
+      "phone": "510.403.3092",
+      "email": "kcaldwell@example.org",
+      "risk_score": 49.9
+    },
+    "coverages": [
+      {
+        "id": "COV-0057",
+        "code": "PL-A",
+        "category": "ERRORS_OMISSIONS",
+        "limit": 3000000.0,
+        "deductible": 5000.0,
+        "exclusions": [
+          "Intentional acts",
+          "War and terrorism"
+        ]
+      }
+    ],
+    "endorsements": []
+  },
+  {
+    "id": "POL-0016",
+    "policy_number": "AF-2023-0016",
+    "type": "AUTO_FLEET",
+    "start_date": "2023-05-27",
+    "end_date": "2024-05-26",
+    "premium": 21359.0,
+    "deductible": 2500.0,
+    "status": "ACTIVE",
+    "policyholder": {
+      "id": "PH-0016",
+      "name": "David Wood",
+      "dob": "1996-11-03",
+      "address": "41904 Sanders Stravenue, North Brittany, MP 82714",
+      "phone": "814.791.9058",
+      "email": "huntermatthew@example.com",
+      "risk_score": 55.5
+    },
+    "coverages": [
+      {
+        "id": "COV-0061",
+        "code": "AF-A",
+        "category": "AUTO",
+        "limit": 1000000.0,
+        "deductible": 2500.0,
+        "exclusions": [
+          "Intentional acts",
+          "War and terrorism"
+        ]
+      },
+      {
+        "id": "COV-0062",
+        "code": "AF-B",
+        "category": "AUTO",
+        "limit": 500000.0,
+        "deductible": 2500.0,
+        "exclusions": [
+          "Intentional acts"
+        ]
+      }
+    ],
+    "endorsements": []
+  },
+  {
+    "id": "POL-0017",
+    "policy_number": "WC-2025-0017",
+    "type": "WORKERS_COMPENSATION",
+    "start_date": "2025-02-03",
+    "end_date": "2026-02-03",
+    "premium": 42311.0,
+    "deductible": 10000.0,
+    "status": "EXPIRED",
+    "policyholder": {
+      "id": "PH-0017",
+      "name": "Ashley Yu",
+      "dob": "1998-11-11",
+      "address": "262 Gilbert Plain Suite 769, Marcusbury, MP 11860",
+      "phone": "973-579-9650x752",
+      "email": "lauren54@example.net",
+      "risk_score": 40.9
+    },
+    "coverages": [
+      {
+        "id": "COV-0065",
+        "code": "WC-A",
+        "category": "EMPLOYEE_INJURY",
+        "limit": 1000000.0,
+        "deductible": 10000.0,
+        "exclusions": [
+          "Intentional acts",
+          "War and terrorism"
+        ]
+      }
+    ],
+    "endorsements": []
+  },
+  {
+    "id": "POL-0018",
+    "policy_number": "CP-2023-0018",
+    "type": "COMMERCIAL_PROPERTY",
+    "start_date": "2023-05-22",
+    "end_date": "2024-05-21",
+    "premium": 37392.0,
+    "deductible": 10000.0,
+    "status": "ACTIVE",
+    "policyholder": {
+      "id": "PH-0018",
+      "name": "Desiree Smith",
+      "dob": "1968-08-11",
+      "address": "8377 Mcguire Course Suite 363, Elizabethstad, NJ 73045",
+      "phone": "356.485.5744x43135",
+      "email": "javierwashington@example.net",
+      "risk_score": 9.2
+    },
+    "coverages": [
+      {
+        "id": "COV-0069",
+        "code": "CPP-A",
+        "category": "PROPERTY",
+        "limit": 5000000.0,
+        "deductible": 10000.0,
+        "exclusions": [
+          "Intentional acts",
+          "War and terrorism"
+        ]
+      },
+      {
+        "id": "COV-0070",
+        "code": "CPP-B",
+        "category": "PROPERTY",
+        "limit": 2000000.0,
+        "deductible": 10000.0,
+        "exclusions": [
+          "Intentional acts"
+        ]
+      }
+    ],
+    "endorsements": []
+  },
+  {
+    "id": "POL-0019",
+    "policy_number": "CGL-2023-0019",
+    "type": "COMMERCIAL_GENERAL_LIABILITY",
+    "start_date": "2023-06-06",
+    "end_date": "2024-06-05",
+    "premium": 45120.0,
+    "deductible": 2500.0,
+    "status": "EXPIRED",
+    "policyholder": {
+      "id": "PH-0019",
+      "name": "Paige Carlson",
+      "dob": "1962-06-14",
+      "address": "52408 Joshua Center Suite 271, New Justinfort, NV 45158",
+      "phone": "(204)471-1671",
+      "email": "lisaavery@example.org",
+      "risk_score": 43.0
+    },
+    "coverages": [
+      {
+        "id": "COV-0073",
+        "code": "CGL-A",
+        "category": "LIABILITY",
+        "limit": 1000000.0,
+        "deductible": 2500.0,
+        "exclusions": [
+          "Intentional acts",
+          "War and terrorism"
+        ]
+      },
+      {
+        "id": "COV-0074",
+        "code": "CGL-B",
+        "category": "LIABILITY",
+        "limit": 2000000.0,
+        "deductible": 2500.0,
+        "exclusions": [
+          "Intentional acts"
+        ]
+      }
+    ],
+    "endorsements": []
+  },
+  {
+    "id": "POL-0020",
+    "policy_number": "CGL-2024-0020",
+    "type": "COMMERCIAL_GENERAL_LIABILITY",
+    "start_date": "2024-01-30",
+    "end_date": "2025-01-29",
+    "premium": 29009.0,
+    "deductible": 10000.0,
+    "status": "ACTIVE",
+    "policyholder": {
+      "id": "PH-0020",
+      "name": "Bailey Duran DDS",
+      "dob": "1997-09-10",
+      "address": "7496 Carroll Circle Apt. 334, East Johnside, CA 21018",
+      "phone": "6679974034",
+      "email": "mcdanielsandra@example.net",
+      "risk_score": 92.4
+    },
+    "coverages": [
+      {
+        "id": "COV-0077",
+        "code": "CGL-A",
+        "category": "LIABILITY",
+        "limit": 1000000.0,
+        "deductible": 10000.0,
+        "exclusions": [
+          "Intentional acts",
+          "War and terrorism"
+        ]
+      },
+      {
+        "id": "COV-0078",
+        "code": "CGL-B",
+        "category": "LIABILITY",
+        "limit": 2000000.0,
+        "deductible": 10000.0,
+        "exclusions": [
+          "Intentional acts"
+        ]
+      }
+    ],
+    "endorsements": [
+      {
+        "id": "END-0019",
+        "endorsement_number": "END-2024-0019",
+        "policy_id": "POL-0020",
+        "type": "DEDUCTIBLE_CHANGE",
+        "effective_date": "2024-05-05",
+        "clause": "This endorsement amends policy CGL-2024-0020. Deductible Change effective 2024-05-05. All other terms and conditions remain unchanged.",
+        "premium_adjustment": 1000.0
+      },
+      {
+        "id": "END-0037",
+        "endorsement_number": "END-2024-0037",
+        "policy_id": "POL-0020",
+        "type": "DEDUCTIBLE_CHANGE",
+        "effective_date": "2024-08-09",
+        "clause": "This endorsement amends policy CGL-2024-0020. Deductible Change effective 2024-08-09. All other terms and conditions remain unchanged.",
+        "premium_adjustment": 0.0
+      }
+    ]
+  },
+  {
+    "id": "POL-0021",
+    "policy_number": "CGL-2024-0021",
+    "type": "COMMERCIAL_GENERAL_LIABILITY",
+    "start_date": "2024-11-27",
+    "end_date": "2025-11-27",
+    "premium": 51233.0,
+    "deductible": 1000.0,
+    "status": "ACTIVE",
+    "policyholder": {
+      "id": "PH-0021",
+      "name": "Regina Gonzalez",
+      "dob": "1963-06-03",
+      "address": "2102 Larson Views, Scottmouth, UT 40358",
+      "phone": "001-664-288-7719x065",
+      "email": "perezemily@example.net",
+      "risk_score": 53.3
+    },
+    "coverages": [
+      {
+        "id": "COV-0081",
+        "code": "CGL-A",
+        "category": "LIABILITY",
+        "limit": 1000000.0,
+        "deductible": 1000.0,
+        "exclusions": [
+          "Intentional acts",
+          "War and terrorism"
+        ]
+      },
+      {
+        "id": "COV-0082",
+        "code": "CGL-B",
+        "category": "LIABILITY",
+        "limit": 2000000.0,
+        "deductible": 1000.0,
+        "exclusions": [
+          "Intentional acts"
+        ]
+      }
+    ],
+    "endorsements": []
+  },
+  {
+    "id": "POL-0022",
+    "policy_number": "WC-2025-0022",
+    "type": "WORKERS_COMPENSATION",
+    "start_date": "2025-02-26",
+    "end_date": "2026-02-26",
+    "premium": 46006.0,
+    "deductible": 5000.0,
+    "status": "ACTIVE",
+    "policyholder": {
+      "id": "PH-0022",
+      "name": "Alicia Hubbard",
+      "dob": "1973-12-13",
+      "address": "8742 Walters Overpass, South Michaelmouth, MD 88336",
+      "phone": "925-367-4680",
+      "email": "johnny16@example.net",
+      "risk_score": 44.1
+    },
+    "coverages": [
+      {
+        "id": "COV-0085",
+        "code": "WC-A",
+        "category": "EMPLOYEE_INJURY",
+        "limit": 1000000.0,
+        "deductible": 5000.0,
+        "exclusions": [
+          "Intentional acts",
+          "War and terrorism"
+        ]
+      }
+    ],
+    "endorsements": []
+  },
+  {
+    "id": "POL-0023",
+    "policy_number": "AF-2023-0023",
+    "type": "AUTO_FLEET",
+    "start_date": "2023-01-04",
+    "end_date": "2024-01-04",
+    "premium": 51323.0,
+    "deductible": 5000.0,
+    "status": "LAPSED",
+    "policyholder": {
+      "id": "PH-0023",
+      "name": "April Booth",
+      "dob": "1987-01-18",
+      "address": "597 Wolf Ford, Andreaport, NV 92022",
+      "phone": "310.993.2480x8613",
+      "email": "hollanderic@example.net",
+      "risk_score": 73.6
+    },
+    "coverages": [
+      {
+        "id": "COV-0089",
+        "code": "AF-A",
+        "category": "AUTO",
+        "limit": 1000000.0,
+        "deductible": 5000.0,
+        "exclusions": [
+          "Intentional acts",
+          "War and terrorism"
+        ]
+      },
+      {
+        "id": "COV-0090",
+        "code": "AF-B",
+        "category": "AUTO",
+        "limit": 500000.0,
+        "deductible": 5000.0,
+        "exclusions": [
+          "Intentional acts"
+        ]
+      }
+    ],
+    "endorsements": [
+      {
+        "id": "END-0033",
+        "endorsement_number": "END-2023-0033",
+        "policy_id": "POL-0023",
+        "type": "LOCATION_ADDED",
+        "effective_date": "2023-12-17",
+        "clause": "This endorsement amends policy AF-2023-0023. Location Added effective 2023-12-17. All other terms and conditions remain unchanged.",
+        "premium_adjustment": 500.0
+      }
+    ]
+  },
+  {
+    "id": "POL-0024",
+    "policy_number": "PL-2023-0024",
+    "type": "PROFESSIONAL_LIABILITY",
+    "start_date": "2023-04-19",
+    "end_date": "2024-04-18",
+    "premium": 44979.0,
+    "deductible": 5000.0,
+    "status": "EXPIRED",
+    "policyholder": {
+      "id": "PH-0024",
+      "name": "Michael Perry",
+      "dob": "1988-06-11",
+      "address": "Unit 3782 Box 6398, DPO AP 18393",
+      "phone": "946-458-4044",
+      "email": "wryan@example.com",
+      "risk_score": 50.7
+    },
+    "coverages": [
+      {
+        "id": "COV-0093",
+        "code": "PL-A",
+        "category": "ERRORS_OMISSIONS",
+        "limit": 3000000.0,
+        "deductible": 5000.0,
+        "exclusions": [
+          "Intentional acts",
+          "War and terrorism"
+        ]
+      }
+    ],
+    "endorsements": [
+      {
+        "id": "END-0009",
+        "endorsement_number": "END-2024-0009",
+        "policy_id": "POL-0024",
+        "type": "LIMIT_INCREASE",
+        "effective_date": "2024-03-12",
+        "clause": "This endorsement amends policy PL-2023-0024. Limit Increase effective 2024-03-12. All other terms and conditions remain unchanged.",
+        "premium_adjustment": 1000.0
+      }
+    ]
+  },
+  {
+    "id": "POL-0025",
+    "policy_number": "CP-2023-0025",
+    "type": "COMMERCIAL_PROPERTY",
+    "start_date": "2023-06-06",
+    "end_date": "2024-06-05",
+    "premium": 28504.0,
+    "deductible": 2500.0,
+    "status": "ACTIVE",
+    "policyholder": {
+      "id": "PH-0025",
+      "name": "Kimberly Gibson",
+      "dob": "1977-07-04",
+      "address": "636 Louis Mountains, Hughesberg, NM 05353",
+      "phone": "(289)451-7187",
+      "email": "jpitts@example.org",
+      "risk_score": 75.1
+    },
+    "coverages": [
+      {
+        "id": "COV-0097",
+        "code": "CPP-A",
+        "category": "PROPERTY",
+        "limit": 5000000.0,
+        "deductible": 2500.0,
+        "exclusions": [
+          "Intentional acts",
+          "War and terrorism"
+        ]
+      },
+      {
+        "id": "COV-0098",
+        "code": "CPP-B",
+        "category": "PROPERTY",
+        "limit": 2000000.0,
+        "deductible": 2500.0,
+        "exclusions": [
+          "Intentional acts"
+        ]
+      }
+    ],
+    "endorsements": [
+      {
+        "id": "END-0045",
+        "endorsement_number": "END-2023-0045",
+        "policy_id": "POL-0025",
+        "type": "ADDITIONAL_INSURED",
+        "effective_date": "2023-10-21",
+        "clause": "This endorsement amends policy CP-2023-0025. Additional Insured effective 2023-10-21. All other terms and conditions remain unchanged.",
+        "premium_adjustment": 500.0
+      }
+    ]
+  },
+  {
+    "id": "POL-0026",
+    "policy_number": "PL-2023-0026",
+    "type": "PROFESSIONAL_LIABILITY",
+    "start_date": "2023-01-01",
+    "end_date": "2024-01-01",
+    "premium": 43252.0,
+    "deductible": 5000.0,
+    "status": "ACTIVE",
+    "policyholder": {
+      "id": "PH-0026",
+      "name": "Wayne Morgan",
+      "dob": "1982-08-29",
+      "address": "865 Brennan Camp Apt. 343, South Tiffanyville, NV 22306",
+      "phone": "001-840-405-0455x623",
+      "email": "gregorylynch@example.com",
+      "risk_score": 15.1
+    },
+    "coverages": [
+      {
+        "id": "COV-0101",
+        "code": "PL-A",
+        "category": "ERRORS_OMISSIONS",
+        "limit": 3000000.0,
+        "deductible": 5000.0,
+        "exclusions": [
+          "Intentional acts",
+          "War and terrorism"
+        ]
+      }
+    ],
+    "endorsements": []
+  },
+  {
+    "id": "POL-0027",
+    "policy_number": "WC-2025-0027",
+    "type": "WORKERS_COMPENSATION",
+    "start_date": "2025-06-18",
+    "end_date": "2026-06-18",
+    "premium": 58504.0,
+    "deductible": 5000.0,
+    "status": "ACTIVE",
+    "policyholder": {
+      "id": "PH-0027",
+      "name": "Cynthia Durham",
+      "dob": "1965-05-08",
+      "address": "4074 Charles Key Suite 647, Jamesfurt, PR 63836",
+      "phone": "836-695-9440",
+      "email": "knightgina@example.net",
+      "risk_score": 26.7
+    },
+    "coverages": [
+      {
+        "id": "COV-0105",
+        "code": "WC-A",
+        "category": "EMPLOYEE_INJURY",
+        "limit": 1000000.0,
+        "deductible": 5000.0,
+        "exclusions": [
+          "Intentional acts",
+          "War and terrorism"
+        ]
+      }
+    ],
+    "endorsements": [
+      {
+        "id": "END-0022",
+        "endorsement_number": "END-2025-0022",
+        "policy_id": "POL-0027",
+        "type": "ADDITIONAL_INSURED",
+        "effective_date": "2025-08-08",
+        "clause": "This endorsement amends policy WC-2025-0027. Additional Insured effective 2025-08-08. All other terms and conditions remain unchanged.",
+        "premium_adjustment": 750.0
+      },
+      {
+        "id": "END-0049",
+        "endorsement_number": "END-2025-0049",
+        "policy_id": "POL-0027",
+        "type": "DEDUCTIBLE_CHANGE",
+        "effective_date": "2025-11-20",
+        "clause": "This endorsement amends policy WC-2025-0027. Deductible Change effective 2025-11-20. All other terms and conditions remain unchanged.",
+        "premium_adjustment": -250.0
+      }
+    ]
+  },
+  {
+    "id": "POL-0028",
+    "policy_number": "PL-2023-0028",
+    "type": "PROFESSIONAL_LIABILITY",
+    "start_date": "2023-03-22",
+    "end_date": "2024-03-21",
+    "premium": 9613.0,
+    "deductible": 10000.0,
+    "status": "EXPIRED",
+    "policyholder": {
+      "id": "PH-0028",
+      "name": "Susan Mcgee",
+      "dob": "1975-02-01",
+      "address": "533 Byrd Stravenue, Lake Colton, SC 85218",
+      "phone": "7478095214",
+      "email": "jamesbuchanan@example.com",
+      "risk_score": 93.0
+    },
+    "coverages": [
+      {
+        "id": "COV-0109",
+        "code": "PL-A",
+        "category": "ERRORS_OMISSIONS",
+        "limit": 3000000.0,
+        "deductible": 10000.0,
+        "exclusions": [
+          "Intentional acts",
+          "War and terrorism"
+        ]
+      }
+    ],
+    "endorsements": [
+      {
+        "id": "END-0050",
+        "endorsement_number": "END-2023-0050",
+        "policy_id": "POL-0028",
+        "type": "LIMIT_INCREASE",
+        "effective_date": "2023-05-21",
+        "clause": "This endorsement amends policy PL-2023-0028. Limit Increase effective 2023-05-21. All other terms and conditions remain unchanged.",
+        "premium_adjustment": 1000.0
+      }
+    ]
+  },
+  {
+    "id": "POL-0029",
+    "policy_number": "PL-2025-0029",
+    "type": "PROFESSIONAL_LIABILITY",
+    "start_date": "2025-02-23",
+    "end_date": "2026-02-23",
+    "premium": 12241.0,
+    "deductible": 2500.0,
+    "status": "ACTIVE",
+    "policyholder": {
+      "id": "PH-0029",
+      "name": "Susan Rivas",
+      "dob": "1973-02-05",
+      "address": "PSC 7451, Box 7123, APO AP 95425",
+      "phone": "+1-868-751-6048x17549",
+      "email": "leonardthomas@example.net",
+      "risk_score": 90.2
+    },
+    "coverages": [
+      {
+        "id": "COV-0113",
+        "code": "PL-A",
+        "category": "ERRORS_OMISSIONS",
+        "limit": 3000000.0,
+        "deductible": 2500.0,
+        "exclusions": [
+          "Intentional acts",
+          "War and terrorism"
+        ]
+      }
+    ],
+    "endorsements": [
+      {
+        "id": "END-0031",
+        "endorsement_number": "END-2025-0031",
+        "policy_id": "POL-0029",
+        "type": "EXCLUSION_ADDED",
+        "effective_date": "2025-07-26",
+        "clause": "This endorsement amends policy PL-2025-0029. Exclusion Added effective 2025-07-26. All other terms and conditions remain unchanged.",
+        "premium_adjustment": 250.0
+      },
+      {
+        "id": "END-0039",
+        "endorsement_number": "END-2026-0039",
+        "policy_id": "POL-0029",
+        "type": "DEDUCTIBLE_CHANGE",
+        "effective_date": "2026-02-20",
+        "clause": "This endorsement amends policy PL-2025-0029. Deductible Change effective 2026-02-20. All other terms and conditions remain unchanged.",
+        "premium_adjustment": 0.0
+      }
+    ]
+  },
+  {
+    "id": "POL-0030",
+    "policy_number": "CP-2023-0030",
+    "type": "COMMERCIAL_PROPERTY",
+    "start_date": "2023-09-29",
+    "end_date": "2024-09-28",
+    "premium": 38581.0,
+    "deductible": 10000.0,
+    "status": "LAPSED",
+    "policyholder": {
+      "id": "PH-0030",
+      "name": "Kristina Herman",
+      "dob": "1970-09-04",
+      "address": "461 Brandon Camp Suite 711, New Derek, NH 49130",
+      "phone": "+1-986-992-6179x64053",
+      "email": "melissagarcia@example.net",
+      "risk_score": 88.6
+    },
+    "coverages": [
+      {
+        "id": "COV-0117",
+        "code": "CPP-A",
+        "category": "PROPERTY",
+        "limit": 5000000.0,
+        "deductible": 10000.0,
+        "exclusions": [
+          "Intentional acts",
+          "War and terrorism"
+        ]
+      },
+      {
+        "id": "COV-0118",
+        "code": "CPP-B",
+        "category": "PROPERTY",
+        "limit": 2000000.0,
+        "deductible": 10000.0,
+        "exclusions": [
+          "Intentional acts"
+        ]
+      }
+    ],
+    "endorsements": [
+      {
+        "id": "END-0018",
+        "endorsement_number": "END-2024-0018",
+        "policy_id": "POL-0030",
+        "type": "LIMIT_INCREASE",
+        "effective_date": "2024-05-21",
+        "clause": "This endorsement amends policy CP-2023-0030. Limit Increase effective 2024-05-21. All other terms and conditions remain unchanged.",
+        "premium_adjustment": 250.0
+      }
+    ]
+  },
+  {
+    "id": "POL-0031",
+    "policy_number": "CP-2024-0031",
+    "type": "COMMERCIAL_PROPERTY",
+    "start_date": "2024-12-31",
+    "end_date": "2025-12-31",
+    "premium": 24428.0,
+    "deductible": 10000.0,
+    "status": "LAPSED",
+    "policyholder": {
+      "id": "PH-0031",
+      "name": "Steven Newman",
+      "dob": "1959-09-24",
+      "address": "71390 Kristin Gardens, Port Anne, CA 73142",
+      "phone": "493.435.2904",
+      "email": "lauren10@example.org",
+      "risk_score": 63.5
+    },
+    "coverages": [
+      {
+        "id": "COV-0121",
+        "code": "CPP-A",
+        "category": "PROPERTY",
+        "limit": 5000000.0,
+        "deductible": 10000.0,
+        "exclusions": [
+          "Intentional acts",
+          "War and terrorism"
+        ]
+      },
+      {
+        "id": "COV-0122",
+        "code": "CPP-B",
+        "category": "PROPERTY",
+        "limit": 2000000.0,
+        "deductible": 10000.0,
+        "exclusions": [
+          "Intentional acts"
+        ]
+      }
+    ],
+    "endorsements": []
+  },
+  {
+    "id": "POL-0032",
+    "policy_number": "AF-2024-0032",
+    "type": "AUTO_FLEET",
+    "start_date": "2024-06-13",
+    "end_date": "2025-06-13",
+    "premium": 33588.0,
+    "deductible": 1000.0,
+    "status": "ACTIVE",
+    "policyholder": {
+      "id": "PH-0032",
+      "name": "Richard Young",
+      "dob": "1977-08-23",
+      "address": "26811 West Lake Apt. 783, Lake Kristahaven, ME 60537",
+      "phone": "+1-400-376-6177x1159",
+      "email": "joshuaschultz@example.net",
+      "risk_score": 10.8
+    },
+    "coverages": [
+      {
+        "id": "COV-0125",
+        "code": "AF-A",
+        "category": "AUTO",
+        "limit": 1000000.0,
+        "deductible": 1000.0,
+        "exclusions": [
+          "Intentional acts",
+          "War and terrorism"
+        ]
+      },
+      {
+        "id": "COV-0126",
+        "code": "AF-B",
+        "category": "AUTO",
+        "limit": 500000.0,
+        "deductible": 1000.0,
+        "exclusions": [
+          "Intentional acts"
+        ]
+      }
+    ],
+    "endorsements": []
+  },
+  {
+    "id": "POL-0033",
+    "policy_number": "CGL-2024-0033",
+    "type": "COMMERCIAL_GENERAL_LIABILITY",
+    "start_date": "2024-08-25",
+    "end_date": "2025-08-25",
+    "premium": 40301.0,
+    "deductible": 2500.0,
+    "status": "ACTIVE",
+    "policyholder": {
+      "id": "PH-0033",
+      "name": "Jane Harper",
+      "dob": "1975-09-05",
+      "address": "18367 Robert Views Suite 661, Ronaldview, MN 20507",
+      "phone": "+1-771-311-1615x28098",
+      "email": "qgomez@example.com",
+      "risk_score": 5.6
+    },
+    "coverages": [
+      {
+        "id": "COV-0129",
+        "code": "CGL-A",
+        "category": "LIABILITY",
+        "limit": 1000000.0,
+        "deductible": 2500.0,
+        "exclusions": [
+          "Intentional acts",
+          "War and terrorism"
+        ]
+      },
+      {
+        "id": "COV-0130",
+        "code": "CGL-B",
+        "category": "LIABILITY",
+        "limit": 2000000.0,
+        "deductible": 2500.0,
+        "exclusions": [
+          "Intentional acts"
+        ]
+      }
+    ],
+    "endorsements": []
+  },
+  {
+    "id": "POL-0034",
+    "policy_number": "CGL-2023-0034",
+    "type": "COMMERCIAL_GENERAL_LIABILITY",
+    "start_date": "2023-08-23",
+    "end_date": "2024-08-22",
+    "premium": 8417.0,
+    "deductible": 1000.0,
+    "status": "EXPIRED",
+    "policyholder": {
+      "id": "PH-0034",
+      "name": "Michelle Schmitt",
+      "dob": "1996-06-20",
+      "address": "832 Walker Coves, Meganstad, DE 37013",
+      "phone": "001-636-289-9809",
+      "email": "joshuafarmer@example.com",
+      "risk_score": 11.4
+    },
+    "coverages": [
+      {
+        "id": "COV-0133",
+        "code": "CGL-A",
+        "category": "LIABILITY",
+        "limit": 1000000.0,
+        "deductible": 1000.0,
+        "exclusions": [
+          "Intentional acts",
+          "War and terrorism"
+        ]
+      },
+      {
+        "id": "COV-0134",
+        "code": "CGL-B",
+        "category": "LIABILITY",
+        "limit": 2000000.0,
+        "deductible": 1000.0,
+        "exclusions": [
+          "Intentional acts"
+        ]
+      }
+    ],
+    "endorsements": []
+  },
+  {
+    "id": "POL-0035",
+    "policy_number": "CP-2023-0035",
+    "type": "COMMERCIAL_PROPERTY",
+    "start_date": "2023-10-13",
+    "end_date": "2024-10-12",
+    "premium": 47842.0,
+    "deductible": 10000.0,
+    "status": "ACTIVE",
+    "policyholder": {
+      "id": "PH-0035",
+      "name": "Christopher Thomas",
+      "dob": "2000-05-05",
+      "address": "018 Nicholas Motorway, Ericport, VA 43018",
+      "phone": "001-999-810-2290x14767",
+      "email": "jason81@example.com",
+      "risk_score": 16.9
+    },
+    "coverages": [
+      {
+        "id": "COV-0137",
+        "code": "CPP-A",
+        "category": "PROPERTY",
+        "limit": 5000000.0,
+        "deductible": 10000.0,
+        "exclusions": [
+          "Intentional acts",
+          "War and terrorism"
+        ]
+      },
+      {
+        "id": "COV-0138",
+        "code": "CPP-B",
+        "category": "PROPERTY",
+        "limit": 2000000.0,
+        "deductible": 10000.0,
+        "exclusions": [
+          "Intentional acts"
+        ]
+      }
+    ],
+    "endorsements": []
+  },
+  {
+    "id": "POL-0036",
+    "policy_number": "PL-2024-0036",
+    "type": "PROFESSIONAL_LIABILITY",
+    "start_date": "2024-08-13",
+    "end_date": "2025-08-13",
+    "premium": 34976.0,
+    "deductible": 2500.0,
+    "status": "EXPIRED",
+    "policyholder": {
+      "id": "PH-0036",
+      "name": "Douglas Gregory",
+      "dob": "1988-09-22",
+      "address": "36900 Kevin Forest Apt. 445, North Tylerchester, HI 17433",
+      "phone": "(783)888-5160x6071",
+      "email": "amckinney@example.com",
+      "risk_score": 77.7
+    },
+    "coverages": [
+      {
+        "id": "COV-0141",
+        "code": "PL-A",
+        "category": "ERRORS_OMISSIONS",
+        "limit": 3000000.0,
+        "deductible": 2500.0,
+        "exclusions": [
+          "Intentional acts",
+          "War and terrorism"
+        ]
+      }
+    ],
+    "endorsements": []
+  },
+  {
+    "id": "POL-0037",
+    "policy_number": "CP-2023-0037",
+    "type": "COMMERCIAL_PROPERTY",
+    "start_date": "2023-04-07",
+    "end_date": "2024-04-06",
+    "premium": 10352.0,
+    "deductible": 10000.0,
+    "status": "ACTIVE",
+    "policyholder": {
+      "id": "PH-0037",
+      "name": "Alex Nguyen",
+      "dob": "1997-09-03",
+      "address": "61369 Warren Locks Suite 535, North William, DE 70048",
+      "phone": "435.952.3124x32921",
+      "email": "wwebster@example.net",
+      "risk_score": 42.0
+    },
+    "coverages": [
+      {
+        "id": "COV-0145",
+        "code": "CPP-A",
+        "category": "PROPERTY",
+        "limit": 5000000.0,
+        "deductible": 10000.0,
+        "exclusions": [
+          "Intentional acts",
+          "War and terrorism"
+        ]
+      },
+      {
+        "id": "COV-0146",
+        "code": "CPP-B",
+        "category": "PROPERTY",
+        "limit": 2000000.0,
+        "deductible": 10000.0,
+        "exclusions": [
+          "Intentional acts"
+        ]
+      }
+    ],
+    "endorsements": []
+  },
+  {
+    "id": "POL-0038",
+    "policy_number": "CGL-2024-0038",
+    "type": "COMMERCIAL_GENERAL_LIABILITY",
+    "start_date": "2024-11-20",
+    "end_date": "2025-11-20",
+    "premium": 46824.0,
+    "deductible": 1000.0,
+    "status": "ACTIVE",
+    "policyholder": {
+      "id": "PH-0038",
+      "name": "Thomas Cunningham",
+      "dob": "1998-11-04",
+      "address": "Unit 5527 Box 1774, DPO AA 78019",
+      "phone": "7586147700",
+      "email": "newmantiffany@example.org",
+      "risk_score": 70.5
+    },
+    "coverages": [
+      {
+        "id": "COV-0149",
+        "code": "CGL-A",
+        "category": "LIABILITY",
+        "limit": 1000000.0,
+        "deductible": 1000.0,
+        "exclusions": [
+          "Intentional acts",
+          "War and terrorism"
+        ]
+      },
+      {
+        "id": "COV-0150",
+        "code": "CGL-B",
+        "category": "LIABILITY",
+        "limit": 2000000.0,
+        "deductible": 1000.0,
+        "exclusions": [
+          "Intentional acts"
+        ]
+      }
+    ],
+    "endorsements": []
+  },
+  {
+    "id": "POL-0039",
+    "policy_number": "CGL-2023-0039",
+    "type": "COMMERCIAL_GENERAL_LIABILITY",
+    "start_date": "2023-09-12",
+    "end_date": "2024-09-11",
+    "premium": 16556.0,
+    "deductible": 2500.0,
+    "status": "ACTIVE",
+    "policyholder": {
+      "id": "PH-0039",
+      "name": "Katie Ford",
+      "dob": "1993-05-01",
+      "address": "USS Cole, FPO AP 85938",
+      "phone": "759.378.2071",
+      "email": "benjaminzimmerman@example.com",
+      "risk_score": 17.6
+    },
+    "coverages": [
+      {
+        "id": "COV-0153",
+        "code": "CGL-A",
+        "category": "LIABILITY",
+        "limit": 1000000.0,
+        "deductible": 2500.0,
+        "exclusions": [
+          "Intentional acts",
+          "War and terrorism"
+        ]
+      },
+      {
+        "id": "COV-0154",
+        "code": "CGL-B",
+        "category": "LIABILITY",
+        "limit": 2000000.0,
+        "deductible": 2500.0,
+        "exclusions": [
+          "Intentional acts"
+        ]
+      }
+    ],
+    "endorsements": [
+      {
+        "id": "END-0016",
+        "endorsement_number": "END-2024-0016",
+        "policy_id": "POL-0039",
+        "type": "EXCLUSION_ADDED",
+        "effective_date": "2024-08-21",
+        "clause": "This endorsement amends policy CGL-2023-0039. Exclusion Added effective 2024-08-21. All other terms and conditions remain unchanged.",
+        "premium_adjustment": 1000.0
+      },
+      {
+        "id": "END-0030",
+        "endorsement_number": "END-2024-0030",
+        "policy_id": "POL-0039",
+        "type": "LIMIT_INCREASE",
+        "effective_date": "2024-08-15",
+        "clause": "This endorsement amends policy CGL-2023-0039. Limit Increase effective 2024-08-15. All other terms and conditions remain unchanged.",
+        "premium_adjustment": 750.0
+      }
+    ]
+  },
+  {
+    "id": "POL-0040",
+    "policy_number": "CP-2023-0040",
+    "type": "COMMERCIAL_PROPERTY",
+    "start_date": "2023-10-13",
+    "end_date": "2024-10-12",
+    "premium": 34318.0,
+    "deductible": 2500.0,
+    "status": "EXPIRED",
+    "policyholder": {
+      "id": "PH-0040",
+      "name": "Lisa Cox",
+      "dob": "1974-11-11",
+      "address": "905 Mark Point Suite 449, West Christopher, TN 19038",
+      "phone": "(346)829-1486x528",
+      "email": "andrew42@example.org",
+      "risk_score": 11.8
+    },
+    "coverages": [
+      {
+        "id": "COV-0157",
+        "code": "CPP-A",
+        "category": "PROPERTY",
+        "limit": 5000000.0,
+        "deductible": 2500.0,
+        "exclusions": [
+          "Intentional acts",
+          "War and terrorism"
+        ]
+      },
+      {
+        "id": "COV-0158",
+        "code": "CPP-B",
+        "category": "PROPERTY",
+        "limit": 2000000.0,
+        "deductible": 2500.0,
+        "exclusions": [
+          "Intentional acts"
+        ]
+      }
+    ],
+    "endorsements": []
+  },
+  {
+    "id": "POL-0041",
+    "policy_number": "PL-2023-0041",
+    "type": "PROFESSIONAL_LIABILITY",
+    "start_date": "2023-04-11",
+    "end_date": "2024-04-10",
+    "premium": 7315.0,
+    "deductible": 1000.0,
+    "status": "LAPSED",
+    "policyholder": {
+      "id": "PH-0041",
+      "name": "Ralph Lee",
+      "dob": "1964-12-21",
+      "address": "88805 Carla Drives Apt. 292, Williamsstad, TX 94818",
+      "phone": "979.547.3834",
+      "email": "erika97@example.com",
+      "risk_score": 88.4
+    },
+    "coverages": [
+      {
+        "id": "COV-0161",
+        "code": "PL-A",
+        "category": "ERRORS_OMISSIONS",
+        "limit": 3000000.0,
+        "deductible": 1000.0,
+        "exclusions": [
+          "Intentional acts",
+          "War and terrorism"
+        ]
+      }
+    ],
+    "endorsements": [
+      {
+        "id": "END-0036",
+        "endorsement_number": "END-2023-0036",
+        "policy_id": "POL-0041",
+        "type": "LOCATION_ADDED",
+        "effective_date": "2023-11-10",
+        "clause": "This endorsement amends policy PL-2023-0041. Location Added effective 2023-11-10. All other terms and conditions remain unchanged.",
+        "premium_adjustment": 500.0
+      }
+    ]
+  },
+  {
+    "id": "POL-0042",
+    "policy_number": "CP-2023-0042",
+    "type": "COMMERCIAL_PROPERTY",
+    "start_date": "2023-06-20",
+    "end_date": "2024-06-19",
+    "premium": 30634.0,
+    "deductible": 10000.0,
+    "status": "ACTIVE",
+    "policyholder": {
+      "id": "PH-0042",
+      "name": "Paula Shaw",
+      "dob": "1984-02-06",
+      "address": "Unit 3924 Box 0758, DPO AE 93745",
+      "phone": "214.812.4782x61375",
+      "email": "sandersnathaniel@example.com",
+      "risk_score": 82.8
+    },
+    "coverages": [
+      {
+        "id": "COV-0165",
+        "code": "CPP-A",
+        "category": "PROPERTY",
+        "limit": 5000000.0,
+        "deductible": 10000.0,
+        "exclusions": [
+          "Intentional acts",
+          "War and terrorism"
+        ]
+      },
+      {
+        "id": "COV-0166",
+        "code": "CPP-B",
+        "category": "PROPERTY",
+        "limit": 2000000.0,
+        "deductible": 10000.0,
+        "exclusions": [
+          "Intentional acts"
+        ]
+      }
+    ],
+    "endorsements": []
+  },
+  {
+    "id": "POL-0043",
+    "policy_number": "CGL-2023-0043",
+    "type": "COMMERCIAL_GENERAL_LIABILITY",
+    "start_date": "2023-06-18",
+    "end_date": "2024-06-17",
+    "premium": 28836.0,
+    "deductible": 1000.0,
+    "status": "LAPSED",
+    "policyholder": {
+      "id": "PH-0043",
+      "name": "Jade Johnson DVM",
+      "dob": "1999-11-03",
+      "address": "04727 Gilbert Common, West Jasonberg, OH 95821",
+      "phone": "+1-986-314-3410x369",
+      "email": "copelandvincent@example.net",
+      "risk_score": 28.9
+    },
+    "coverages": [
+      {
+        "id": "COV-0169",
+        "code": "CGL-A",
+        "category": "LIABILITY",
+        "limit": 1000000.0,
+        "deductible": 1000.0,
+        "exclusions": [
+          "Intentional acts",
+          "War and terrorism"
+        ]
+      },
+      {
+        "id": "COV-0170",
+        "code": "CGL-B",
+        "category": "LIABILITY",
+        "limit": 2000000.0,
+        "deductible": 1000.0,
+        "exclusions": [
+          "Intentional acts"
+        ]
+      }
+    ],
+    "endorsements": [
+      {
+        "id": "END-0043",
+        "endorsement_number": "END-2023-0043",
+        "policy_id": "POL-0043",
+        "type": "LOCATION_ADDED",
+        "effective_date": "2023-07-28",
+        "clause": "This endorsement amends policy CGL-2023-0043. Location Added effective 2023-07-28. All other terms and conditions remain unchanged.",
+        "premium_adjustment": 500.0
+      }
+    ]
+  },
+  {
+    "id": "POL-0044",
+    "policy_number": "AF-2023-0044",
+    "type": "AUTO_FLEET",
+    "start_date": "2023-10-20",
+    "end_date": "2024-10-19",
+    "premium": 31722.0,
+    "deductible": 10000.0,
+    "status": "ACTIVE",
+    "policyholder": {
+      "id": "PH-0044",
+      "name": "Jose Allen",
+      "dob": "1965-05-19",
+      "address": "539 Lopez Skyway, New Theresaland, NC 71814",
+      "phone": "588.306.7065x40515",
+      "email": "dennis58@example.com",
+      "risk_score": 31.7
+    },
+    "coverages": [
+      {
+        "id": "COV-0173",
+        "code": "AF-A",
+        "category": "AUTO",
+        "limit": 1000000.0,
+        "deductible": 10000.0,
+        "exclusions": [
+          "Intentional acts",
+          "War and terrorism"
+        ]
+      },
+      {
+        "id": "COV-0174",
+        "code": "AF-B",
+        "category": "AUTO",
+        "limit": 500000.0,
+        "deductible": 10000.0,
+        "exclusions": [
+          "Intentional acts"
+        ]
+      }
+    ],
+    "endorsements": []
+  },
+  {
+    "id": "POL-0045",
+    "policy_number": "CGL-2024-0045",
+    "type": "COMMERCIAL_GENERAL_LIABILITY",
+    "start_date": "2024-08-16",
+    "end_date": "2025-08-16",
+    "premium": 52217.0,
+    "deductible": 1000.0,
+    "status": "EXPIRED",
+    "policyholder": {
+      "id": "PH-0045",
+      "name": "Carrie Maxwell",
+      "dob": "1987-03-25",
+      "address": "Unit 7221 Box 7043, DPO AE 26645",
+      "phone": "5546868740",
+      "email": "michelle05@example.com",
+      "risk_score": 10.1
+    },
+    "coverages": [
+      {
+        "id": "COV-0177",
+        "code": "CGL-A",
+        "category": "LIABILITY",
+        "limit": 1000000.0,
+        "deductible": 1000.0,
+        "exclusions": [
+          "Intentional acts",
+          "War and terrorism"
+        ]
+      },
+      {
+        "id": "COV-0178",
+        "code": "CGL-B",
+        "category": "LIABILITY",
+        "limit": 2000000.0,
+        "deductible": 1000.0,
+        "exclusions": [
+          "Intentional acts"
+        ]
+      }
+    ],
+    "endorsements": []
+  },
+  {
+    "id": "POL-0046",
+    "policy_number": "PL-2024-0046",
+    "type": "PROFESSIONAL_LIABILITY",
+    "start_date": "2024-05-03",
+    "end_date": "2025-05-03",
+    "premium": 36954.0,
+    "deductible": 2500.0,
+    "status": "ACTIVE",
+    "policyholder": {
+      "id": "PH-0046",
+      "name": "Jacob Preston",
+      "dob": "1985-07-14",
+      "address": "PSC 6527, Box 7584, APO AE 95801",
+      "phone": "(816)492-8451x15447",
+      "email": "cbell@example.net",
+      "risk_score": 50.7
+    },
+    "coverages": [
+      {
+        "id": "COV-0181",
+        "code": "PL-A",
+        "category": "ERRORS_OMISSIONS",
+        "limit": 3000000.0,
+        "deductible": 2500.0,
+        "exclusions": [
+          "Intentional acts",
+          "War and terrorism"
+        ]
+      }
+    ],
+    "endorsements": []
+  },
+  {
+    "id": "POL-0047",
+    "policy_number": "CP-2023-0047",
+    "type": "COMMERCIAL_PROPERTY",
+    "start_date": "2023-03-12",
+    "end_date": "2024-03-11",
+    "premium": 42996.0,
+    "deductible": 1000.0,
+    "status": "ACTIVE",
+    "policyholder": {
+      "id": "PH-0047",
+      "name": "Heather Bolton",
+      "dob": "1974-04-18",
+      "address": "65820 Melinda Springs, Johnsonland, IA 85063",
+      "phone": "(456)790-9275x571",
+      "email": "redwards@example.org",
+      "risk_score": 26.2
+    },
+    "coverages": [
+      {
+        "id": "COV-0185",
+        "code": "CPP-A",
+        "category": "PROPERTY",
+        "limit": 5000000.0,
+        "deductible": 1000.0,
+        "exclusions": [
+          "Intentional acts",
+          "War and terrorism"
+        ]
+      },
+      {
+        "id": "COV-0186",
+        "code": "CPP-B",
+        "category": "PROPERTY",
+        "limit": 2000000.0,
+        "deductible": 1000.0,
+        "exclusions": [
+          "Intentional acts"
+        ]
+      }
+    ],
+    "endorsements": []
+  },
+  {
+    "id": "POL-0048",
+    "policy_number": "CGL-2025-0048",
+    "type": "COMMERCIAL_GENERAL_LIABILITY",
+    "start_date": "2025-06-30",
+    "end_date": "2026-06-30",
+    "premium": 41334.0,
+    "deductible": 2500.0,
+    "status": "ACTIVE",
+    "policyholder": {
+      "id": "PH-0048",
+      "name": "Allison Lopez",
+      "dob": "1990-11-04",
+      "address": "4739 Benson Overpass, North Derek, CA 59751",
+      "phone": "(671)455-1884",
+      "email": "laurahicks@example.org",
+      "risk_score": 8.6
+    },
+    "coverages": [
+      {
+        "id": "COV-0189",
+        "code": "CGL-A",
+        "category": "LIABILITY",
+        "limit": 1000000.0,
+        "deductible": 2500.0,
+        "exclusions": [
+          "Intentional acts",
+          "War and terrorism"
+        ]
+      },
+      {
+        "id": "COV-0190",
+        "code": "CGL-B",
+        "category": "LIABILITY",
+        "limit": 2000000.0,
+        "deductible": 2500.0,
+        "exclusions": [
+          "Intentional acts"
+        ]
+      }
+    ],
+    "endorsements": [
+      {
+        "id": "END-0044",
+        "endorsement_number": "END-2026-0044",
+        "policy_id": "POL-0048",
+        "type": "ADDITIONAL_INSURED",
+        "effective_date": "2026-03-31",
+        "clause": "This endorsement amends policy CGL-2025-0048. Additional Insured effective 2026-03-31. All other terms and conditions remain unchanged.",
+        "premium_adjustment": 1000.0
+      }
+    ]
+  },
+  {
+    "id": "POL-0049",
+    "policy_number": "CGL-2024-0049",
+    "type": "COMMERCIAL_GENERAL_LIABILITY",
+    "start_date": "2024-03-05",
+    "end_date": "2025-03-05",
+    "premium": 47081.0,
+    "deductible": 5000.0,
+    "status": "CANCELLED",
+    "policyholder": {
+      "id": "PH-0049",
+      "name": "Dr. Cynthia Snyder",
+      "dob": "1980-03-03",
+      "address": "8291 Kyle Stravenue Suite 866, East Teresaland, NV 61558",
+      "phone": "+1-685-428-9226x80182",
+      "email": "marcusfletcher@example.com",
+      "risk_score": 23.4
+    },
+    "coverages": [
+      {
+        "id": "COV-0193",
+        "code": "CGL-A",
+        "category": "LIABILITY",
+        "limit": 1000000.0,
+        "deductible": 5000.0,
+        "exclusions": [
+          "Intentional acts",
+          "War and terrorism"
+        ]
+      },
+      {
+        "id": "COV-0194",
+        "code": "CGL-B",
+        "category": "LIABILITY",
+        "limit": 2000000.0,
+        "deductible": 5000.0,
+        "exclusions": [
+          "Intentional acts"
+        ]
+      }
+    ],
+    "endorsements": []
+  },
+  {
+    "id": "POL-0050",
+    "policy_number": "WC-2023-0050",
+    "type": "WORKERS_COMPENSATION",
+    "start_date": "2023-09-02",
+    "end_date": "2024-09-01",
+    "premium": 21407.0,
+    "deductible": 10000.0,
+    "status": "ACTIVE",
+    "policyholder": {
+      "id": "PH-0050",
+      "name": "Kelly Campbell",
+      "dob": "1960-12-23",
+      "address": "49818 Brittany Prairie Apt. 299, Meganshire, AZ 04219",
+      "phone": "909-643-9690",
+      "email": "timothy64@example.com",
+      "risk_score": 63.1
+    },
+    "coverages": [
+      {
+        "id": "COV-0197",
+        "code": "WC-A",
+        "category": "EMPLOYEE_INJURY",
+        "limit": 1000000.0,
+        "deductible": 10000.0,
+        "exclusions": [
+          "Intentional acts",
+          "War and terrorism"
+        ]
+      }
+    ],
+    "endorsements": [
+      {
+        "id": "END-0042",
+        "endorsement_number": "END-2024-0042",
+        "policy_id": "POL-0050",
+        "type": "LIMIT_INCREASE",
+        "effective_date": "2024-01-10",
+        "clause": "This endorsement amends policy WC-2023-0050. Limit Increase effective 2024-01-10. All other terms and conditions remain unchanged.",
+        "premium_adjustment": 0.0
+      }
+    ]
+  },
+  {
+    "id": "POL-0051",
+    "policy_number": "AF-2023-0051",
+    "type": "AUTO_FLEET",
+    "start_date": "2023-11-20",
+    "end_date": "2024-11-19",
+    "premium": 53274.0,
+    "deductible": 1000.0,
+    "status": "ACTIVE",
+    "policyholder": {
+      "id": "PH-0051",
+      "name": "Anthony Gonzales",
+      "dob": "1988-07-25",
+      "address": "255 Hester Curve Suite 881, Johnville, KY 59430",
+      "phone": "421.704.6963",
+      "email": "james27@example.net",
+      "risk_score": 60.9
+    },
+    "coverages": [
+      {
+        "id": "COV-0201",
+        "code": "AF-A",
+        "category": "AUTO",
+        "limit": 1000000.0,
+        "deductible": 1000.0,
+        "exclusions": [
+          "Intentional acts",
+          "War and terrorism"
+        ]
+      },
+      {
+        "id": "COV-0202",
+        "code": "AF-B",
+        "category": "AUTO",
+        "limit": 500000.0,
+        "deductible": 1000.0,
+        "exclusions": [
+          "Intentional acts"
+        ]
+      }
+    ],
+    "endorsements": []
+  },
+  {
+    "id": "POL-0052",
+    "policy_number": "PL-2023-0052",
+    "type": "PROFESSIONAL_LIABILITY",
+    "start_date": "2023-04-13",
+    "end_date": "2024-04-12",
+    "premium": 8801.0,
+    "deductible": 2500.0,
+    "status": "ACTIVE",
+    "policyholder": {
+      "id": "PH-0052",
+      "name": "Shawn Jimenez",
+      "dob": "1961-09-27",
+      "address": "USCGC Levy, FPO AE 76961",
+      "phone": "(400)647-9748x016",
+      "email": "kathryn50@example.com",
+      "risk_score": 16.9
+    },
+    "coverages": [
+      {
+        "id": "COV-0205",
+        "code": "PL-A",
+        "category": "ERRORS_OMISSIONS",
+        "limit": 3000000.0,
+        "deductible": 2500.0,
+        "exclusions": [
+          "Intentional acts",
+          "War and terrorism"
+        ]
+      }
+    ],
+    "endorsements": []
+  },
+  {
+    "id": "POL-0053",
+    "policy_number": "WC-2025-0053",
+    "type": "WORKERS_COMPENSATION",
+    "start_date": "2025-06-21",
+    "end_date": "2026-06-21",
+    "premium": 8508.0,
+    "deductible": 2500.0,
+    "status": "ACTIVE",
+    "policyholder": {
+      "id": "PH-0053",
+      "name": "Justin Cox",
+      "dob": "1975-04-02",
+      "address": "499 David Court Suite 558, Kariborough, PA 67232",
+      "phone": "(480)700-2578x7298",
+      "email": "francisco94@example.net",
+      "risk_score": 19.2
+    },
+    "coverages": [
+      {
+        "id": "COV-0209",
+        "code": "WC-A",
+        "category": "EMPLOYEE_INJURY",
+        "limit": 1000000.0,
+        "deductible": 2500.0,
+        "exclusions": [
+          "Intentional acts",
+          "War and terrorism"
+        ]
+      }
+    ],
+    "endorsements": []
+  },
+  {
+    "id": "POL-0054",
+    "policy_number": "PL-2024-0054",
+    "type": "PROFESSIONAL_LIABILITY",
+    "start_date": "2024-12-21",
+    "end_date": "2025-12-21",
+    "premium": 23825.0,
+    "deductible": 1000.0,
+    "status": "ACTIVE",
+    "policyholder": {
+      "id": "PH-0054",
+      "name": "Ronald Patel",
+      "dob": "1993-12-01",
+      "address": "5169 Robles Stream, New Thomasshire, OK 30325",
+      "phone": "001-509-272-8962x3091",
+      "email": "jedwards@example.com",
+      "risk_score": 54.9
+    },
+    "coverages": [
+      {
+        "id": "COV-0213",
+        "code": "PL-A",
+        "category": "ERRORS_OMISSIONS",
+        "limit": 3000000.0,
+        "deductible": 1000.0,
+        "exclusions": [
+          "Intentional acts",
+          "War and terrorism"
+        ]
+      }
+    ],
+    "endorsements": [
+      {
+        "id": "END-0021",
+        "endorsement_number": "END-2024-0021",
+        "policy_id": "POL-0054",
+        "type": "NAMED_PARTY_ADDED",
+        "effective_date": "2024-12-29",
+        "clause": "This endorsement amends policy PL-2024-0054. Named Party Added effective 2024-12-29. All other terms and conditions remain unchanged.",
+        "premium_adjustment": 0.0
+      },
+      {
+        "id": "END-0041",
+        "endorsement_number": "END-2025-0041",
+        "policy_id": "POL-0054",
+        "type": "NAMED_PARTY_ADDED",
+        "effective_date": "2025-09-18",
+        "clause": "This endorsement amends policy PL-2024-0054. Named Party Added effective 2025-09-18. All other terms and conditions remain unchanged.",
+        "premium_adjustment": 0.0
+      }
+    ]
+  },
+  {
+    "id": "POL-0055",
+    "policy_number": "CGL-2025-0055",
+    "type": "COMMERCIAL_GENERAL_LIABILITY",
+    "start_date": "2025-06-18",
+    "end_date": "2026-06-18",
+    "premium": 12800.0,
+    "deductible": 5000.0,
+    "status": "ACTIVE",
+    "policyholder": {
+      "id": "PH-0055",
+      "name": "Jennifer Hampton",
+      "dob": "1987-09-14",
+      "address": "283 Bolton Neck, Edwardsburgh, NH 70379",
+      "phone": "585-949-7334x84344",
+      "email": "timothy84@example.com",
+      "risk_score": 14.6
+    },
+    "coverages": [
+      {
+        "id": "COV-0217",
+        "code": "CGL-A",
+        "category": "LIABILITY",
+        "limit": 1000000.0,
+        "deductible": 5000.0,
+        "exclusions": [
+          "Intentional acts",
+          "War and terrorism"
+        ]
+      },
+      {
+        "id": "COV-0218",
+        "code": "CGL-B",
+        "category": "LIABILITY",
+        "limit": 2000000.0,
+        "deductible": 5000.0,
+        "exclusions": [
+          "Intentional acts"
+        ]
+      }
+    ],
+    "endorsements": []
+  },
+  {
+    "id": "POL-0056",
+    "policy_number": "PL-2023-0056",
+    "type": "PROFESSIONAL_LIABILITY",
+    "start_date": "2023-06-09",
+    "end_date": "2024-06-08",
+    "premium": 21848.0,
+    "deductible": 5000.0,
+    "status": "ACTIVE",
+    "policyholder": {
+      "id": "PH-0056",
+      "name": "Michael James",
+      "dob": "1982-06-17",
+      "address": "0415 Douglas Summit, Lewisside, KY 74165",
+      "phone": "001-242-319-9330x833",
+      "email": "erivera@example.org",
+      "risk_score": 69.6
+    },
+    "coverages": [
+      {
+        "id": "COV-0221",
+        "code": "PL-A",
+        "category": "ERRORS_OMISSIONS",
+        "limit": 3000000.0,
+        "deductible": 5000.0,
+        "exclusions": [
+          "Intentional acts",
+          "War and terrorism"
+        ]
+      }
+    ],
+    "endorsements": []
+  },
+  {
+    "id": "POL-0057",
+    "policy_number": "CP-2024-0057",
+    "type": "COMMERCIAL_PROPERTY",
+    "start_date": "2024-12-04",
+    "end_date": "2025-12-04",
+    "premium": 45565.0,
+    "deductible": 5000.0,
+    "status": "ACTIVE",
+    "policyholder": {
+      "id": "PH-0057",
+      "name": "Brenda Oconnell",
+      "dob": "1966-05-11",
+      "address": "3454 Rebecca Corners Apt. 802, Khanburgh, PW 05264",
+      "phone": "(972)440-0499x1547",
+      "email": "znelson@example.org",
+      "risk_score": 27.6
+    },
+    "coverages": [
+      {
+        "id": "COV-0225",
+        "code": "CPP-A",
+        "category": "PROPERTY",
+        "limit": 5000000.0,
+        "deductible": 5000.0,
+        "exclusions": [
+          "Intentional acts",
+          "War and terrorism"
+        ]
+      },
+      {
+        "id": "COV-0226",
+        "code": "CPP-B",
+        "category": "PROPERTY",
+        "limit": 2000000.0,
+        "deductible": 5000.0,
+        "exclusions": [
+          "Intentional acts"
+        ]
+      }
+    ],
+    "endorsements": []
+  },
+  {
+    "id": "POL-0058",
+    "policy_number": "CGL-2023-0058",
+    "type": "COMMERCIAL_GENERAL_LIABILITY",
+    "start_date": "2023-04-05",
+    "end_date": "2024-04-04",
+    "premium": 45568.0,
+    "deductible": 10000.0,
+    "status": "EXPIRED",
+    "policyholder": {
+      "id": "PH-0058",
+      "name": "Nicholas Wong",
+      "dob": "1968-04-13",
+      "address": "9329 Wilcox Passage Suite 161, East Thomas, IA 01396",
+      "phone": "563-274-5499x045",
+      "email": "marshallerik@example.net",
+      "risk_score": 9.0
+    },
+    "coverages": [
+      {
+        "id": "COV-0229",
+        "code": "CGL-A",
+        "category": "LIABILITY",
+        "limit": 1000000.0,
+        "deductible": 10000.0,
+        "exclusions": [
+          "Intentional acts",
+          "War and terrorism"
+        ]
+      },
+      {
+        "id": "COV-0230",
+        "code": "CGL-B",
+        "category": "LIABILITY",
+        "limit": 2000000.0,
+        "deductible": 10000.0,
+        "exclusions": [
+          "Intentional acts"
+        ]
+      }
+    ],
+    "endorsements": [
+      {
+        "id": "END-0011",
+        "endorsement_number": "END-2023-0011",
+        "policy_id": "POL-0058",
+        "type": "EXCLUSION_ADDED",
+        "effective_date": "2023-10-14",
+        "clause": "This endorsement amends policy CGL-2023-0058. Exclusion Added effective 2023-10-14. All other terms and conditions remain unchanged.",
+        "premium_adjustment": -250.0
+      }
+    ]
+  },
+  {
+    "id": "POL-0059",
+    "policy_number": "WC-2025-0059",
+    "type": "WORKERS_COMPENSATION",
+    "start_date": "2025-02-28",
+    "end_date": "2026-02-28",
+    "premium": 12573.0,
+    "deductible": 5000.0,
+    "status": "ACTIVE",
+    "policyholder": {
+      "id": "PH-0059",
+      "name": "Stephanie Padilla",
+      "dob": "1976-10-09",
+      "address": "9332 Hernandez Summit Suite 687, Port John, WV 78595",
+      "phone": "587-485-1910",
+      "email": "markmeyer@example.org",
+      "risk_score": 44.8
+    },
+    "coverages": [
+      {
+        "id": "COV-0233",
+        "code": "WC-A",
+        "category": "EMPLOYEE_INJURY",
+        "limit": 1000000.0,
+        "deductible": 5000.0,
+        "exclusions": [
+          "Intentional acts",
+          "War and terrorism"
+        ]
+      }
+    ],
+    "endorsements": [
+      {
+        "id": "END-0001",
+        "endorsement_number": "END-2025-0001",
+        "policy_id": "POL-0059",
+        "type": "LIMIT_INCREASE",
+        "effective_date": "2025-11-17",
+        "clause": "This endorsement amends policy WC-2025-0059. Limit Increase effective 2025-11-17. All other terms and conditions remain unchanged.",
+        "premium_adjustment": 500.0
+      },
+      {
+        "id": "END-0002",
+        "endorsement_number": "END-2025-0002",
+        "policy_id": "POL-0059",
+        "type": "NAMED_PARTY_ADDED",
+        "effective_date": "2025-03-29",
+        "clause": "This endorsement amends policy WC-2025-0059. Named Party Added effective 2025-03-29. All other terms and conditions remain unchanged.",
+        "premium_adjustment": 750.0
+      }
+    ]
+  },
+  {
+    "id": "POL-0060",
+    "policy_number": "AF-2024-0060",
+    "type": "AUTO_FLEET",
+    "start_date": "2024-07-28",
+    "end_date": "2025-07-28",
+    "premium": 4633.0,
+    "deductible": 1000.0,
+    "status": "ACTIVE",
+    "policyholder": {
+      "id": "PH-0060",
+      "name": "Michelle Burns",
+      "dob": "1990-05-05",
+      "address": "2867 Angelica Spring, Jenniferfurt, KS 00896",
+      "phone": "001-639-810-6518x0170",
+      "email": "kaylacannon@example.net",
+      "risk_score": 84.5
+    },
+    "coverages": [
+      {
+        "id": "COV-0237",
+        "code": "AF-A",
+        "category": "AUTO",
+        "limit": 1000000.0,
+        "deductible": 1000.0,
+        "exclusions": [
+          "Intentional acts",
+          "War and terrorism"
+        ]
+      },
+      {
+        "id": "COV-0238",
+        "code": "AF-B",
+        "category": "AUTO",
+        "limit": 500000.0,
+        "deductible": 1000.0,
+        "exclusions": [
+          "Intentional acts"
+        ]
+      }
+    ],
+    "endorsements": [
+      {
+        "id": "END-0003",
+        "endorsement_number": "END-2025-0003",
+        "policy_id": "POL-0060",
+        "type": "LOCATION_ADDED",
+        "effective_date": "2025-01-01",
+        "clause": "This endorsement amends policy AF-2024-0060. Location Added effective 2025-01-01. All other terms and conditions remain unchanged.",
+        "premium_adjustment": 1000.0
+      },
+      {
+        "id": "END-0040",
+        "endorsement_number": "END-2025-0040",
+        "policy_id": "POL-0060",
+        "type": "ADDITIONAL_INSURED",
+        "effective_date": "2025-05-11",
+        "clause": "This endorsement amends policy AF-2024-0060. Additional Insured effective 2025-05-11. All other terms and conditions remain unchanged.",
+        "premium_adjustment": 500.0
+      }
+    ]
+  },
+  {
+    "id": "POL-0061",
+    "policy_number": "CP-2024-0061",
+    "type": "COMMERCIAL_PROPERTY",
+    "start_date": "2024-07-12",
+    "end_date": "2025-07-12",
+    "premium": 6361.0,
+    "deductible": 5000.0,
+    "status": "ACTIVE",
+    "policyholder": {
+      "id": "PH-0061",
+      "name": "Jennifer Haney",
+      "dob": "1981-08-21",
+      "address": "1825 Gregory Plain Suite 823, Port Andrewport, NH 88777",
+      "phone": "001-286-886-3375x2431",
+      "email": "allencarlos@example.net",
+      "risk_score": 18.3
+    },
+    "coverages": [
+      {
+        "id": "COV-0241",
+        "code": "CPP-A",
+        "category": "PROPERTY",
+        "limit": 5000000.0,
+        "deductible": 5000.0,
+        "exclusions": [
+          "Intentional acts",
+          "War and terrorism"
+        ]
+      },
+      {
+        "id": "COV-0242",
+        "code": "CPP-B",
+        "category": "PROPERTY",
+        "limit": 2000000.0,
+        "deductible": 5000.0,
+        "exclusions": [
+          "Intentional acts"
+        ]
+      }
+    ],
+    "endorsements": [
+      {
+        "id": "END-0008",
+        "endorsement_number": "END-2024-0008",
+        "policy_id": "POL-0061",
+        "type": "ADDITIONAL_INSURED",
+        "effective_date": "2024-12-05",
+        "clause": "This endorsement amends policy CP-2024-0061. Additional Insured effective 2024-12-05. All other terms and conditions remain unchanged.",
+        "premium_adjustment": 500.0
+      }
+    ]
+  },
+  {
+    "id": "POL-0062",
+    "policy_number": "CP-2023-0062",
+    "type": "COMMERCIAL_PROPERTY",
+    "start_date": "2023-02-12",
+    "end_date": "2024-02-12",
+    "premium": 24202.0,
+    "deductible": 5000.0,
+    "status": "EXPIRED",
+    "policyholder": {
+      "id": "PH-0062",
+      "name": "Kyle Warner",
+      "dob": "1958-12-03",
+      "address": "7383 Donald Highway, Port Sabrina, OK 42300",
+      "phone": "001-695-634-2836",
+      "email": "hawkinsbrittany@example.net",
+      "risk_score": 76.7
+    },
+    "coverages": [
+      {
+        "id": "COV-0245",
+        "code": "CPP-A",
+        "category": "PROPERTY",
+        "limit": 5000000.0,
+        "deductible": 5000.0,
+        "exclusions": [
+          "Intentional acts",
+          "War and terrorism"
+        ]
+      },
+      {
+        "id": "COV-0246",
+        "code": "CPP-B",
+        "category": "PROPERTY",
+        "limit": 2000000.0,
+        "deductible": 5000.0,
+        "exclusions": [
+          "Intentional acts"
+        ]
+      }
+    ],
+    "endorsements": []
+  },
+  {
+    "id": "POL-0063",
+    "policy_number": "CGL-2024-0063",
+    "type": "COMMERCIAL_GENERAL_LIABILITY",
+    "start_date": "2024-01-02",
+    "end_date": "2025-01-01",
+    "premium": 17767.0,
+    "deductible": 2500.0,
+    "status": "ACTIVE",
+    "policyholder": {
+      "id": "PH-0063",
+      "name": "Lori Simmons",
+      "dob": "1989-05-03",
+      "address": "685 Russell Hills Suite 287, Port Jeremiah, PR 93244",
+      "phone": "(870)586-6882",
+      "email": "james17@example.com",
+      "risk_score": 36.8
+    },
+    "coverages": [
+      {
+        "id": "COV-0249",
+        "code": "CGL-A",
+        "category": "LIABILITY",
+        "limit": 1000000.0,
+        "deductible": 2500.0,
+        "exclusions": [
+          "Intentional acts",
+          "War and terrorism"
+        ]
+      },
+      {
+        "id": "COV-0250",
+        "code": "CGL-B",
+        "category": "LIABILITY",
+        "limit": 2000000.0,
+        "deductible": 2500.0,
+        "exclusions": [
+          "Intentional acts"
+        ]
+      }
+    ],
+    "endorsements": []
+  },
+  {
+    "id": "POL-0064",
+    "policy_number": "PL-2025-0064",
+    "type": "PROFESSIONAL_LIABILITY",
+    "start_date": "2025-06-24",
+    "end_date": "2026-06-24",
+    "premium": 30632.0,
+    "deductible": 2500.0,
+    "status": "CANCELLED",
+    "policyholder": {
+      "id": "PH-0064",
+      "name": "Nathaniel Lee",
+      "dob": "1973-11-17",
+      "address": "39837 Molly Isle, Susantown, IL 25407",
+      "phone": "001-717-639-3638x5467",
+      "email": "michael77@example.org",
+      "risk_score": 26.3
+    },
+    "coverages": [
+      {
+        "id": "COV-0253",
+        "code": "PL-A",
+        "category": "ERRORS_OMISSIONS",
+        "limit": 3000000.0,
+        "deductible": 2500.0,
+        "exclusions": [
+          "Intentional acts",
+          "War and terrorism"
+        ]
+      }
+    ],
+    "endorsements": []
+  },
+  {
+    "id": "POL-0065",
+    "policy_number": "CP-2025-0065",
+    "type": "COMMERCIAL_PROPERTY",
+    "start_date": "2025-03-30",
+    "end_date": "2026-03-30",
+    "premium": 57134.0,
+    "deductible": 2500.0,
+    "status": "EXPIRED",
+    "policyholder": {
+      "id": "PH-0065",
+      "name": "Miranda Gill",
+      "dob": "1977-05-27",
+      "address": "PSC 5560, Box 9320, APO AA 73024",
+      "phone": "001-596-942-3536",
+      "email": "jonathan77@example.com",
+      "risk_score": 7.2
+    },
+    "coverages": [
+      {
+        "id": "COV-0257",
+        "code": "CPP-A",
+        "category": "PROPERTY",
+        "limit": 5000000.0,
+        "deductible": 2500.0,
+        "exclusions": [
+          "Intentional acts",
+          "War and terrorism"
+        ]
+      },
+      {
+        "id": "COV-0258",
+        "code": "CPP-B",
+        "category": "PROPERTY",
+        "limit": 2000000.0,
+        "deductible": 2500.0,
+        "exclusions": [
+          "Intentional acts"
+        ]
+      }
+    ],
+    "endorsements": [
+      {
+        "id": "END-0027",
+        "endorsement_number": "END-2025-0027",
+        "policy_id": "POL-0065",
+        "type": "DEDUCTIBLE_CHANGE",
+        "effective_date": "2025-07-27",
+        "clause": "This endorsement amends policy CP-2025-0065. Deductible Change effective 2025-07-27. All other terms and conditions remain unchanged.",
+        "premium_adjustment": 1000.0
+      }
+    ]
+  },
+  {
+    "id": "POL-0066",
+    "policy_number": "WC-2025-0066",
+    "type": "WORKERS_COMPENSATION",
+    "start_date": "2025-03-12",
+    "end_date": "2026-03-12",
+    "premium": 30982.0,
+    "deductible": 2500.0,
+    "status": "ACTIVE",
+    "policyholder": {
+      "id": "PH-0066",
+      "name": "Robert Jackson",
+      "dob": "1992-10-20",
+      "address": "010 Robert Ville, North Jasmine, AL 29169",
+      "phone": "275.609.9770x08860",
+      "email": "andre62@example.org",
+      "risk_score": 75.9
+    },
+    "coverages": [
+      {
+        "id": "COV-0261",
+        "code": "WC-A",
+        "category": "EMPLOYEE_INJURY",
+        "limit": 1000000.0,
+        "deductible": 2500.0,
+        "exclusions": [
+          "Intentional acts",
+          "War and terrorism"
+        ]
+      }
+    ],
+    "endorsements": []
+  },
+  {
+    "id": "POL-0067",
+    "policy_number": "CGL-2024-0067",
+    "type": "COMMERCIAL_GENERAL_LIABILITY",
+    "start_date": "2024-01-27",
+    "end_date": "2025-01-26",
+    "premium": 6537.0,
+    "deductible": 10000.0,
+    "status": "ACTIVE",
+    "policyholder": {
+      "id": "PH-0067",
+      "name": "Kelly Allen",
+      "dob": "1997-10-14",
+      "address": "6156 Cunningham Square Apt. 410, South Nicholasside, NJ 07856",
+      "phone": "+1-902-617-6591x8033",
+      "email": "glassgabrielle@example.com",
+      "risk_score": 78.5
+    },
+    "coverages": [
+      {
+        "id": "COV-0265",
+        "code": "CGL-A",
+        "category": "LIABILITY",
+        "limit": 1000000.0,
+        "deductible": 10000.0,
+        "exclusions": [
+          "Intentional acts",
+          "War and terrorism"
+        ]
+      },
+      {
+        "id": "COV-0266",
+        "code": "CGL-B",
+        "category": "LIABILITY",
+        "limit": 2000000.0,
+        "deductible": 10000.0,
+        "exclusions": [
+          "Intentional acts"
+        ]
+      }
+    ],
+    "endorsements": []
+  },
+  {
+    "id": "POL-0068",
+    "policy_number": "AF-2023-0068",
+    "type": "AUTO_FLEET",
+    "start_date": "2023-12-25",
+    "end_date": "2024-12-24",
+    "premium": 24000.0,
+    "deductible": 2500.0,
+    "status": "ACTIVE",
+    "policyholder": {
+      "id": "PH-0068",
+      "name": "Kristy Johnson",
+      "dob": "1977-01-04",
+      "address": "261 Martin Garden, Rhodesside, MA 50812",
+      "phone": "001-821-785-0163x15999",
+      "email": "walterskristen@example.com",
+      "risk_score": 64.4
+    },
+    "coverages": [
+      {
+        "id": "COV-0269",
+        "code": "AF-A",
+        "category": "AUTO",
+        "limit": 1000000.0,
+        "deductible": 2500.0,
+        "exclusions": [
+          "Intentional acts",
+          "War and terrorism"
+        ]
+      },
+      {
+        "id": "COV-0270",
+        "code": "AF-B",
+        "category": "AUTO",
+        "limit": 500000.0,
+        "deductible": 2500.0,
+        "exclusions": [
+          "Intentional acts"
+        ]
+      }
+    ],
+    "endorsements": []
+  },
+  {
+    "id": "POL-0069",
+    "policy_number": "AF-2023-0069",
+    "type": "AUTO_FLEET",
+    "start_date": "2023-12-03",
+    "end_date": "2024-12-02",
+    "premium": 22258.0,
+    "deductible": 1000.0,
+    "status": "LAPSED",
+    "policyholder": {
+      "id": "PH-0069",
+      "name": "Henry Pugh MD",
+      "dob": "1995-06-25",
+      "address": "431 Joseph Light, Lake Peter, MN 14466",
+      "phone": "404-875-4121",
+      "email": "ghawkins@example.com",
+      "risk_score": 30.1
+    },
+    "coverages": [
+      {
+        "id": "COV-0273",
+        "code": "AF-A",
+        "category": "AUTO",
+        "limit": 1000000.0,
+        "deductible": 1000.0,
+        "exclusions": [
+          "Intentional acts",
+          "War and terrorism"
+        ]
+      },
+      {
+        "id": "COV-0274",
+        "code": "AF-B",
+        "category": "AUTO",
+        "limit": 500000.0,
+        "deductible": 1000.0,
+        "exclusions": [
+          "Intentional acts"
+        ]
+      }
+    ],
+    "endorsements": [
+      {
+        "id": "END-0014",
+        "endorsement_number": "END-2024-0014",
+        "policy_id": "POL-0069",
+        "type": "EXCLUSION_ADDED",
+        "effective_date": "2024-08-29",
+        "clause": "This endorsement amends policy AF-2023-0069. Exclusion Added effective 2024-08-29. All other terms and conditions remain unchanged.",
+        "premium_adjustment": 0.0
+      }
+    ]
+  },
+  {
+    "id": "POL-0070",
+    "policy_number": "PL-2024-0070",
+    "type": "PROFESSIONAL_LIABILITY",
+    "start_date": "2024-02-14",
+    "end_date": "2025-02-13",
+    "premium": 48532.0,
+    "deductible": 5000.0,
+    "status": "CANCELLED",
+    "policyholder": {
+      "id": "PH-0070",
+      "name": "Brandon Spencer",
+      "dob": "1996-03-25",
+      "address": "0466 Jenny Points Apt. 982, Jacksonview, ME 35681",
+      "phone": "921.526.4647x1543",
+      "email": "trodriguez@example.org",
+      "risk_score": 15.4
+    },
+    "coverages": [
+      {
+        "id": "COV-0277",
+        "code": "PL-A",
+        "category": "ERRORS_OMISSIONS",
+        "limit": 3000000.0,
+        "deductible": 5000.0,
+        "exclusions": [
+          "Intentional acts",
+          "War and terrorism"
+        ]
+      }
+    ],
+    "endorsements": [
+      {
+        "id": "END-0017",
+        "endorsement_number": "END-2024-0017",
+        "policy_id": "POL-0070",
+        "type": "EXCLUSION_ADDED",
+        "effective_date": "2024-11-12",
+        "clause": "This endorsement amends policy PL-2024-0070. Exclusion Added effective 2024-11-12. All other terms and conditions remain unchanged.",
+        "premium_adjustment": 500.0
+      },
+      {
+        "id": "END-0026",
+        "endorsement_number": "END-2024-0026",
+        "policy_id": "POL-0070",
+        "type": "LIMIT_INCREASE",
+        "effective_date": "2024-03-13",
+        "clause": "This endorsement amends policy PL-2024-0070. Limit Increase effective 2024-03-13. All other terms and conditions remain unchanged.",
+        "premium_adjustment": 0.0
+      }
+    ]
+  },
+  {
+    "id": "POL-0071",
+    "policy_number": "WC-2023-0071",
+    "type": "WORKERS_COMPENSATION",
+    "start_date": "2023-07-02",
+    "end_date": "2024-07-01",
+    "premium": 42049.0,
+    "deductible": 5000.0,
+    "status": "ACTIVE",
+    "policyholder": {
+      "id": "PH-0071",
+      "name": "Evelyn Oliver",
+      "dob": "1978-01-13",
+      "address": "924 Morrison Square Apt. 752, Novakport, WA 91590",
+      "phone": "+1-479-235-6465x1939",
+      "email": "nhahn@example.com",
+      "risk_score": 58.7
+    },
+    "coverages": [
+      {
+        "id": "COV-0281",
+        "code": "WC-A",
+        "category": "EMPLOYEE_INJURY",
+        "limit": 1000000.0,
+        "deductible": 5000.0,
+        "exclusions": [
+          "Intentional acts",
+          "War and terrorism"
+        ]
+      }
+    ],
+    "endorsements": []
+  },
+  {
+    "id": "POL-0072",
+    "policy_number": "WC-2025-0072",
+    "type": "WORKERS_COMPENSATION",
+    "start_date": "2025-01-16",
+    "end_date": "2026-01-16",
+    "premium": 55539.0,
+    "deductible": 5000.0,
+    "status": "ACTIVE",
+    "policyholder": {
+      "id": "PH-0072",
+      "name": "Sandra Jones",
+      "dob": "1983-06-15",
+      "address": "434 Jennifer Turnpike, Jonesfort, OR 53035",
+      "phone": "+1-386-580-5891",
+      "email": "gabriel90@example.net",
+      "risk_score": 93.6
+    },
+    "coverages": [
+      {
+        "id": "COV-0285",
+        "code": "WC-A",
+        "category": "EMPLOYEE_INJURY",
+        "limit": 1000000.0,
+        "deductible": 5000.0,
+        "exclusions": [
+          "Intentional acts",
+          "War and terrorism"
+        ]
+      }
+    ],
+    "endorsements": [
+      {
+        "id": "END-0034",
+        "endorsement_number": "END-2025-0034",
+        "policy_id": "POL-0072",
+        "type": "EXCLUSION_ADDED",
+        "effective_date": "2025-02-09",
+        "clause": "This endorsement amends policy WC-2025-0072. Exclusion Added effective 2025-02-09. All other terms and conditions remain unchanged.",
+        "premium_adjustment": 250.0
+      }
+    ]
+  },
+  {
+    "id": "POL-0073",
+    "policy_number": "CGL-2024-0073",
+    "type": "COMMERCIAL_GENERAL_LIABILITY",
+    "start_date": "2024-01-30",
+    "end_date": "2025-01-29",
+    "premium": 41787.0,
+    "deductible": 2500.0,
+    "status": "ACTIVE",
+    "policyholder": {
+      "id": "PH-0073",
+      "name": "Miss Jennifer Goodwin",
+      "dob": "1984-11-26",
+      "address": "3888 Sean Lock, Bartonshire, UT 66098",
+      "phone": "(450)771-4611",
+      "email": "matthew38@example.com",
+      "risk_score": 68.8
+    },
+    "coverages": [
+      {
+        "id": "COV-0289",
+        "code": "CGL-A",
+        "category": "LIABILITY",
+        "limit": 1000000.0,
+        "deductible": 2500.0,
+        "exclusions": [
+          "Intentional acts",
+          "War and terrorism"
+        ]
+      },
+      {
+        "id": "COV-0290",
+        "code": "CGL-B",
+        "category": "LIABILITY",
+        "limit": 2000000.0,
+        "deductible": 2500.0,
+        "exclusions": [
+          "Intentional acts"
+        ]
+      }
+    ],
+    "endorsements": []
+  },
+  {
+    "id": "POL-0074",
+    "policy_number": "CGL-2024-0074",
+    "type": "COMMERCIAL_GENERAL_LIABILITY",
+    "start_date": "2024-06-16",
+    "end_date": "2025-06-16",
+    "premium": 56855.0,
+    "deductible": 2500.0,
+    "status": "ACTIVE",
+    "policyholder": {
+      "id": "PH-0074",
+      "name": "Brent Bowen",
+      "dob": "1986-05-26",
+      "address": "10512 Zachary Plaza Apt. 586, Hallfurt, SC 24677",
+      "phone": "(866)209-3796",
+      "email": "jamiegoodwin@example.org",
+      "risk_score": 11.3
+    },
+    "coverages": [
+      {
+        "id": "COV-0293",
+        "code": "CGL-A",
+        "category": "LIABILITY",
+        "limit": 1000000.0,
+        "deductible": 2500.0,
+        "exclusions": [
+          "Intentional acts",
+          "War and terrorism"
+        ]
+      },
+      {
+        "id": "COV-0294",
+        "code": "CGL-B",
+        "category": "LIABILITY",
+        "limit": 2000000.0,
+        "deductible": 2500.0,
+        "exclusions": [
+          "Intentional acts"
+        ]
+      }
+    ],
+    "endorsements": [
+      {
+        "id": "END-0028",
+        "endorsement_number": "END-2025-0028",
+        "policy_id": "POL-0074",
+        "type": "DEDUCTIBLE_CHANGE",
+        "effective_date": "2025-04-07",
+        "clause": "This endorsement amends policy CGL-2024-0074. Deductible Change effective 2025-04-07. All other terms and conditions remain unchanged.",
+        "premium_adjustment": 750.0
+      }
+    ]
+  },
+  {
+    "id": "POL-0075",
+    "policy_number": "WC-2024-0075",
+    "type": "WORKERS_COMPENSATION",
+    "start_date": "2024-09-30",
+    "end_date": "2025-09-30",
+    "premium": 24572.0,
+    "deductible": 1000.0,
+    "status": "EXPIRED",
+    "policyholder": {
+      "id": "PH-0075",
+      "name": "Rebecca Herrera",
+      "dob": "1980-07-02",
+      "address": "47859 Carr Radial Apt. 557, Port Emily, AS 39487",
+      "phone": "+1-891-825-1341x252",
+      "email": "baileyhenderson@example.com",
+      "risk_score": 32.0
+    },
+    "coverages": [
+      {
+        "id": "COV-0297",
+        "code": "WC-A",
+        "category": "EMPLOYEE_INJURY",
+        "limit": 1000000.0,
+        "deductible": 1000.0,
+        "exclusions": [
+          "Intentional acts",
+          "War and terrorism"
+        ]
+      }
+    ],
+    "endorsements": []
+  },
+  {
+    "id": "POL-0076",
+    "policy_number": "WC-2024-0076",
+    "type": "WORKERS_COMPENSATION",
+    "start_date": "2024-11-13",
+    "end_date": "2025-11-13",
+    "premium": 30764.0,
+    "deductible": 5000.0,
+    "status": "ACTIVE",
+    "policyholder": {
+      "id": "PH-0076",
+      "name": "Melissa Brewer",
+      "dob": "1967-05-26",
+      "address": "2257 Michelle Branch Suite 236, Ortizfort, MT 93580",
+      "phone": "672.419.0340x438",
+      "email": "xcunningham@example.com",
+      "risk_score": 31.6
+    },
+    "coverages": [
+      {
+        "id": "COV-0301",
+        "code": "WC-A",
+        "category": "EMPLOYEE_INJURY",
+        "limit": 1000000.0,
+        "deductible": 5000.0,
+        "exclusions": [
+          "Intentional acts",
+          "War and terrorism"
+        ]
+      }
+    ],
+    "endorsements": []
+  },
+  {
+    "id": "POL-0077",
+    "policy_number": "CP-2023-0077",
+    "type": "COMMERCIAL_PROPERTY",
+    "start_date": "2023-07-16",
+    "end_date": "2024-07-15",
+    "premium": 31554.0,
+    "deductible": 10000.0,
+    "status": "ACTIVE",
+    "policyholder": {
+      "id": "PH-0077",
+      "name": "Ashley Wilson",
+      "dob": "1992-07-26",
+      "address": "078 Veronica Cove Apt. 407, Michaelland, NV 15887",
+      "phone": "001-733-695-9629x23309",
+      "email": "mariopadilla@example.com",
+      "risk_score": 86.3
+    },
+    "coverages": [
+      {
+        "id": "COV-0305",
+        "code": "CPP-A",
+        "category": "PROPERTY",
+        "limit": 5000000.0,
+        "deductible": 10000.0,
+        "exclusions": [
+          "Intentional acts",
+          "War and terrorism"
+        ]
+      },
+      {
+        "id": "COV-0306",
+        "code": "CPP-B",
+        "category": "PROPERTY",
+        "limit": 2000000.0,
+        "deductible": 10000.0,
+        "exclusions": [
+          "Intentional acts"
+        ]
+      }
+    ],
+    "endorsements": []
+  },
+  {
+    "id": "POL-0078",
+    "policy_number": "PL-2024-0078",
+    "type": "PROFESSIONAL_LIABILITY",
+    "start_date": "2024-08-05",
+    "end_date": "2025-08-05",
+    "premium": 23723.0,
+    "deductible": 10000.0,
+    "status": "ACTIVE",
+    "policyholder": {
+      "id": "PH-0078",
+      "name": "Tiffany Robertson",
+      "dob": "1962-02-02",
+      "address": "42232 Poole Trace Suite 729, Courtneyfurt, NV 10399",
+      "phone": "+1-716-384-5775x9017",
+      "email": "brobinson@example.org",
+      "risk_score": 5.0
+    },
+    "coverages": [
+      {
+        "id": "COV-0309",
+        "code": "PL-A",
+        "category": "ERRORS_OMISSIONS",
+        "limit": 3000000.0,
+        "deductible": 10000.0,
+        "exclusions": [
+          "Intentional acts",
+          "War and terrorism"
+        ]
+      }
+    ],
+    "endorsements": []
+  },
+  {
+    "id": "POL-0079",
+    "policy_number": "WC-2023-0079",
+    "type": "WORKERS_COMPENSATION",
+    "start_date": "2023-08-04",
+    "end_date": "2024-08-03",
+    "premium": 32173.0,
+    "deductible": 5000.0,
+    "status": "ACTIVE",
+    "policyholder": {
+      "id": "PH-0079",
+      "name": "Frank Campbell MD",
+      "dob": "1964-06-30",
+      "address": "0017 David Walks Apt. 770, Harrisberg, FM 85697",
+      "phone": "824-315-4152x0643",
+      "email": "smiththomas@example.org",
+      "risk_score": 44.8
+    },
+    "coverages": [
+      {
+        "id": "COV-0313",
+        "code": "WC-A",
+        "category": "EMPLOYEE_INJURY",
+        "limit": 1000000.0,
+        "deductible": 5000.0,
+        "exclusions": [
+          "Intentional acts",
+          "War and terrorism"
+        ]
+      }
+    ],
+    "endorsements": []
+  },
+  {
+    "id": "POL-0080",
+    "policy_number": "CP-2024-0080",
+    "type": "COMMERCIAL_PROPERTY",
+    "start_date": "2024-06-07",
+    "end_date": "2025-06-07",
+    "premium": 35010.0,
+    "deductible": 2500.0,
+    "status": "ACTIVE",
+    "policyholder": {
+      "id": "PH-0080",
+      "name": "Kelly Wallace",
+      "dob": "1956-02-28",
+      "address": "2713 Davis Valley, North Lawrenceport, DC 50665",
+      "phone": "001-922-518-9092x75326",
+      "email": "mosleydonald@example.org",
+      "risk_score": 30.5
+    },
+    "coverages": [
+      {
+        "id": "COV-0317",
+        "code": "CPP-A",
+        "category": "PROPERTY",
+        "limit": 5000000.0,
+        "deductible": 2500.0,
+        "exclusions": [
+          "Intentional acts",
+          "War and terrorism"
+        ]
+      },
+      {
+        "id": "COV-0318",
+        "code": "CPP-B",
+        "category": "PROPERTY",
+        "limit": 2000000.0,
+        "deductible": 2500.0,
+        "exclusions": [
+          "Intentional acts"
+        ]
+      }
+    ],
+    "endorsements": []
+  },
+  {
+    "id": "POL-0081",
+    "policy_number": "PL-2023-0081",
+    "type": "PROFESSIONAL_LIABILITY",
+    "start_date": "2023-12-10",
+    "end_date": "2024-12-09",
+    "premium": 10120.0,
+    "deductible": 2500.0,
+    "status": "ACTIVE",
+    "policyholder": {
+      "id": "PH-0081",
+      "name": "Janet Richmond",
+      "dob": "1977-01-05",
+      "address": "1389 Maxwell Spurs, Port Melanieport, IL 68363",
+      "phone": "+1-383-264-0376x137",
+      "email": "sarah26@example.net",
+      "risk_score": 25.2
+    },
+    "coverages": [
+      {
+        "id": "COV-0321",
+        "code": "PL-A",
+        "category": "ERRORS_OMISSIONS",
+        "limit": 3000000.0,
+        "deductible": 2500.0,
+        "exclusions": [
+          "Intentional acts",
+          "War and terrorism"
+        ]
+      }
+    ],
+    "endorsements": []
+  },
+  {
+    "id": "POL-0082",
+    "policy_number": "CP-2023-0082",
+    "type": "COMMERCIAL_PROPERTY",
+    "start_date": "2023-05-31",
+    "end_date": "2024-05-30",
+    "premium": 5600.0,
+    "deductible": 1000.0,
+    "status": "ACTIVE",
+    "policyholder": {
+      "id": "PH-0082",
+      "name": "Joshua Thompson",
+      "dob": "1987-08-31",
+      "address": "USS Smith, FPO AE 02308",
+      "phone": "430-606-8486x661",
+      "email": "collinswilliam@example.org",
+      "risk_score": 47.8
+    },
+    "coverages": [
+      {
+        "id": "COV-0325",
+        "code": "CPP-A",
+        "category": "PROPERTY",
+        "limit": 5000000.0,
+        "deductible": 1000.0,
+        "exclusions": [
+          "Intentional acts",
+          "War and terrorism"
+        ]
+      },
+      {
+        "id": "COV-0326",
+        "code": "CPP-B",
+        "category": "PROPERTY",
+        "limit": 2000000.0,
+        "deductible": 1000.0,
+        "exclusions": [
+          "Intentional acts"
+        ]
+      }
+    ],
+    "endorsements": []
+  },
+  {
+    "id": "POL-0083",
+    "policy_number": "CGL-2024-0083",
+    "type": "COMMERCIAL_GENERAL_LIABILITY",
+    "start_date": "2024-04-11",
+    "end_date": "2025-04-11",
+    "premium": 31160.0,
+    "deductible": 2500.0,
+    "status": "EXPIRED",
+    "policyholder": {
+      "id": "PH-0083",
+      "name": "Brittney Murphy",
+      "dob": "1995-07-08",
+      "address": "6303 Sandy Crescent, Salazarton, ME 87805",
+      "phone": "001-721-402-0275x8842",
+      "email": "jessica10@example.com",
+      "risk_score": 39.6
+    },
+    "coverages": [
+      {
+        "id": "COV-0329",
+        "code": "CGL-A",
+        "category": "LIABILITY",
+        "limit": 1000000.0,
+        "deductible": 2500.0,
+        "exclusions": [
+          "Intentional acts",
+          "War and terrorism"
+        ]
+      },
+      {
+        "id": "COV-0330",
+        "code": "CGL-B",
+        "category": "LIABILITY",
+        "limit": 2000000.0,
+        "deductible": 2500.0,
+        "exclusions": [
+          "Intentional acts"
+        ]
+      }
+    ],
+    "endorsements": [
+      {
+        "id": "END-0010",
+        "endorsement_number": "END-2024-0010",
+        "policy_id": "POL-0083",
+        "type": "EXCLUSION_ADDED",
+        "effective_date": "2024-10-19",
+        "clause": "This endorsement amends policy CGL-2024-0083. Exclusion Added effective 2024-10-19. All other terms and conditions remain unchanged.",
+        "premium_adjustment": 500.0
+      },
+      {
+        "id": "END-0035",
+        "endorsement_number": "END-2024-0035",
+        "policy_id": "POL-0083",
+        "type": "LOCATION_ADDED",
+        "effective_date": "2024-10-23",
+        "clause": "This endorsement amends policy CGL-2024-0083. Location Added effective 2024-10-23. All other terms and conditions remain unchanged.",
+        "premium_adjustment": 750.0
+      }
+    ]
+  },
+  {
+    "id": "POL-0084",
+    "policy_number": "AF-2023-0084",
+    "type": "AUTO_FLEET",
+    "start_date": "2023-09-07",
+    "end_date": "2024-09-06",
+    "premium": 13671.0,
+    "deductible": 1000.0,
+    "status": "EXPIRED",
+    "policyholder": {
+      "id": "PH-0084",
+      "name": "Denise Brown",
+      "dob": "1994-11-07",
+      "address": "8507 Michael Glens Apt. 913, North Micheletown, IA 06527",
+      "phone": "656.322.0863x5365",
+      "email": "david02@example.org",
+      "risk_score": 82.4
+    },
+    "coverages": [
+      {
+        "id": "COV-0333",
+        "code": "AF-A",
+        "category": "AUTO",
+        "limit": 1000000.0,
+        "deductible": 1000.0,
+        "exclusions": [
+          "Intentional acts",
+          "War and terrorism"
+        ]
+      },
+      {
+        "id": "COV-0334",
+        "code": "AF-B",
+        "category": "AUTO",
+        "limit": 500000.0,
+        "deductible": 1000.0,
+        "exclusions": [
+          "Intentional acts"
+        ]
+      }
+    ],
+    "endorsements": [
+      {
+        "id": "END-0013",
+        "endorsement_number": "END-2023-0013",
+        "policy_id": "POL-0084",
+        "type": "DEDUCTIBLE_CHANGE",
+        "effective_date": "2023-11-06",
+        "clause": "This endorsement amends policy AF-2023-0084. Deductible Change effective 2023-11-06. All other terms and conditions remain unchanged.",
+        "premium_adjustment": 0.0
+      }
+    ]
+  },
+  {
+    "id": "POL-0085",
+    "policy_number": "CGL-2025-0085",
+    "type": "COMMERCIAL_GENERAL_LIABILITY",
+    "start_date": "2025-03-08",
+    "end_date": "2026-03-08",
+    "premium": 31862.0,
+    "deductible": 2500.0,
+    "status": "ACTIVE",
+    "policyholder": {
+      "id": "PH-0085",
+      "name": "Vicki Finley",
+      "dob": "1960-04-20",
+      "address": "5187 Miguel Highway Suite 937, Brittanyfort, WI 26115",
+      "phone": "001-883-620-6038x5050",
+      "email": "harristonya@example.com",
+      "risk_score": 91.2
+    },
+    "coverages": [
+      {
+        "id": "COV-0337",
+        "code": "CGL-A",
+        "category": "LIABILITY",
+        "limit": 1000000.0,
+        "deductible": 2500.0,
+        "exclusions": [
+          "Intentional acts",
+          "War and terrorism"
+        ]
+      },
+      {
+        "id": "COV-0338",
+        "code": "CGL-B",
+        "category": "LIABILITY",
+        "limit": 2000000.0,
+        "deductible": 2500.0,
+        "exclusions": [
+          "Intentional acts"
+        ]
+      }
+    ],
+    "endorsements": []
+  },
+  {
+    "id": "POL-0086",
+    "policy_number": "PL-2024-0086",
+    "type": "PROFESSIONAL_LIABILITY",
+    "start_date": "2024-04-20",
+    "end_date": "2025-04-20",
+    "premium": 7291.0,
+    "deductible": 2500.0,
+    "status": "CANCELLED",
+    "policyholder": {
+      "id": "PH-0086",
+      "name": "Anthony Shea DDS",
+      "dob": "1961-12-10",
+      "address": "657 Beverly Parkways, Lake Lori, CA 78081",
+      "phone": "001-706-723-4456",
+      "email": "enelson@example.org",
+      "risk_score": 15.9
+    },
+    "coverages": [
+      {
+        "id": "COV-0341",
+        "code": "PL-A",
+        "category": "ERRORS_OMISSIONS",
+        "limit": 3000000.0,
+        "deductible": 2500.0,
+        "exclusions": [
+          "Intentional acts",
+          "War and terrorism"
+        ]
+      }
+    ],
+    "endorsements": [
+      {
+        "id": "END-0048",
+        "endorsement_number": "END-2024-0048",
+        "policy_id": "POL-0086",
+        "type": "NAMED_PARTY_ADDED",
+        "effective_date": "2024-08-09",
+        "clause": "This endorsement amends policy PL-2024-0086. Named Party Added effective 2024-08-09. All other terms and conditions remain unchanged.",
+        "premium_adjustment": 500.0
+      }
+    ]
+  },
+  {
+    "id": "POL-0087",
+    "policy_number": "CP-2025-0087",
+    "type": "COMMERCIAL_PROPERTY",
+    "start_date": "2025-03-31",
+    "end_date": "2026-03-31",
+    "premium": 34450.0,
+    "deductible": 5000.0,
+    "status": "CANCELLED",
+    "policyholder": {
+      "id": "PH-0087",
+      "name": "Randy Rodriguez",
+      "dob": "1962-10-20",
+      "address": "6185 Shannon Mountain Suite 112, Margaretton, IL 43465",
+      "phone": "(413)256-8044",
+      "email": "jbond@example.net",
+      "risk_score": 85.2
+    },
+    "coverages": [
+      {
+        "id": "COV-0345",
+        "code": "CPP-A",
+        "category": "PROPERTY",
+        "limit": 5000000.0,
+        "deductible": 5000.0,
+        "exclusions": [
+          "Intentional acts",
+          "War and terrorism"
+        ]
+      },
+      {
+        "id": "COV-0346",
+        "code": "CPP-B",
+        "category": "PROPERTY",
+        "limit": 2000000.0,
+        "deductible": 5000.0,
+        "exclusions": [
+          "Intentional acts"
+        ]
+      }
+    ],
+    "endorsements": [
+      {
+        "id": "END-0046",
+        "endorsement_number": "END-2026-0046",
+        "policy_id": "POL-0087",
+        "type": "NAMED_PARTY_ADDED",
+        "effective_date": "2026-02-02",
+        "clause": "This endorsement amends policy CP-2025-0087. Named Party Added effective 2026-02-02. All other terms and conditions remain unchanged.",
+        "premium_adjustment": -250.0
+      }
+    ]
+  },
+  {
+    "id": "POL-0088",
+    "policy_number": "PL-2025-0088",
+    "type": "PROFESSIONAL_LIABILITY",
+    "start_date": "2025-04-14",
+    "end_date": "2026-04-14",
+    "premium": 51138.0,
+    "deductible": 10000.0,
+    "status": "EXPIRED",
+    "policyholder": {
+      "id": "PH-0088",
+      "name": "Anna Garcia",
+      "dob": "1965-02-14",
+      "address": "23651 Lowery Club, North Jamesmouth, AS 17381",
+      "phone": "851-907-0296",
+      "email": "reyesronald@example.com",
+      "risk_score": 54.3
+    },
+    "coverages": [
+      {
+        "id": "COV-0349",
+        "code": "PL-A",
+        "category": "ERRORS_OMISSIONS",
+        "limit": 3000000.0,
+        "deductible": 10000.0,
+        "exclusions": [
+          "Intentional acts",
+          "War and terrorism"
+        ]
+      }
+    ],
+    "endorsements": [
+      {
+        "id": "END-0012",
+        "endorsement_number": "END-2026-0012",
+        "policy_id": "POL-0088",
+        "type": "LOCATION_ADDED",
+        "effective_date": "2026-01-15",
+        "clause": "This endorsement amends policy PL-2025-0088. Location Added effective 2026-01-15. All other terms and conditions remain unchanged.",
+        "premium_adjustment": 0.0
+      }
+    ]
+  },
+  {
+    "id": "POL-0089",
+    "policy_number": "CP-2025-0089",
+    "type": "COMMERCIAL_PROPERTY",
+    "start_date": "2025-01-31",
+    "end_date": "2026-01-31",
+    "premium": 35108.0,
+    "deductible": 10000.0,
+    "status": "ACTIVE",
+    "policyholder": {
+      "id": "PH-0089",
+      "name": "Cody Ramirez",
+      "dob": "1965-09-22",
+      "address": "476 Brown Harbors, Taylorborough, SD 69420",
+      "phone": "780.865.7875",
+      "email": "hector59@example.org",
+      "risk_score": 27.3
+    },
+    "coverages": [
+      {
+        "id": "COV-0353",
+        "code": "CPP-A",
+        "category": "PROPERTY",
+        "limit": 5000000.0,
+        "deductible": 10000.0,
+        "exclusions": [
+          "Intentional acts",
+          "War and terrorism"
+        ]
+      },
+      {
+        "id": "COV-0354",
+        "code": "CPP-B",
+        "category": "PROPERTY",
+        "limit": 2000000.0,
+        "deductible": 10000.0,
+        "exclusions": [
+          "Intentional acts"
+        ]
+      }
+    ],
+    "endorsements": []
+  },
+  {
+    "id": "POL-0090",
+    "policy_number": "WC-2025-0090",
+    "type": "WORKERS_COMPENSATION",
+    "start_date": "2025-02-23",
+    "end_date": "2026-02-23",
+    "premium": 54965.0,
+    "deductible": 10000.0,
+    "status": "ACTIVE",
+    "policyholder": {
+      "id": "PH-0090",
+      "name": "Robert Campbell",
+      "dob": "1987-09-16",
+      "address": "13348 Kathryn Forges, Kellyburgh, HI 31506",
+      "phone": "001-555-990-5992",
+      "email": "gregory01@example.org",
+      "risk_score": 29.7
+    },
+    "coverages": [
+      {
+        "id": "COV-0357",
+        "code": "WC-A",
+        "category": "EMPLOYEE_INJURY",
+        "limit": 1000000.0,
+        "deductible": 10000.0,
+        "exclusions": [
+          "Intentional acts",
+          "War and terrorism"
+        ]
+      }
+    ],
+    "endorsements": []
+  },
+  {
+    "id": "POL-0091",
+    "policy_number": "CGL-2024-0091",
+    "type": "COMMERCIAL_GENERAL_LIABILITY",
+    "start_date": "2024-12-31",
+    "end_date": "2025-12-31",
+    "premium": 22725.0,
+    "deductible": 2500.0,
+    "status": "ACTIVE",
+    "policyholder": {
+      "id": "PH-0091",
+      "name": "Daniel Fox",
+      "dob": "1955-08-28",
+      "address": "52500 Brenda Divide, Port Aliciastad, CA 49468",
+      "phone": "001-469-715-4522x675",
+      "email": "elizabetholsen@example.com",
+      "risk_score": 33.8
+    },
+    "coverages": [
+      {
+        "id": "COV-0361",
+        "code": "CGL-A",
+        "category": "LIABILITY",
+        "limit": 1000000.0,
+        "deductible": 2500.0,
+        "exclusions": [
+          "Intentional acts",
+          "War and terrorism"
+        ]
+      },
+      {
+        "id": "COV-0362",
+        "code": "CGL-B",
+        "category": "LIABILITY",
+        "limit": 2000000.0,
+        "deductible": 2500.0,
+        "exclusions": [
+          "Intentional acts"
+        ]
+      }
+    ],
+    "endorsements": [
+      {
+        "id": "END-0024",
+        "endorsement_number": "END-2025-0024",
+        "policy_id": "POL-0091",
+        "type": "ADDITIONAL_INSURED",
+        "effective_date": "2025-05-05",
+        "clause": "This endorsement amends policy CGL-2024-0091. Additional Insured effective 2025-05-05. All other terms and conditions remain unchanged.",
+        "premium_adjustment": 1000.0
+      }
+    ]
+  },
+  {
+    "id": "POL-0092",
+    "policy_number": "PL-2023-0092",
+    "type": "PROFESSIONAL_LIABILITY",
+    "start_date": "2023-03-24",
+    "end_date": "2024-03-23",
+    "premium": 13068.0,
+    "deductible": 2500.0,
+    "status": "ACTIVE",
+    "policyholder": {
+      "id": "PH-0092",
+      "name": "Michael Anderson",
+      "dob": "1955-09-25",
+      "address": "USCGC Rosales, FPO AP 04745",
+      "phone": "(795)393-9172",
+      "email": "michaelflores@example.net",
+      "risk_score": 67.5
+    },
+    "coverages": [
+      {
+        "id": "COV-0365",
+        "code": "PL-A",
+        "category": "ERRORS_OMISSIONS",
+        "limit": 3000000.0,
+        "deductible": 2500.0,
+        "exclusions": [
+          "Intentional acts",
+          "War and terrorism"
+        ]
+      }
+    ],
+    "endorsements": []
+  },
+  {
+    "id": "POL-0093",
+    "policy_number": "CP-2023-0093",
+    "type": "COMMERCIAL_PROPERTY",
+    "start_date": "2023-03-07",
+    "end_date": "2024-03-06",
+    "premium": 31188.0,
+    "deductible": 10000.0,
+    "status": "ACTIVE",
+    "policyholder": {
+      "id": "PH-0093",
+      "name": "Ann Fletcher",
+      "dob": "1999-02-06",
+      "address": "0433 Michael Turnpike Apt. 006, Oconnorburgh, FM 54767",
+      "phone": "665.286.1793x2710",
+      "email": "jose11@example.com",
+      "risk_score": 46.9
+    },
+    "coverages": [
+      {
+        "id": "COV-0369",
+        "code": "CPP-A",
+        "category": "PROPERTY",
+        "limit": 5000000.0,
+        "deductible": 10000.0,
+        "exclusions": [
+          "Intentional acts",
+          "War and terrorism"
+        ]
+      },
+      {
+        "id": "COV-0370",
+        "code": "CPP-B",
+        "category": "PROPERTY",
+        "limit": 2000000.0,
+        "deductible": 10000.0,
+        "exclusions": [
+          "Intentional acts"
+        ]
+      }
+    ],
+    "endorsements": []
+  },
+  {
+    "id": "POL-0094",
+    "policy_number": "CGL-2023-0094",
+    "type": "COMMERCIAL_GENERAL_LIABILITY",
+    "start_date": "2023-07-31",
+    "end_date": "2024-07-30",
+    "premium": 58584.0,
+    "deductible": 10000.0,
+    "status": "ACTIVE",
+    "policyholder": {
+      "id": "PH-0094",
+      "name": "James Dennis",
+      "dob": "1992-11-01",
+      "address": "USS Morgan, FPO AP 63774",
+      "phone": "001-806-629-6201x533",
+      "email": "kenneth10@example.com",
+      "risk_score": 74.3
+    },
+    "coverages": [
+      {
+        "id": "COV-0373",
+        "code": "CGL-A",
+        "category": "LIABILITY",
+        "limit": 1000000.0,
+        "deductible": 10000.0,
+        "exclusions": [
+          "Intentional acts",
+          "War and terrorism"
+        ]
+      },
+      {
+        "id": "COV-0374",
+        "code": "CGL-B",
+        "category": "LIABILITY",
+        "limit": 2000000.0,
+        "deductible": 10000.0,
+        "exclusions": [
+          "Intentional acts"
+        ]
+      }
+    ],
+    "endorsements": [
+      {
+        "id": "END-0015",
+        "endorsement_number": "END-2023-0015",
+        "policy_id": "POL-0094",
+        "type": "LIMIT_INCREASE",
+        "effective_date": "2023-08-01",
+        "clause": "This endorsement amends policy CGL-2023-0094. Limit Increase effective 2023-08-01. All other terms and conditions remain unchanged.",
+        "premium_adjustment": -250.0
+      }
+    ]
+  },
+  {
+    "id": "POL-0095",
+    "policy_number": "CGL-2025-0095",
+    "type": "COMMERCIAL_GENERAL_LIABILITY",
+    "start_date": "2025-05-27",
+    "end_date": "2026-05-27",
+    "premium": 54174.0,
+    "deductible": 10000.0,
+    "status": "ACTIVE",
+    "policyholder": {
+      "id": "PH-0095",
+      "name": "Sara Hernandez",
+      "dob": "1980-03-01",
+      "address": "9731 Jamie Route, Tiffanyfort, PR 15640",
+      "phone": "967-274-1862x5652",
+      "email": "scott43@example.com",
+      "risk_score": 89.8
+    },
+    "coverages": [
+      {
+        "id": "COV-0377",
+        "code": "CGL-A",
+        "category": "LIABILITY",
+        "limit": 1000000.0,
+        "deductible": 10000.0,
+        "exclusions": [
+          "Intentional acts",
+          "War and terrorism"
+        ]
+      },
+      {
+        "id": "COV-0378",
+        "code": "CGL-B",
+        "category": "LIABILITY",
+        "limit": 2000000.0,
+        "deductible": 10000.0,
+        "exclusions": [
+          "Intentional acts"
+        ]
+      }
+    ],
+    "endorsements": []
+  },
+  {
+    "id": "POL-0096",
+    "policy_number": "WC-2025-0096",
+    "type": "WORKERS_COMPENSATION",
+    "start_date": "2025-02-10",
+    "end_date": "2026-02-10",
+    "premium": 29558.0,
+    "deductible": 10000.0,
+    "status": "ACTIVE",
+    "policyholder": {
+      "id": "PH-0096",
+      "name": "Brittany Horton",
+      "dob": "1962-03-11",
+      "address": "693 Mary Viaduct Suite 879, South Kent, MO 94126",
+      "phone": "4894899217",
+      "email": "lindseymartinez@example.com",
+      "risk_score": 71.1
+    },
+    "coverages": [
+      {
+        "id": "COV-0381",
+        "code": "WC-A",
+        "category": "EMPLOYEE_INJURY",
+        "limit": 1000000.0,
+        "deductible": 10000.0,
+        "exclusions": [
+          "Intentional acts",
+          "War and terrorism"
+        ]
+      }
+    ],
+    "endorsements": [
+      {
+        "id": "END-0005",
+        "endorsement_number": "END-2025-0005",
+        "policy_id": "POL-0096",
+        "type": "LIMIT_INCREASE",
+        "effective_date": "2025-12-03",
+        "clause": "This endorsement amends policy WC-2025-0096. Limit Increase effective 2025-12-03. All other terms and conditions remain unchanged.",
+        "premium_adjustment": -250.0
+      }
+    ]
+  },
+  {
+    "id": "POL-0097",
+    "policy_number": "PL-2023-0097",
+    "type": "PROFESSIONAL_LIABILITY",
+    "start_date": "2023-08-14",
+    "end_date": "2024-08-13",
+    "premium": 35996.0,
+    "deductible": 2500.0,
+    "status": "ACTIVE",
+    "policyholder": {
+      "id": "PH-0097",
+      "name": "Michael Harris",
+      "dob": "1998-04-17",
+      "address": "1168 Arnold Walks Suite 870, Rodriguezberg, FL 74765",
+      "phone": "001-891-619-1485",
+      "email": "kpena@example.net",
+      "risk_score": 48.7
+    },
+    "coverages": [
+      {
+        "id": "COV-0385",
+        "code": "PL-A",
+        "category": "ERRORS_OMISSIONS",
+        "limit": 3000000.0,
+        "deductible": 2500.0,
+        "exclusions": [
+          "Intentional acts",
+          "War and terrorism"
+        ]
+      }
+    ],
+    "endorsements": [
+      {
+        "id": "END-0038",
+        "endorsement_number": "END-2024-0038",
+        "policy_id": "POL-0097",
+        "type": "NAMED_PARTY_ADDED",
+        "effective_date": "2024-04-12",
+        "clause": "This endorsement amends policy PL-2023-0097. Named Party Added effective 2024-04-12. All other terms and conditions remain unchanged.",
+        "premium_adjustment": 0.0
+      }
+    ]
+  },
+  {
+    "id": "POL-0098",
+    "policy_number": "AF-2023-0098",
+    "type": "AUTO_FLEET",
+    "start_date": "2023-12-11",
+    "end_date": "2024-12-10",
+    "premium": 47835.0,
+    "deductible": 10000.0,
+    "status": "EXPIRED",
+    "policyholder": {
+      "id": "PH-0098",
+      "name": "Christopher Powell",
+      "dob": "1997-09-06",
+      "address": "65307 Prince Brooks Suite 444, Garrisonville, VI 30379",
+      "phone": "(947)554-6913",
+      "email": "wfigueroa@example.net",
+      "risk_score": 80.6
+    },
+    "coverages": [
+      {
+        "id": "COV-0389",
+        "code": "AF-A",
+        "category": "AUTO",
+        "limit": 1000000.0,
+        "deductible": 10000.0,
+        "exclusions": [
+          "Intentional acts",
+          "War and terrorism"
+        ]
+      },
+      {
+        "id": "COV-0390",
+        "code": "AF-B",
+        "category": "AUTO",
+        "limit": 500000.0,
+        "deductible": 10000.0,
+        "exclusions": [
+          "Intentional acts"
+        ]
+      }
+    ],
+    "endorsements": [
+      {
+        "id": "END-0020",
+        "endorsement_number": "END-2023-0020",
+        "policy_id": "POL-0098",
+        "type": "ADDITIONAL_INSURED",
+        "effective_date": "2023-12-27",
+        "clause": "This endorsement amends policy AF-2023-0098. Additional Insured effective 2023-12-27. All other terms and conditions remain unchanged.",
+        "premium_adjustment": 1000.0
+      }
+    ]
+  },
+  {
+    "id": "POL-0099",
+    "policy_number": "CP-2024-0099",
+    "type": "COMMERCIAL_PROPERTY",
+    "start_date": "2024-09-29",
+    "end_date": "2025-09-29",
+    "premium": 39004.0,
+    "deductible": 1000.0,
+    "status": "CANCELLED",
+    "policyholder": {
+      "id": "PH-0099",
+      "name": "Samantha Robertson",
+      "dob": "1966-06-06",
+      "address": "89023 Mary Gateway Apt. 705, West Micheal, NH 66708",
+      "phone": "(710)435-7972x7985",
+      "email": "kaitlyn14@example.org",
+      "risk_score": 58.3
+    },
+    "coverages": [
+      {
+        "id": "COV-0393",
+        "code": "CPP-A",
+        "category": "PROPERTY",
+        "limit": 5000000.0,
+        "deductible": 1000.0,
+        "exclusions": [
+          "Intentional acts",
+          "War and terrorism"
+        ]
+      },
+      {
+        "id": "COV-0394",
+        "code": "CPP-B",
+        "category": "PROPERTY",
+        "limit": 2000000.0,
+        "deductible": 1000.0,
+        "exclusions": [
+          "Intentional acts"
+        ]
+      }
+    ],
+    "endorsements": [
+      {
+        "id": "END-0029",
+        "endorsement_number": "END-2025-0029",
+        "policy_id": "POL-0099",
+        "type": "LOCATION_ADDED",
+        "effective_date": "2025-03-12",
+        "clause": "This endorsement amends policy CP-2024-0099. Location Added effective 2025-03-12. All other terms and conditions remain unchanged.",
+        "premium_adjustment": 0.0
+      }
+    ]
+  },
+  {
+    "id": "POL-0100",
+    "policy_number": "CGL-2023-0100",
+    "type": "COMMERCIAL_GENERAL_LIABILITY",
+    "start_date": "2023-03-27",
+    "end_date": "2024-03-26",
+    "premium": 46123.0,
+    "deductible": 10000.0,
+    "status": "ACTIVE",
+    "policyholder": {
+      "id": "PH-0100",
+      "name": "Christopher Armstrong",
+      "dob": "1970-03-12",
+      "address": "346 Michelle Trafficway, South Rhondaburgh, PA 01610",
+      "phone": "649.544.6657",
+      "email": "hturner@example.net",
+      "risk_score": 46.6
+    },
+    "coverages": [
+      {
+        "id": "COV-0397",
+        "code": "CGL-A",
+        "category": "LIABILITY",
+        "limit": 1000000.0,
+        "deductible": 10000.0,
+        "exclusions": [
+          "Intentional acts",
+          "War and terrorism"
+        ]
+      },
+      {
+        "id": "COV-0398",
+        "code": "CGL-B",
+        "category": "LIABILITY",
+        "limit": 2000000.0,
+        "deductible": 10000.0,
+        "exclusions": [
+          "Intentional acts"
+        ]
+      }
+    ],
+    "endorsements": []
+  }
+]

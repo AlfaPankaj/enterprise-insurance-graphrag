@@ -1,0 +1,394 @@
+{
+  "total_queries": 20,
+  "passed": 20,
+  "retrieval_accuracy": 100.0,
+  "avg_savings_pct": 7.28,
+  "avg_latency_ms": 5264.39,
+  "results": [
+    {
+      "dataset": "fraud_oracle",
+      "row": 771,
+      "position": "head",
+      "query": "Is claim CLM-00771 flagged as fraud?",
+      "expected": [
+        "CLM-00771"
+      ],
+      "expected_found": 1,
+      "retrieved": true,
+      "survived_prune": true,
+      "tokens_before": 174,
+      "tokens_after": 161,
+      "savings_percent": 7.47,
+      "latency_ms": 5328.94,
+      "verdict": "UNKNOWN",
+      "answer_ok": true,
+      "answer": "Not determinable from the retrieved context. The context does not contain any information about whether claim CLM-00771 is flagged as fraud."
+    },
+    {
+      "dataset": "fraud_oracle",
+      "row": 4626,
+      "position": "middle",
+      "query": "Is claim CLM-04626 flagged as fraud?",
+      "expected": [
+        "CLM-04626"
+      ],
+      "expected_found": 1,
+      "retrieved": true,
+      "survived_prune": true,
+      "tokens_before": 175,
+      "tokens_after": 162,
+      "savings_percent": 7.43,
+      "latency_ms": 5234.07,
+      "verdict": "UNKNOWN",
+      "answer_ok": true,
+      "answer": "Not determinable from the retrieved context. The context does not contain any information about whether claim CLM-04626 is flagged as fraud."
+    },
+    {
+      "dataset": "fraud_oracle",
+      "row": 8481,
+      "position": "middle",
+      "query": "Is claim CLM-08481 flagged as fraud?",
+      "expected": [
+        "CLM-08481"
+      ],
+      "expected_found": 1,
+      "retrieved": true,
+      "survived_prune": true,
+      "tokens_before": 175,
+      "tokens_after": 162,
+      "savings_percent": 7.43,
+      "latency_ms": 5206.97,
+      "verdict": "UNKNOWN",
+      "answer_ok": true,
+      "answer": "Not determinable from the retrieved context. The context does not contain any information about whether claim CLM-08481 is flagged as fraud."
+    },
+    {
+      "dataset": "fraud_oracle",
+      "row": 12336,
+      "position": "middle",
+      "query": "Is claim CLM-12336 flagged as fraud?",
+      "expected": [
+        "CLM-12336"
+      ],
+      "expected_found": 1,
+      "retrieved": true,
+      "survived_prune": true,
+      "tokens_before": 179,
+      "tokens_after": 166,
+      "savings_percent": 7.26,
+      "latency_ms": 5195.93,
+      "verdict": "UNKNOWN",
+      "answer_ok": true,
+      "answer": "Not determinable from the retrieved context. The context does not contain any information about whether claim CLM-12336 is flagged as fraud."
+    },
+    {
+      "dataset": "fraud_oracle",
+      "row": 14649,
+      "position": "tail",
+      "query": "Is claim CLM-14649 flagged as fraud?",
+      "expected": [
+        "CLM-14649"
+      ],
+      "expected_found": 1,
+      "retrieved": true,
+      "survived_prune": true,
+      "tokens_before": 173,
+      "tokens_after": 160,
+      "savings_percent": 7.51,
+      "latency_ms": 5174.48,
+      "verdict": "UNKNOWN",
+      "answer_ok": true,
+      "answer": "Not determinable from the retrieved context. The context does not contain any information about whether claim CLM-14649 is flagged as fraud."
+    },
+    {
+      "dataset": "insurance_claims",
+      "row": 50,
+      "position": "head",
+      "query": "Was claim CLM-00050 reported as fraud?",
+      "expected": [
+        "CLM-00050"
+      ],
+      "expected_found": 1,
+      "retrieved": true,
+      "survived_prune": true,
+      "tokens_before": 221,
+      "tokens_after": 208,
+      "savings_percent": 5.88,
+      "latency_ms": 5193.93,
+      "verdict": "UNKNOWN",
+      "answer_ok": true,
+      "answer": "Not determinable from the retrieved context. The claim status is listed as \"Total Loss\", but this does not necessarily indicate that it was reported as fraud."
+    },
+    {
+      "dataset": "insurance_claims",
+      "row": 300,
+      "position": "middle",
+      "query": "Was claim CLM-00300 reported as fraud?",
+      "expected": [
+        "CLM-00300"
+      ],
+      "expected_found": 1,
+      "retrieved": true,
+      "survived_prune": true,
+      "tokens_before": 224,
+      "tokens_after": 211,
+      "savings_percent": 5.8,
+      "latency_ms": 5128.3,
+      "verdict": "UNKNOWN",
+      "answer_ok": true,
+      "answer": "Not determinable from the retrieved context. The context does not contain any information about whether claim CLM-00300 was reported as fraud."
+    },
+    {
+      "dataset": "insurance_claims",
+      "row": 550,
+      "position": "middle",
+      "query": "Was claim CLM-00550 reported as fraud?",
+      "expected": [
+        "CLM-00550"
+      ],
+      "expected_found": 1,
+      "retrieved": true,
+      "survived_prune": true,
+      "tokens_before": 222,
+      "tokens_after": 209,
+      "savings_percent": 5.86,
+      "latency_ms": 5244.53,
+      "verdict": "UNKNOWN",
+      "answer_ok": true,
+      "answer": "Not determinable from the retrieved context. The claim status is listed as \"Minor Damage\", and there is no indication that it was reported as fraud."
+    },
+    {
+      "dataset": "insurance_claims",
+      "row": 800,
+      "position": "middle",
+      "query": "Was claim CLM-00800 reported as fraud?",
+      "expected": [
+        "CLM-00800"
+      ],
+      "expected_found": 1,
+      "retrieved": true,
+      "survived_prune": true,
+      "tokens_before": 220,
+      "tokens_after": 207,
+      "savings_percent": 5.91,
+      "latency_ms": 5071.85,
+      "verdict": "UNKNOWN",
+      "answer_ok": true,
+      "answer": "Not determinable from the retrieved context. The claim status is listed as \"Trivial Damage\", which does not indicate fraud."
+    },
+    {
+      "dataset": "insurance_claims",
+      "row": 950,
+      "position": "tail",
+      "query": "Was claim CLM-00950 reported as fraud?",
+      "expected": [
+        "CLM-00950"
+      ],
+      "expected_found": 1,
+      "retrieved": true,
+      "survived_prune": true,
+      "tokens_before": 221,
+      "tokens_after": 208,
+      "savings_percent": 5.88,
+      "latency_ms": 5407.33,
+      "verdict": "UNKNOWN",
+      "answer_ok": true,
+      "answer": "Not determinable from the retrieved context. The claim status is listed as \"Total Loss\", but there is no information indicating whether this was reported as fraudulent or not."
+    },
+    {
+      "dataset": "insurance_dataset",
+      "row": 650,
+      "position": "head",
+      "query": "What is the status of claim CLM-00650?",
+      "expected": [
+        "CLM-00650"
+      ],
+      "expected_found": 1,
+      "retrieved": true,
+      "survived_prune": true,
+      "tokens_before": 171,
+      "tokens_after": 157,
+      "savings_percent": 8.19,
+      "latency_ms": 4734.44,
+      "verdict": "n/a",
+      "answer_ok": true,
+      "answer": "The status of claim CLM-00650 is ACTIVE."
+    },
+    {
+      "dataset": "insurance_dataset",
+      "row": 3900,
+      "position": "middle",
+      "query": "What is the status of claim CLM-03900?",
+      "expected": [
+        "CLM-03900"
+      ],
+      "expected_found": 1,
+      "retrieved": true,
+      "survived_prune": true,
+      "tokens_before": 165,
+      "tokens_after": 151,
+      "savings_percent": 8.48,
+      "latency_ms": 4595.01,
+      "verdict": "n/a",
+      "answer_ok": true,
+      "answer": "The status of claim CLM-03900 is ACTIVE."
+    },
+    {
+      "dataset": "insurance_dataset",
+      "row": 7150,
+      "position": "middle",
+      "query": "What is the status of claim CLM-07150?",
+      "expected": [
+        "CLM-07150"
+      ],
+      "expected_found": 1,
+      "retrieved": true,
+      "survived_prune": true,
+      "tokens_before": 176,
+      "tokens_after": 162,
+      "savings_percent": 7.95,
+      "latency_ms": 4705.69,
+      "verdict": "n/a",
+      "answer_ok": true,
+      "answer": "The status of claim CLM-07150 is ACTIVE."
+    },
+    {
+      "dataset": "insurance_dataset",
+      "row": 10400,
+      "position": "middle",
+      "query": "What is the status of claim CLM-10400?",
+      "expected": [
+        "CLM-10400"
+      ],
+      "expected_found": 1,
+      "retrieved": true,
+      "survived_prune": true,
+      "tokens_before": 165,
+      "tokens_after": 151,
+      "savings_percent": 8.48,
+      "latency_ms": 4478.75,
+      "verdict": "n/a",
+      "answer_ok": true,
+      "answer": "The status of claim CLM-10400 is ACTIVE."
+    },
+    {
+      "dataset": "insurance_dataset",
+      "row": 12350,
+      "position": "tail",
+      "query": "What is the status of claim CLM-12350?",
+      "expected": [
+        "CLM-12350"
+      ],
+      "expected_found": 1,
+      "retrieved": true,
+      "survived_prune": true,
+      "tokens_before": 165,
+      "tokens_after": 151,
+      "savings_percent": 8.48,
+      "latency_ms": 4548.07,
+      "verdict": "n/a",
+      "answer_ok": true,
+      "answer": "The status of claim CLM-12350 is ACTIVE."
+    },
+    {
+      "dataset": "data_synthetic",
+      "row": 2675,
+      "position": "head",
+      "query": "Show me the coverage for policyholder PH-15309",
+      "expected": [
+        "COV-15309",
+        "POL-15309"
+      ],
+      "expected_found": 2,
+      "retrieved": true,
+      "survived_prune": true,
+      "tokens_before": 185,
+      "tokens_after": 171,
+      "savings_percent": 7.57,
+      "latency_ms": 5912.69,
+      "verdict": "n/a",
+      "answer_ok": true,
+      "answer": "The coverage for policyholder PH-15309 is:\n\n[COV-15309] code=COV-15309; category=Individual; limit=$375,419.0; deductible=$346.0"
+    },
+    {
+      "dataset": "data_synthetic",
+      "row": 16051,
+      "position": "middle",
+      "query": "Show me the coverage for policyholder PH-91496",
+      "expected": [
+        "COV-91496",
+        "POL-91496"
+      ],
+      "expected_found": 2,
+      "retrieved": true,
+      "survived_prune": true,
+      "tokens_before": 186,
+      "tokens_after": 172,
+      "savings_percent": 7.53,
+      "latency_ms": 5936.11,
+      "verdict": "n/a",
+      "answer_ok": true,
+      "answer": "The coverage for policyholder PH-91496 is:\n\n[COV-91496] code=COV-91496; category=Group; limit=$140,098.0; deductible=$871.0"
+    },
+    {
+      "dataset": "data_synthetic",
+      "row": 29427,
+      "position": "middle",
+      "query": "Show me the coverage for policyholder PH-74112",
+      "expected": [
+        "COV-74112",
+        "POL-74112"
+      ],
+      "expected_found": 2,
+      "retrieved": true,
+      "survived_prune": true,
+      "tokens_before": 188,
+      "tokens_after": 174,
+      "savings_percent": 7.45,
+      "latency_ms": 5959.42,
+      "verdict": "n/a",
+      "answer_ok": true,
+      "answer": "The coverage for policyholder PH-74112 is:\n\n[COV-74112]\ncode=COV-74112\ncategory=Family\nlimit=$348840.0\ndeductible=$374.0"
+    },
+    {
+      "dataset": "data_synthetic",
+      "row": 42802,
+      "position": "middle",
+      "query": "Show me the coverage for policyholder PH-84770",
+      "expected": [
+        "COV-84770",
+        "POL-84770"
+      ],
+      "expected_found": 2,
+      "retrieved": true,
+      "survived_prune": true,
+      "tokens_before": 187,
+      "tokens_after": 173,
+      "savings_percent": 7.49,
+      "latency_ms": 6062.08,
+      "verdict": "n/a",
+      "answer_ok": true,
+      "answer": "The coverage for policyholder PH-84770 is:\n\n[COV-84770]\ncode=COV-84770\ncategory=Business\nlimit=$819,021.0\ndeductible=$693.0"
+    },
+    {
+      "dataset": "data_synthetic",
+      "row": 50828,
+      "position": "tail",
+      "query": "Show me the coverage for policyholder PH-59266",
+      "expected": [
+        "COV-59266",
+        "POL-59266"
+      ],
+      "expected_found": 2,
+      "retrieved": true,
+      "survived_prune": true,
+      "tokens_before": 188,
+      "tokens_after": 174,
+      "savings_percent": 7.45,
+      "latency_ms": 6169.23,
+      "verdict": "n/a",
+      "answer_ok": true,
+      "answer": "The coverage for policyholder PH-59266 is:\n\n[COV-59266] code=COV-59266; category=Family; limit=$323,634.0; deductible=$221.0"
+    }
+  ]
+}

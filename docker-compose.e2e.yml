@@ -1,0 +1,66 @@
+# Standalone E2E test stack — mirrors docker-compose.yml but with
+# names/ports that cannot collide with the user's running Neo4j (7474/7687).
+#
+#   docker compose -f docker-compose.e2e.yml -p graphrag-e2e up -d --build
+#   docker compose -f docker-compose.e2e.yml -p graphrag-e2e down
+#
+# Override ports/names at runtime:
+#   docker compose -f docker-compose.e2e.yml -f override.yml ...
+services:
+  neo4j:
+    image: neo4j:5.26-community
+    container_name: e2e-neo4j
+    environment:
+      NEO4J_AUTH: "neo4j/${NEO4J_PASSWORD:-graphrag-demo}"
+      NEO4J_server_memory_heap_max__size: "512M"
+    ports:
+      - "7475:7474"
+      - "7688:7687"
+    volumes:
+      - e2e_neo4j_data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:7474 >/dev/null 2>&1 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+
+  api:
+    build: .
+    container_name: e2e-api
+    environment:
+      NEO4J_URI: bolt://neo4j:7687
+      NEO4J_USER: neo4j
+      NEO4J_PASSWORD: "${NEO4J_PASSWORD:-graphrag-demo}"
+      API_KEY: "${API_KEY:-}"
+      CORS_ORIGINS: "http://localhost:8501,http://localhost:8502"
+      LLAMA_API_URL: "${LLAMA_API_URL:-http://host.docker.internal:11434}"
+    ports:
+      - "8001:8000"
+    depends_on:
+      neo4j:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request;urllib.request.urlopen('http://localhost:8000/health/live')\""]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
+  dashboard:
+    build:
+      context: .
+      dockerfile: Dockerfile.dashboard
+    container_name: e2e-dashboard
+    environment:
+      NEO4J_URI: bolt://neo4j:7687
+      NEO4J_USER: neo4j
+      NEO4J_PASSWORD: "${NEO4J_PASSWORD:-graphrag-demo}"
+      LLAMA_API_URL: "${LLAMA_API_URL:-http://host.docker.internal:11434}"
+    ports:
+      - "8503:8501"
+    depends_on:
+      neo4j:
+        condition: service_healthy
+
+volumes:
+  e2e_neo4j_data:

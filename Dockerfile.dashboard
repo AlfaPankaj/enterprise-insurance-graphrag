@@ -1,0 +1,20 @@
+# GraphRAG Token Optimization + Audit dashboards — image (Phase 5)
+# Heavier than the API image: streamlit + the cross-encoder reranker.
+FROM python:3.12-slim
+
+WORKDIR /app
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY dashboard.py .
+COPY src ./src
+COPY scripts ./scripts
+COPY data ./data
+
+ENV PYTHONUNBUFFERED=1
+
+EXPOSE 8501
+
+CMD ["streamlit", "run", "dashboard.py", \
+     "--server.headless", "true", "--server.port", "8501"]

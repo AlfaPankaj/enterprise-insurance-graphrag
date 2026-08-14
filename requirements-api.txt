@@ -1,0 +1,13 @@
+# Runtime deps for the Dockerized API image — lean by design:
+# sentence-transformers/torch/streamlit stay OUT of the API image (the
+# reranker falls back to deterministic lexical when the cross-encoder is
+# absent; the dashboard runs from its own image).
+neo4j>=5.0
+fastapi>=0.110
+uvicorn>=0.29
+pydantic-settings>=2.0
+python-multipart>=0.0.9
+PyPDF2>=3.0
+pdfplumber>=0.11
+httpx>=0.27
+tiktoken>=0.6

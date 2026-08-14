@@ -1,0 +1,452 @@
+[
+  {
+    "id": "END-0001",
+    "endorsement_number": "END-2025-0001",
+    "policy_id": "POL-0059",
+    "type": "LIMIT_INCREASE",
+    "effective_date": "2025-11-17",
+    "clause": "This endorsement amends policy WC-2025-0059. Limit Increase effective 2025-11-17. All other terms and conditions remain unchanged.",
+    "premium_adjustment": 500.0
+  },
+  {
+    "id": "END-0002",
+    "endorsement_number": "END-2025-0002",
+    "policy_id": "POL-0059",
+    "type": "NAMED_PARTY_ADDED",
+    "effective_date": "2025-03-29",
+    "clause": "This endorsement amends policy WC-2025-0059. Named Party Added effective 2025-03-29. All other terms and conditions remain unchanged.",
+    "premium_adjustment": 750.0
+  },
+  {
+    "id": "END-0003",
+    "endorsement_number": "END-2025-0003",
+    "policy_id": "POL-0060",
+    "type": "LOCATION_ADDED",
+    "effective_date": "2025-01-01",
+    "clause": "This endorsement amends policy AF-2024-0060. Location Added effective 2025-01-01. All other terms and conditions remain unchanged.",
+    "premium_adjustment": 1000.0
+  },
+  {
+    "id": "END-0004",
+    "endorsement_number": "END-2024-0004",
+    "policy_id": "POL-0003",
+    "type": "EXCLUSION_ADDED",
+    "effective_date": "2024-07-13",
+    "clause": "This endorsement amends policy PL-2024-0003. Exclusion Added effective 2024-07-13. All other terms and conditions remain unchanged.",
+    "premium_adjustment": -250.0
+  },
+  {
+    "id": "END-0005",
+    "endorsement_number": "END-2025-0005",
+    "policy_id": "POL-0096",
+    "type": "LIMIT_INCREASE",
+    "effective_date": "2025-12-03",
+    "clause": "This endorsement amends policy WC-2025-0096. Limit Increase effective 2025-12-03. All other terms and conditions remain unchanged.",
+    "premium_adjustment": -250.0
+  },
+  {
+    "id": "END-0006",
+    "endorsement_number": "END-2025-0006",
+    "policy_id": "POL-0006",
+    "type": "EXCLUSION_ADDED",
+    "effective_date": "2025-11-09",
+    "clause": "This endorsement amends policy WC-2025-0006. Exclusion Added effective 2025-11-09. All other terms and conditions remain unchanged.",
+    "premium_adjustment": 1000.0
+  },
+  {
+    "id": "END-0007",
+    "endorsement_number": "END-2025-0007",
+    "policy_id": "POL-0009",
+    "type": "NAMED_PARTY_ADDED",
+    "effective_date": "2025-04-01",
+    "clause": "This endorsement amends policy CP-2025-0009. Named Party Added effective 2025-04-01. All other terms and conditions remain unchanged.",
+    "premium_adjustment": -250.0
+  },
+  {
+    "id": "END-0008",
+    "endorsement_number": "END-2024-0008",
+    "policy_id": "POL-0061",
+    "type": "ADDITIONAL_INSURED",
+    "effective_date": "2024-12-05",
+    "clause": "This endorsement amends policy CP-2024-0061. Additional Insured effective 2024-12-05. All other terms and conditions remain unchanged.",
+    "premium_adjustment": 500.0
+  },
+  {
+    "id": "END-0009",
+    "endorsement_number": "END-2024-0009",
+    "policy_id": "POL-0024",
+    "type": "LIMIT_INCREASE",
+    "effective_date": "2024-03-12",
+    "clause": "This endorsement amends policy PL-2023-0024. Limit Increase effective 2024-03-12. All other terms and conditions remain unchanged.",
+    "premium_adjustment": 1000.0
+  },
+  {
+    "id": "END-0010",
+    "endorsement_number": "END-2024-0010",
+    "policy_id": "POL-0083",
+    "type": "EXCLUSION_ADDED",
+    "effective_date": "2024-10-19",
+    "clause": "This endorsement amends policy CGL-2024-0083. Exclusion Added effective 2024-10-19. All other terms and conditions remain unchanged.",
+    "premium_adjustment": 500.0
+  },
+  {
+    "id": "END-0011",
+    "endorsement_number": "END-2023-0011",
+    "policy_id": "POL-0058",
+    "type": "EXCLUSION_ADDED",
+    "effective_date": "2023-10-14",
+    "clause": "This endorsement amends policy CGL-2023-0058. Exclusion Added effective 2023-10-14. All other terms and conditions remain unchanged.",
+    "premium_adjustment": -250.0
+  },
+  {
+    "id": "END-0012",
+    "endorsement_number": "END-2026-0012",
+    "policy_id": "POL-0088",
+    "type": "LOCATION_ADDED",
+    "effective_date": "2026-01-15",
+    "clause": "This endorsement amends policy PL-2025-0088. Location Added effective 2026-01-15. All other terms and conditions remain unchanged.",
+    "premium_adjustment": 0.0
+  },
+  {
+    "id": "END-0013",
+    "endorsement_number": "END-2023-0013",
+    "policy_id": "POL-0084",
+    "type": "DEDUCTIBLE_CHANGE",
+    "effective_date": "2023-11-06",
+    "clause": "This endorsement amends policy AF-2023-0084. Deductible Change effective 2023-11-06. All other terms and conditions remain unchanged.",
+    "premium_adjustment": 0.0
+  },
+  {
+    "id": "END-0014",
+    "endorsement_number": "END-2024-0014",
+    "policy_id": "POL-0069",
+    "type": "EXCLUSION_ADDED",
+    "effective_date": "2024-08-29",
+    "clause": "This endorsement amends policy AF-2023-0069. Exclusion Added effective 2024-08-29. All other terms and conditions remain unchanged.",
+    "premium_adjustment": 0.0
+  },
+  {
+    "id": "END-0015",
+    "endorsement_number": "END-2023-0015",
+    "policy_id": "POL-0094",
+    "type": "LIMIT_INCREASE",
+    "effective_date": "2023-08-01",
+    "clause": "This endorsement amends policy CGL-2023-0094. Limit Increase effective 2023-08-01. All other terms and conditions remain unchanged.",
+    "premium_adjustment": -250.0
+  },
+  {
+    "id": "END-0016",
+    "endorsement_number": "END-2024-0016",
+    "policy_id": "POL-0039",
+    "type": "EXCLUSION_ADDED",
+    "effective_date": "2024-08-21",
+    "clause": "This endorsement amends policy CGL-2023-0039. Exclusion Added effective 2024-08-21. All other terms and conditions remain unchanged.",
+    "premium_adjustment": 1000.0
+  },
+  {
+    "id": "END-0017",
+    "endorsement_number": "END-2024-0017",
+    "policy_id": "POL-0070",
+    "type": "EXCLUSION_ADDED",
+    "effective_date": "2024-11-12",
+    "clause": "This endorsement amends policy PL-2024-0070. Exclusion Added effective 2024-11-12. All other terms and conditions remain unchanged.",
+    "premium_adjustment": 500.0
+  },
+  {
+    "id": "END-0018",
+    "endorsement_number": "END-2024-0018",
+    "policy_id": "POL-0030",
+    "type": "LIMIT_INCREASE",
+    "effective_date": "2024-05-21",
+    "clause": "This endorsement amends policy CP-2023-0030. Limit Increase effective 2024-05-21. All other terms and conditions remain unchanged.",
+    "premium_adjustment": 250.0
+  },
+  {
+    "id": "END-0019",
+    "endorsement_number": "END-2024-0019",
+    "policy_id": "POL-0020",
+    "type": "DEDUCTIBLE_CHANGE",
+    "effective_date": "2024-05-05",
+    "clause": "This endorsement amends policy CGL-2024-0020. Deductible Change effective 2024-05-05. All other terms and conditions remain unchanged.",
+    "premium_adjustment": 1000.0
+  },
+  {
+    "id": "END-0020",
+    "endorsement_number": "END-2023-0020",
+    "policy_id": "POL-0098",
+    "type": "ADDITIONAL_INSURED",
+    "effective_date": "2023-12-27",
+    "clause": "This endorsement amends policy AF-2023-0098. Additional Insured effective 2023-12-27. All other terms and conditions remain unchanged.",
+    "premium_adjustment": 1000.0
+  },
+  {
+    "id": "END-0021",
+    "endorsement_number": "END-2024-0021",
+    "policy_id": "POL-0054",
+    "type": "NAMED_PARTY_ADDED",
+    "effective_date": "2024-12-29",
+    "clause": "This endorsement amends policy PL-2024-0054. Named Party Added effective 2024-12-29. All other terms and conditions remain unchanged.",
+    "premium_adjustment": 0.0
+  },
+  {
+    "id": "END-0022",
+    "endorsement_number": "END-2025-0022",
+    "policy_id": "POL-0027",
+    "type": "ADDITIONAL_INSURED",
+    "effective_date": "2025-08-08",
+    "clause": "This endorsement amends policy WC-2025-0027. Additional Insured effective 2025-08-08. All other terms and conditions remain unchanged.",
+    "premium_adjustment": 750.0
+  },
+  {
+    "id": "END-0023",
+    "endorsement_number": "END-2024-0023",
+    "policy_id": "POL-0005",
+    "type": "EXCLUSION_ADDED",
+    "effective_date": "2024-06-10",
+    "clause": "This endorsement amends policy CP-2023-0005. Exclusion Added effective 2024-06-10. All other terms and conditions remain unchanged.",
+    "premium_adjustment": 1000.0
+  },
+  {
+    "id": "END-0024",
+    "endorsement_number": "END-2025-0024",
+    "policy_id": "POL-0091",
+    "type": "ADDITIONAL_INSURED",
+    "effective_date": "2025-05-05",
+    "clause": "This endorsement amends policy CGL-2024-0091. Additional Insured effective 2025-05-05. All other terms and conditions remain unchanged.",
+    "premium_adjustment": 1000.0
+  },
+  {
+    "id": "END-0025",
+    "endorsement_number": "END-2025-0025",
+    "policy_id": "POL-0006",
+    "type": "EXCLUSION_ADDED",
+    "effective_date": "2025-12-27",
+    "clause": "This endorsement amends policy WC-2025-0006. Exclusion Added effective 2025-12-27. All other terms and conditions remain unchanged.",
+    "premium_adjustment": 0.0
+  },
+  {
+    "id": "END-0026",
+    "endorsement_number": "END-2024-0026",
+    "policy_id": "POL-0070",
+    "type": "LIMIT_INCREASE",
+    "effective_date": "2024-03-13",
+    "clause": "This endorsement amends policy PL-2024-0070. Limit Increase effective 2024-03-13. All other terms and conditions remain unchanged.",
+    "premium_adjustment": 0.0
+  },
+  {
+    "id": "END-0027",
+    "endorsement_number": "END-2025-0027",
+    "policy_id": "POL-0065",
+    "type": "DEDUCTIBLE_CHANGE",
+    "effective_date": "2025-07-27",
+    "clause": "This endorsement amends policy CP-2025-0065. Deductible Change effective 2025-07-27. All other terms and conditions remain unchanged.",
+    "premium_adjustment": 1000.0
+  },
+  {
+    "id": "END-0028",
+    "endorsement_number": "END-2025-0028",
+    "policy_id": "POL-0074",
+    "type": "DEDUCTIBLE_CHANGE",
+    "effective_date": "2025-04-07",
+    "clause": "This endorsement amends policy CGL-2024-0074. Deductible Change effective 2025-04-07. All other terms and conditions remain unchanged.",
+    "premium_adjustment": 750.0
+  },
+  {
+    "id": "END-0029",
+    "endorsement_number": "END-2025-0029",
+    "policy_id": "POL-0099",
+    "type": "LOCATION_ADDED",
+    "effective_date": "2025-03-12",
+    "clause": "This endorsement amends policy CP-2024-0099. Location Added effective 2025-03-12. All other terms and conditions remain unchanged.",
+    "premium_adjustment": 0.0
+  },
+  {
+    "id": "END-0030",
+    "endorsement_number": "END-2024-0030",
+    "policy_id": "POL-0039",
+    "type": "LIMIT_INCREASE",
+    "effective_date": "2024-08-15",
+    "clause": "This endorsement amends policy CGL-2023-0039. Limit Increase effective 2024-08-15. All other terms and conditions remain unchanged.",
+    "premium_adjustment": 750.0
+  },
+  {
+    "id": "END-0031",
+    "endorsement_number": "END-2025-0031",
+    "policy_id": "POL-0029",
+    "type": "EXCLUSION_ADDED",
+    "effective_date": "2025-07-26",
+    "clause": "This endorsement amends policy PL-2025-0029. Exclusion Added effective 2025-07-26. All other terms and conditions remain unchanged.",
+    "premium_adjustment": 250.0
+  },
+  {
+    "id": "END-0032",
+    "endorsement_number": "END-2026-0032",
+    "policy_id": "POL-0008",
+    "type": "NAMED_PARTY_ADDED",
+    "effective_date": "2026-04-23",
+    "clause": "This endorsement amends policy PL-2025-0008. Named Party Added effective 2026-04-23. All other terms and conditions remain unchanged.",
+    "premium_adjustment": 1000.0
+  },
+  {
+    "id": "END-0033",
+    "endorsement_number": "END-2023-0033",
+    "policy_id": "POL-0023",
+    "type": "LOCATION_ADDED",
+    "effective_date": "2023-12-17",
+    "clause": "This endorsement amends policy AF-2023-0023. Location Added effective 2023-12-17. All other terms and conditions remain unchanged.",
+    "premium_adjustment": 500.0
+  },
+  {
+    "id": "END-0034",
+    "endorsement_number": "END-2025-0034",
+    "policy_id": "POL-0072",
+    "type": "EXCLUSION_ADDED",
+    "effective_date": "2025-02-09",
+    "clause": "This endorsement amends policy WC-2025-0072. Exclusion Added effective 2025-02-09. All other terms and conditions remain unchanged.",
+    "premium_adjustment": 250.0
+  },
+  {
+    "id": "END-0035",
+    "endorsement_number": "END-2024-0035",
+    "policy_id": "POL-0083",
+    "type": "LOCATION_ADDED",
+    "effective_date": "2024-10-23",
+    "clause": "This endorsement amends policy CGL-2024-0083. Location Added effective 2024-10-23. All other terms and conditions remain unchanged.",
+    "premium_adjustment": 750.0
+  },
+  {
+    "id": "END-0036",
+    "endorsement_number": "END-2023-0036",
+    "policy_id": "POL-0041",
+    "type": "LOCATION_ADDED",
+    "effective_date": "2023-11-10",
+    "clause": "This endorsement amends policy PL-2023-0041. Location Added effective 2023-11-10. All other terms and conditions remain unchanged.",
+    "premium_adjustment": 500.0
+  },
+  {
+    "id": "END-0037",
+    "endorsement_number": "END-2024-0037",
+    "policy_id": "POL-0020",
+    "type": "DEDUCTIBLE_CHANGE",
+    "effective_date": "2024-08-09",
+    "clause": "This endorsement amends policy CGL-2024-0020. Deductible Change effective 2024-08-09. All other terms and conditions remain unchanged.",
+    "premium_adjustment": 0.0
+  },
+  {
+    "id": "END-0038",
+    "endorsement_number": "END-2024-0038",
+    "policy_id": "POL-0097",
+    "type": "NAMED_PARTY_ADDED",
+    "effective_date": "2024-04-12",
+    "clause": "This endorsement amends policy PL-2023-0097. Named Party Added effective 2024-04-12. All other terms and conditions remain unchanged.",
+    "premium_adjustment": 0.0
+  },
+  {
+    "id": "END-0039",
+    "endorsement_number": "END-2026-0039",
+    "policy_id": "POL-0029",
+    "type": "DEDUCTIBLE_CHANGE",
+    "effective_date": "2026-02-20",
+    "clause": "This endorsement amends policy PL-2025-0029. Deductible Change effective 2026-02-20. All other terms and conditions remain unchanged.",
+    "premium_adjustment": 0.0
+  },
+  {
+    "id": "END-0040",
+    "endorsement_number": "END-2025-0040",
+    "policy_id": "POL-0060",
+    "type": "ADDITIONAL_INSURED",
+    "effective_date": "2025-05-11",
+    "clause": "This endorsement amends policy AF-2024-0060. Additional Insured effective 2025-05-11. All other terms and conditions remain unchanged.",
+    "premium_adjustment": 500.0
+  },
+  {
+    "id": "END-0041",
+    "endorsement_number": "END-2025-0041",
+    "policy_id": "POL-0054",
+    "type": "NAMED_PARTY_ADDED",
+    "effective_date": "2025-09-18",
+    "clause": "This endorsement amends policy PL-2024-0054. Named Party Added effective 2025-09-18. All other terms and conditions remain unchanged.",
+    "premium_adjustment": 0.0
+  },
+  {
+    "id": "END-0042",
+    "endorsement_number": "END-2024-0042",
+    "policy_id": "POL-0050",
+    "type": "LIMIT_INCREASE",
+    "effective_date": "2024-01-10",
+    "clause": "This endorsement amends policy WC-2023-0050. Limit Increase effective 2024-01-10. All other terms and conditions remain unchanged.",
+    "premium_adjustment": 0.0
+  },
+  {
+    "id": "END-0043",
+    "endorsement_number": "END-2023-0043",
+    "policy_id": "POL-0043",
+    "type": "LOCATION_ADDED",
+    "effective_date": "2023-07-28",
+    "clause": "This endorsement amends policy CGL-2023-0043. Location Added effective 2023-07-28. All other terms and conditions remain unchanged.",
+    "premium_adjustment": 500.0
+  },
+  {
+    "id": "END-0044",
+    "endorsement_number": "END-2026-0044",
+    "policy_id": "POL-0048",
+    "type": "ADDITIONAL_INSURED",
+    "effective_date": "2026-03-31",
+    "clause": "This endorsement amends policy CGL-2025-0048. Additional Insured effective 2026-03-31. All other terms and conditions remain unchanged.",
+    "premium_adjustment": 1000.0
+  },
+  {
+    "id": "END-0045",
+    "endorsement_number": "END-2023-0045",
+    "policy_id": "POL-0025",
+    "type": "ADDITIONAL_INSURED",
+    "effective_date": "2023-10-21",
+    "clause": "This endorsement amends policy CP-2023-0025. Additional Insured effective 2023-10-21. All other terms and conditions remain unchanged.",
+    "premium_adjustment": 500.0
+  },
+  {
+    "id": "END-0046",
+    "endorsement_number": "END-2026-0046",
+    "policy_id": "POL-0087",
+    "type": "NAMED_PARTY_ADDED",
+    "effective_date": "2026-02-02",
+    "clause": "This endorsement amends policy CP-2025-0087. Named Party Added effective 2026-02-02. All other terms and conditions remain unchanged.",
+    "premium_adjustment": -250.0
+  },
+  {
+    "id": "END-0047",
+    "endorsement_number": "END-2024-0047",
+    "policy_id": "POL-0010",
+    "type": "LIMIT_INCREASE",
+    "effective_date": "2024-08-07",
+    "clause": "This endorsement amends policy AF-2023-0010. Limit Increase effective 2024-08-07. All other terms and conditions remain unchanged.",
+    "premium_adjustment": 1000.0
+  },
+  {
+    "id": "END-0048",
+    "endorsement_number": "END-2024-0048",
+    "policy_id": "POL-0086",
+    "type": "NAMED_PARTY_ADDED",
+    "effective_date": "2024-08-09",
+    "clause": "This endorsement amends policy PL-2024-0086. Named Party Added effective 2024-08-09. All other terms and conditions remain unchanged.",
+    "premium_adjustment": 500.0
+  },
+  {
+    "id": "END-0049",
+    "endorsement_number": "END-2025-0049",
+    "policy_id": "POL-0027",
+    "type": "DEDUCTIBLE_CHANGE",
+    "effective_date": "2025-11-20",
+    "clause": "This endorsement amends policy WC-2025-0027. Deductible Change effective 2025-11-20. All other terms and conditions remain unchanged.",
+    "premium_adjustment": -250.0
+  },
+  {
+    "id": "END-0050",
+    "endorsement_number": "END-2023-0050",
+    "policy_id": "POL-0028",
+    "type": "LIMIT_INCREASE",
+    "effective_date": "2023-05-21",
+    "clause": "This endorsement amends policy PL-2023-0028. Limit Increase effective 2023-05-21. All other terms and conditions remain unchanged.",
+    "premium_adjustment": 1000.0
+  }
+]

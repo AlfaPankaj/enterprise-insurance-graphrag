@@ -1,0 +1,24 @@
+# Streamlit configuration for the GraphRAG Insurance Claims app.
+#
+# fileWatcherType = "none" disables Streamlit's module-path scanner.
+# The scanner walks every imported package's source tree, and transformers 5.x
+# lazily imports optional deps (e.g. torchvision for its YOLOS/ZoeDepth image
+# processors) — producing harmless-but-noisy "Examining the path ... raised:
+# ModuleNotFoundError" tracebacks in the terminal on startup.
+#
+# Trade-off: the dashboard script no longer hot-reloads on save — restart
+# `streamlit run app.py` after editing it.
+
+[server]
+fileWatcherType = "none"
+
+# Dark base theme — matches the palette in app.py / src/graphrag/audit_ui.py
+# (:root --bg / --surface / --accent / --text). Without this, Streamlit's
+# default light theme fights the CSS: sidebar text, captions, h4 headings and
+# widget labels render dark-on-dark and are unreadable.
+[theme]
+base = "dark"
+primaryColor = "#58a6ff"
+backgroundColor = "#0f1117"
+secondaryBackgroundColor = "#161b22"
+textColor = "#e6edf3"

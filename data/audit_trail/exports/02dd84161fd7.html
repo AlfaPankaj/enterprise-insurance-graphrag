@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Audit Trail Report — 02dd84161fd7</title>
+<style>
+  body { font-family: -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif;
+         color: #0d1117; margin: 2rem auto; max-width: 900px; padding: 0 1rem; }
+  h1 { font-size: 1.4rem; border-bottom: 2px solid #1f6feb; padding-bottom: .4rem; }
+  h2 { font-size: 1.05rem; color: #1f6feb; margin-top: 1.6rem; }
+  .meta { color: #57606a; font-size: .85rem; margin-bottom: 1.4rem; }
+  .answer { background: #f6f8fa; border-left: 4px solid #1a7f37;
+            border-radius: 6px; padding: .8rem 1rem; }
+  pre { background: #0d1117; color: #e6edf3; border-radius: 6px;
+        padding: .8rem 1rem; overflow-x: auto; font-size: .8rem; }
+  table { border-collapse: collapse; width: 100%; font-size: .85rem; }
+  td, th { border: 1px solid #d0d7de; padding: .35rem .6rem; text-align: left; }
+  th { background: #f6f8fa; }
+  .path { font-family: ui-monospace, Consolas, monospace; font-size: .82rem;
+          line-height: 1.5; }
+  .tag { display: inline-block; background: #ddf4ff; color: #0969da;
+         border-radius: 999px; padding: .1rem .6rem; font-size: .75rem;
+         margin-right: .35rem; }
+  .muted { color: #57606a; }
+  @media print { body { margin: 0; } pre { white-space: pre-wrap; } }
+</style>
+</head>
+<body>
+  <h1>GraphRAG Audit Trail Report</h1>
+  <div class="meta">
+    Audit ID: <b>02dd84161fd7</b> &nbsp;·&nbsp; 2026-08-12T22:25:16 &nbsp;·&nbsp;
+    Reranker: <b>lexical</b> (BM25 lexical) &nbsp;·&nbsp;
+    Max hops: <b>2</b>
+  </div>
+
+  <h2>Question</h2>
+  <p><b>Show me all claims over $100,000</b></p>
+
+  <h2>Answer</h2>
+  <div class="answer">Most relevant context: CLM-0001 (Claim) — 16 nodes retained.
+    <div class="muted" style="font-size:.8rem;margin-top:.35rem">answer mode: extractive</div>
+  </div>
+
+  <h2>Traversal path (nodes &amp; edges visited)</h2>
+  <div class="path">CLM-0001&nbsp;&nbsp;─[HAS_CLAIM]→&nbsp;&nbsp;POL-0007<br>CLM-0001&nbsp;&nbsp;─[HAS_CLAIM]→&nbsp;&nbsp;POL-0007&nbsp;&nbsp;─[COVERS]→&nbsp;&nbsp;COV-0025<br>CLM-0001&nbsp;&nbsp;─[HAS_CLAIM]→&nbsp;&nbsp;POL-0007&nbsp;&nbsp;─[HAS_CLAIM]→&nbsp;&nbsp;CLM-0120<br>CLM-0001&nbsp;&nbsp;─[HAS_CLAIM]→&nbsp;&nbsp;POL-0007&nbsp;&nbsp;─[HAS_POLICY]→&nbsp;&nbsp;PH-0007<br>CLM-0001&nbsp;&nbsp;─[INVESTIGATES_CLAIM]→&nbsp;&nbsp;INV-0004<br>CLM-0001&nbsp;&nbsp;─[INVESTIGATES_CLAIM]→&nbsp;&nbsp;INV-0004&nbsp;&nbsp;─[INVESTIGATES_CLAIM]→&nbsp;&nbsp;CLM-0009<br>CLM-0001&nbsp;&nbsp;─[INVESTIGATES_CLAIM]→&nbsp;&nbsp;INV-0004&nbsp;&nbsp;─[INVESTIGATES_CLAIM]→&nbsp;&nbsp;CLM-0012<br>CLM-0001&nbsp;&nbsp;─[INVESTIGATES_CLAIM]→&nbsp;&nbsp;INV-0004&nbsp;&nbsp;─[INVESTIGATES_CLAIM]→&nbsp;&nbsp;CLM-0021<br>CLM-0001&nbsp;&nbsp;─[INVESTIGATES_CLAIM]→&nbsp;&nbsp;INV-0004&nbsp;&nbsp;─[INVESTIGATES_CLAIM]→&nbsp;&nbsp;CLM-0024<br>CLM-0001&nbsp;&nbsp;─[INVESTIGATES_CLAIM]→&nbsp;&nbsp;INV-0004&nbsp;&nbsp;─[INVESTIGATES_CLAIM]→&nbsp;&nbsp;CLM-0026<br>CLM-0001&nbsp;&nbsp;─[INVESTIGATES_CLAIM]→&nbsp;&nbsp;INV-0004&nbsp;&nbsp;─[INVESTIGATES_CLAIM]→&nbsp;&nbsp;CLM-0030<br>CLM-0001&nbsp;&nbsp;─[INVESTIGATES_CLAIM]→&nbsp;&nbsp;INV-0004&nbsp;&nbsp;─[INVESTIGATES_CLAIM]→&nbsp;&nbsp;CLM-0034<br>CLM-0001&nbsp;&nbsp;─[INVESTIGATES_CLAIM]→&nbsp;&nbsp;INV-0004&nbsp;&nbsp;─[INVESTIGATES_CLAIM]→&nbsp;&nbsp;CLM-0105<br>CLM-0001&nbsp;&nbsp;─[INVESTIGATES_CLAIM]→&nbsp;&nbsp;INV-0004&nbsp;&nbsp;─[INVESTIGATES_CLAIM]→&nbsp;&nbsp;CLM-0129<br>CLM-0001&nbsp;&nbsp;─[INVESTIGATES_CLAIM]→&nbsp;&nbsp;INV-0004&nbsp;&nbsp;─[INVESTIGATES_CLAIM]→&nbsp;&nbsp;CLM-0135<br>CLM-0001&nbsp;&nbsp;─[INVESTIGATES_CLAIM]→&nbsp;&nbsp;INV-0004&nbsp;&nbsp;─[INVESTIGATES_CLAIM]→&nbsp;&nbsp;CLM-0147<br>CLM-0001&nbsp;&nbsp;─[INVESTIGATES_CLAIM]→&nbsp;&nbsp;INV-0004&nbsp;&nbsp;─[INVESTIGATES_CLAIM]→&nbsp;&nbsp;CLM-0157<br>CLM-0001&nbsp;&nbsp;─[INVESTIGATES_CLAIM]→&nbsp;&nbsp;INV-0004&nbsp;&nbsp;─[INVESTIGATES_CLAIM]→&nbsp;&nbsp;CLM-0160<br>CLM-0001&nbsp;&nbsp;─[INVESTIGATES_CLAIM]→&nbsp;&nbsp;INV-0004&nbsp;&nbsp;─[INVESTIGATES_CLAIM]→&nbsp;&nbsp;CLM-0171<br>CLM-0002&nbsp;&nbsp;─[HAS_CLAIM]→&nbsp;&nbsp;POL-0033<br>CLM-0002&nbsp;&nbsp;─[HAS_CLAIM]→&nbsp;&nbsp;POL-0033&nbsp;&nbsp;─[COVERS]→&nbsp;&nbsp;COV-0129<br>CLM-0002&nbsp;&nbsp;─[HAS_CLAIM]→&nbsp;&nbsp;POL-0033&nbsp;&nbsp;─[COVERS]→&nbsp;&nbsp;COV-0130<br>CLM-0002&nbsp;&nbsp;─[HAS_CLAIM]→&nbsp;&nbsp;POL-0033&nbsp;&nbsp;─[HAS_CLAIM]→&nbsp;&nbsp;CLM-0064<br>CLM-0002&nbsp;&nbsp;─[HAS_CLAIM]→&nbsp;&nbsp;POL-0033&nbsp;&nbsp;─[HAS_CLAIM]→&nbsp;&nbsp;CLM-0182<br>CLM-0002&nbsp;&nbsp;─[HAS_CLAIM]→&nbsp;&nbsp;POL-0033&nbsp;&nbsp;─[HAS_POLICY]→&nbsp;&nbsp;PH-0033</div>
+
+  <h2>Cypher used</h2>
+  <pre>-- 1. seed lookup --
+// seed 1 (keyword match)
+MATCH (s0:Claim {id: &quot;CLM-0001&quot;})
+RETURN s0
+
+// seed 2 (keyword match)
+MATCH (s1:Claim {id: &quot;CLM-0002&quot;})
+RETURN s1
+
+// seed 3 (keyword match)
+MATCH (s2:Claim {id: &quot;CLM-0003&quot;})
+RETURN s2
+
+// seed 4 (keyword match)
+MATCH (s3:Claim {id: &quot;CLM-0005&quot;})
+RETURN s3
+
+// seed 5 (keyword match)
+MATCH (s4:Claim {id: &quot;CLM-0006&quot;})
+RETURN s4
+
+-- 2. BFS expansion (both directions, max 2 hops) --
+MATCH p = (s0 {id: &quot;CLM-0001&quot;})-[*1..2]-(n)
+RETURN DISTINCT nodes(p) AS visited, relationships(p) AS edges
+
+-- 3. concrete answer path (first extracted chain) --
+MATCH p = (n0 {id: &quot;CLM-0001&quot;})-[:HAS_CLAIM]-&gt;(n1 {id: &quot;POL-0007&quot;})
+RETURN p</pre>
+
+  <h2>Retrieval &amp; pruning</h2>
+  <table>
+    <tr><th>Seed nodes</th><td>CLM-0001, CLM-0002, CLM-0003, CLM-0005, CLM-0006</td></tr>
+    <tr><th>Retrieved</th><td>72 nodes / 70 edges</td></tr>
+    <tr><th>After pruning</th><td>16 kept / 56 dropped (budget 1280 tokens)</td></tr>
+    <tr><th>Tokens</th><td>6554 → 1276 (80.53% saved)</td></tr>
+    <tr><th>Timings</th><td>retrieval 90.52ms · rerank 2.55ms · prune 7.15ms · total 100.22ms</td></tr>
+  </table>
+
+  <h2>Ranked context (top 10)</h2>
+  <table>
+    <tr><th>Rank</th><th>Node</th><th>Label</th><th>Score</th></tr>
+    <tr><td>1</td><td>CLM-0001</td><td>Claim</td><td>0.0</td></tr><tr><td>2</td><td>CLM-0002</td><td>Claim</td><td>0.0</td></tr><tr><td>3</td><td>CLM-0003</td><td>Claim</td><td>0.0</td></tr><tr><td>4</td><td>CLM-0005</td><td>Claim</td><td>0.0</td></tr><tr><td>5</td><td>CLM-0006</td><td>Claim</td><td>0.0</td></tr><tr><td>6</td><td>CLM-0009</td><td>Claim</td><td>0.0</td></tr><tr><td>7</td><td>CLM-0012</td><td>Claim</td><td>0.0</td></tr><tr><td>8</td><td>CLM-0014</td><td>Claim</td><td>0.0</td></tr><tr><td>9</td><td>CLM-0021</td><td>Claim</td><td>0.0</td></tr><tr><td>10</td><td>CLM-0024</td><td>Claim</td><td>0.0</td></tr>
+  </table>
+
+  <p class="muted" style="margin-top:2rem;font-size:.75rem">
+    Generated by the GraphRAG Insurance Claims System — lineage &amp; explainability (Shot 3).
+  </p>
+</body>
+</html>

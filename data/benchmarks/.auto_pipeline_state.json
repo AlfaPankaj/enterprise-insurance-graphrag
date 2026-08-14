@@ -1,0 +1,34 @@
+{
+  "files": {
+    "data_synthetic": {
+      "size": 11998674,
+      "mtime_ns": 1786560607206757300,
+      "sha256": "e4921fda8b35db33f8403e1db039310a380916d72fe593868aea58ca36213426"
+    },
+    "fraud_oracle": {
+      "size": 3618564,
+      "mtime_ns": 1786544638264913700,
+      "sha256": "8b6aa59764ef4f8b058598d3e8f325ef3623f52f4b1cd4ef946baebb5ccfa9a6"
+    },
+    "insurance_claims": {
+      "size": 266964,
+      "mtime_ns": 1786544602496974400,
+      "sha256": "be11b9370c0cda353a4519832803d07bb90a494e91dfd9d56a85aa4093ba5378"
+    },
+    "insurance_dataset": {
+      "size": 638157,
+      "mtime_ns": 1786544612697205600,
+      "sha256": "757b72989a9fd4469e8d447cd45912444eec3b6d6851f51e7c387b0cf4f7ece1"
+    }
+  },
+  "last_run": {
+    "timestamp": "2026-08-13 00:29:47",
+    "datasets": [
+      "data_synthetic",
+      "fraud_oracle",
+      "insurance_claims",
+      "insurance_dataset"
+    ],
+    "elapsed_s": 95.3
+  }
+}

@@ -1,0 +1,2689 @@
+{
+  "policy_POL-0001.pdf": {
+    "entities": [
+      {
+        "label": "Policyholder",
+        "id": "PH-0001"
+      },
+      {
+        "label": "Policy",
+        "id": "POL-0001"
+      },
+      {
+        "label": "Coverage",
+        "id": "COV-0001"
+      },
+      {
+        "label": "Coverage",
+        "id": "COV-0002"
+      }
+    ],
+    "relationships": [
+      {
+        "from": "PH-0001",
+        "type": "HAS_POLICY",
+        "to": "POL-0001"
+      },
+      {
+        "from": "POL-0001",
+        "type": "COVERS",
+        "to": "COV-0001"
+      },
+      {
+        "from": "POL-0001",
+        "type": "COVERS",
+        "to": "COV-0002"
+      }
+    ]
+  },
+  "policy_POL-0002.pdf": {
+    "entities": [
+      {
+        "label": "Policyholder",
+        "id": "PH-0002"
+      },
+      {
+        "label": "Policy",
+        "id": "POL-0002"
+      },
+      {
+        "label": "Coverage",
+        "id": "COV-0005"
+      },
+      {
+        "label": "Coverage",
+        "id": "COV-0006"
+      }
+    ],
+    "relationships": [
+      {
+        "from": "PH-0002",
+        "type": "HAS_POLICY",
+        "to": "POL-0002"
+      },
+      {
+        "from": "POL-0002",
+        "type": "COVERS",
+        "to": "COV-0005"
+      },
+      {
+        "from": "POL-0002",
+        "type": "COVERS",
+        "to": "COV-0006"
+      }
+    ]
+  },
+  "policy_POL-0003.pdf": {
+    "entities": [
+      {
+        "label": "Policyholder",
+        "id": "PH-0003"
+      },
+      {
+        "label": "Policy",
+        "id": "POL-0003"
+      },
+      {
+        "label": "Coverage",
+        "id": "COV-0009"
+      },
+      {
+        "label": "Endorsement",
+        "id": "END-0004"
+      }
+    ],
+    "relationships": [
+      {
+        "from": "PH-0003",
+        "type": "HAS_POLICY",
+        "to": "POL-0003"
+      },
+      {
+        "from": "POL-0003",
+        "type": "COVERS",
+        "to": "COV-0009"
+      },
+      {
+        "from": "POL-0003",
+        "type": "ENDORSED_BY",
+        "to": "END-0004"
+      }
+    ]
+  },
+  "policy_POL-0004.pdf": {
+    "entities": [
+      {
+        "label": "Policyholder",
+        "id": "PH-0004"
+      },
+      {
+        "label": "Policy",
+        "id": "POL-0004"
+      },
+      {
+        "label": "Coverage",
+        "id": "COV-0013"
+      },
+      {
+        "label": "Coverage",
+        "id": "COV-0014"
+      }
+    ],
+    "relationships": [
+      {
+        "from": "PH-0004",
+        "type": "HAS_POLICY",
+        "to": "POL-0004"
+      },
+      {
+        "from": "POL-0004",
+        "type": "COVERS",
+        "to": "COV-0013"
+      },
+      {
+        "from": "POL-0004",
+        "type": "COVERS",
+        "to": "COV-0014"
+      }
+    ]
+  },
+  "policy_POL-0005.pdf": {
+    "entities": [
+      {
+        "label": "Policyholder",
+        "id": "PH-0005"
+      },
+      {
+        "label": "Policy",
+        "id": "POL-0005"
+      },
+      {
+        "label": "Coverage",
+        "id": "COV-0017"
+      },
+      {
+        "label": "Coverage",
+        "id": "COV-0018"
+      },
+      {
+        "label": "Endorsement",
+        "id": "END-0023"
+      }
+    ],
+    "relationships": [
+      {
+        "from": "PH-0005",
+        "type": "HAS_POLICY",
+        "to": "POL-0005"
+      },
+      {
+        "from": "POL-0005",
+        "type": "COVERS",
+        "to": "COV-0017"
+      },
+      {
+        "from": "POL-0005",
+        "type": "COVERS",
+        "to": "COV-0018"
+      },
+      {
+        "from": "POL-0005",
+        "type": "ENDORSED_BY",
+        "to": "END-0023"
+      }
+    ]
+  },
+  "policy_POL-0006.pdf": {
+    "entities": [
+      {
+        "label": "Policyholder",
+        "id": "PH-0006"
+      },
+      {
+        "label": "Policy",
+        "id": "POL-0006"
+      },
+      {
+        "label": "Coverage",
+        "id": "COV-0021"
+      },
+      {
+        "label": "Endorsement",
+        "id": "END-0006"
+      },
+      {
+        "label": "Endorsement",
+        "id": "END-0025"
+      }
+    ],
+    "relationships": [
+      {
+        "from": "PH-0006",
+        "type": "HAS_POLICY",
+        "to": "POL-0006"
+      },
+      {
+        "from": "POL-0006",
+        "type": "COVERS",
+        "to": "COV-0021"
+      },
+      {
+        "from": "POL-0006",
+        "type": "ENDORSED_BY",
+        "to": "END-0006"
+      },
+      {
+        "from": "POL-0006",
+        "type": "ENDORSED_BY",
+        "to": "END-0025"
+      }
+    ]
+  },
+  "policy_POL-0007.pdf": {
+    "entities": [
+      {
+        "label": "Policyholder",
+        "id": "PH-0007"
+      },
+      {
+        "label": "Policy",
+        "id": "POL-0007"
+      },
+      {
+        "label": "Coverage",
+        "id": "COV-0025"
+      }
+    ],
+    "relationships": [
+      {
+        "from": "PH-0007",
+        "type": "HAS_POLICY",
+        "to": "POL-0007"
+      },
+      {
+        "from": "POL-0007",
+        "type": "COVERS",
+        "to": "COV-0025"
+      }
+    ]
+  },
+  "policy_POL-0008.pdf": {
+    "entities": [
+      {
+        "label": "Policyholder",
+        "id": "PH-0008"
+      },
+      {
+        "label": "Policy",
+        "id": "POL-0008"
+      },
+      {
+        "label": "Coverage",
+        "id": "COV-0029"
+      },
+      {
+        "label": "Endorsement",
+        "id": "END-0032"
+      }
+    ],
+    "relationships": [
+      {
+        "from": "PH-0008",
+        "type": "HAS_POLICY",
+        "to": "POL-0008"
+      },
+      {
+        "from": "POL-0008",
+        "type": "COVERS",
+        "to": "COV-0029"
+      },
+      {
+        "from": "POL-0008",
+        "type": "ENDORSED_BY",
+        "to": "END-0032"
+      }
+    ]
+  },
+  "policy_POL-0009.pdf": {
+    "entities": [
+      {
+        "label": "Policyholder",
+        "id": "PH-0009"
+      },
+      {
+        "label": "Policy",
+        "id": "POL-0009"
+      },
+      {
+        "label": "Coverage",
+        "id": "COV-0033"
+      },
+      {
+        "label": "Coverage",
+        "id": "COV-0034"
+      },
+      {
+        "label": "Endorsement",
+        "id": "END-0007"
+      }
+    ],
+    "relationships": [
+      {
+        "from": "PH-0009",
+        "type": "HAS_POLICY",
+        "to": "POL-0009"
+      },
+      {
+        "from": "POL-0009",
+        "type": "COVERS",
+        "to": "COV-0033"
+      },
+      {
+        "from": "POL-0009",
+        "type": "COVERS",
+        "to": "COV-0034"
+      },
+      {
+        "from": "POL-0009",
+        "type": "ENDORSED_BY",
+        "to": "END-0007"
+      }
+    ]
+  },
+  "policy_POL-0010.pdf": {
+    "entities": [
+      {
+        "label": "Policyholder",
+        "id": "PH-0010"
+      },
+      {
+        "label": "Policy",
+        "id": "POL-0010"
+      },
+      {
+        "label": "Coverage",
+        "id": "COV-0037"
+      },
+      {
+        "label": "Coverage",
+        "id": "COV-0038"
+      },
+      {
+        "label": "Endorsement",
+        "id": "END-0047"
+      }
+    ],
+    "relationships": [
+      {
+        "from": "PH-0010",
+        "type": "HAS_POLICY",
+        "to": "POL-0010"
+      },
+      {
+        "from": "POL-0010",
+        "type": "COVERS",
+        "to": "COV-0037"
+      },
+      {
+        "from": "POL-0010",
+        "type": "COVERS",
+        "to": "COV-0038"
+      },
+      {
+        "from": "POL-0010",
+        "type": "ENDORSED_BY",
+        "to": "END-0047"
+      }
+    ]
+  },
+  "policy_POL-0011.pdf": {
+    "entities": [
+      {
+        "label": "Policyholder",
+        "id": "PH-0011"
+      },
+      {
+        "label": "Policy",
+        "id": "POL-0011"
+      },
+      {
+        "label": "Coverage",
+        "id": "COV-0041"
+      }
+    ],
+    "relationships": [
+      {
+        "from": "PH-0011",
+        "type": "HAS_POLICY",
+        "to": "POL-0011"
+      },
+      {
+        "from": "POL-0011",
+        "type": "COVERS",
+        "to": "COV-0041"
+      }
+    ]
+  },
+  "policy_POL-0012.pdf": {
+    "entities": [
+      {
+        "label": "Policyholder",
+        "id": "PH-0012"
+      },
+      {
+        "label": "Policy",
+        "id": "POL-0012"
+      },
+      {
+        "label": "Coverage",
+        "id": "COV-0045"
+      },
+      {
+        "label": "Coverage",
+        "id": "COV-0046"
+      }
+    ],
+    "relationships": [
+      {
+        "from": "PH-0012",
+        "type": "HAS_POLICY",
+        "to": "POL-0012"
+      },
+      {
+        "from": "POL-0012",
+        "type": "COVERS",
+        "to": "COV-0045"
+      },
+      {
+        "from": "POL-0012",
+        "type": "COVERS",
+        "to": "COV-0046"
+      }
+    ]
+  },
+  "policy_POL-0013.pdf": {
+    "entities": [
+      {
+        "label": "Policyholder",
+        "id": "PH-0013"
+      },
+      {
+        "label": "Policy",
+        "id": "POL-0013"
+      },
+      {
+        "label": "Coverage",
+        "id": "COV-0049"
+      }
+    ],
+    "relationships": [
+      {
+        "from": "PH-0013",
+        "type": "HAS_POLICY",
+        "to": "POL-0013"
+      },
+      {
+        "from": "POL-0013",
+        "type": "COVERS",
+        "to": "COV-0049"
+      }
+    ]
+  },
+  "policy_POL-0014.pdf": {
+    "entities": [
+      {
+        "label": "Policyholder",
+        "id": "PH-0014"
+      },
+      {
+        "label": "Policy",
+        "id": "POL-0014"
+      },
+      {
+        "label": "Coverage",
+        "id": "COV-0053"
+      },
+      {
+        "label": "Coverage",
+        "id": "COV-0054"
+      }
+    ],
+    "relationships": [
+      {
+        "from": "PH-0014",
+        "type": "HAS_POLICY",
+        "to": "POL-0014"
+      },
+      {
+        "from": "POL-0014",
+        "type": "COVERS",
+        "to": "COV-0053"
+      },
+      {
+        "from": "POL-0014",
+        "type": "COVERS",
+        "to": "COV-0054"
+      }
+    ]
+  },
+  "policy_POL-0015.pdf": {
+    "entities": [
+      {
+        "label": "Policyholder",
+        "id": "PH-0015"
+      },
+      {
+        "label": "Policy",
+        "id": "POL-0015"
+      },
+      {
+        "label": "Coverage",
+        "id": "COV-0057"
+      }
+    ],
+    "relationships": [
+      {
+        "from": "PH-0015",
+        "type": "HAS_POLICY",
+        "to": "POL-0015"
+      },
+      {
+        "from": "POL-0015",
+        "type": "COVERS",
+        "to": "COV-0057"
+      }
+    ]
+  },
+  "policy_POL-0016.pdf": {
+    "entities": [
+      {
+        "label": "Policyholder",
+        "id": "PH-0016"
+      },
+      {
+        "label": "Policy",
+        "id": "POL-0016"
+      },
+      {
+        "label": "Coverage",
+        "id": "COV-0061"
+      },
+      {
+        "label": "Coverage",
+        "id": "COV-0062"
+      }
+    ],
+    "relationships": [
+      {
+        "from": "PH-0016",
+        "type": "HAS_POLICY",
+        "to": "POL-0016"
+      },
+      {
+        "from": "POL-0016",
+        "type": "COVERS",
+        "to": "COV-0061"
+      },
+      {
+        "from": "POL-0016",
+        "type": "COVERS",
+        "to": "COV-0062"
+      }
+    ]
+  },
+  "policy_POL-0017.pdf": {
+    "entities": [
+      {
+        "label": "Policyholder",
+        "id": "PH-0017"
+      },
+      {
+        "label": "Policy",
+        "id": "POL-0017"
+      },
+      {
+        "label": "Coverage",
+        "id": "COV-0065"
+      }
+    ],
+    "relationships": [
+      {
+        "from": "PH-0017",
+        "type": "HAS_POLICY",
+        "to": "POL-0017"
+      },
+      {
+        "from": "POL-0017",
+        "type": "COVERS",
+        "to": "COV-0065"
+      }
+    ]
+  },
+  "policy_POL-0018.pdf": {
+    "entities": [
+      {
+        "label": "Policyholder",
+        "id": "PH-0018"
+      },
+      {
+        "label": "Policy",
+        "id": "POL-0018"
+      },
+      {
+        "label": "Coverage",
+        "id": "COV-0069"
+      },
+      {
+        "label": "Coverage",
+        "id": "COV-0070"
+      }
+    ],
+    "relationships": [
+      {
+        "from": "PH-0018",
+        "type": "HAS_POLICY",
+        "to": "POL-0018"
+      },
+      {
+        "from": "POL-0018",
+        "type": "COVERS",
+        "to": "COV-0069"
+      },
+      {
+        "from": "POL-0018",
+        "type": "COVERS",
+        "to": "COV-0070"
+      }
+    ]
+  },
+  "policy_POL-0019.pdf": {
+    "entities": [
+      {
+        "label": "Policyholder",
+        "id": "PH-0019"
+      },
+      {
+        "label": "Policy",
+        "id": "POL-0019"
+      },
+      {
+        "label": "Coverage",
+        "id": "COV-0073"
+      },
+      {
+        "label": "Coverage",
+        "id": "COV-0074"
+      }
+    ],
+    "relationships": [
+      {
+        "from": "PH-0019",
+        "type": "HAS_POLICY",
+        "to": "POL-0019"
+      },
+      {
+        "from": "POL-0019",
+        "type": "COVERS",
+        "to": "COV-0073"
+      },
+      {
+        "from": "POL-0019",
+        "type": "COVERS",
+        "to": "COV-0074"
+      }
+    ]
+  },
+  "policy_POL-0020.pdf": {
+    "entities": [
+      {
+        "label": "Policyholder",
+        "id": "PH-0020"
+      },
+      {
+        "label": "Policy",
+        "id": "POL-0020"
+      },
+      {
+        "label": "Coverage",
+        "id": "COV-0077"
+      },
+      {
+        "label": "Coverage",
+        "id": "COV-0078"
+      },
+      {
+        "label": "Endorsement",
+        "id": "END-0019"
+      },
+      {
+        "label": "Endorsement",
+        "id": "END-0037"
+      }
+    ],
+    "relationships": [
+      {
+        "from": "PH-0020",
+        "type": "HAS_POLICY",
+        "to": "POL-0020"
+      },
+      {
+        "from": "POL-0020",
+        "type": "COVERS",
+        "to": "COV-0077"
+      },
+      {
+        "from": "POL-0020",
+        "type": "COVERS",
+        "to": "COV-0078"
+      },
+      {
+        "from": "POL-0020",
+        "type": "ENDORSED_BY",
+        "to": "END-0019"
+      },
+      {
+        "from": "POL-0020",
+        "type": "ENDORSED_BY",
+        "to": "END-0037"
+      }
+    ]
+  },
+  "policy_POL-0021.pdf": {
+    "entities": [
+      {
+        "label": "Policyholder",
+        "id": "PH-0021"
+      },
+      {
+        "label": "Policy",
+        "id": "POL-0021"
+      },
+      {
+        "label": "Coverage",
+        "id": "COV-0081"
+      },
+      {
+        "label": "Coverage",
+        "id": "COV-0082"
+      }
+    ],
+    "relationships": [
+      {
+        "from": "PH-0021",
+        "type": "HAS_POLICY",
+        "to": "POL-0021"
+      },
+      {
+        "from": "POL-0021",
+        "type": "COVERS",
+        "to": "COV-0081"
+      },
+      {
+        "from": "POL-0021",
+        "type": "COVERS",
+        "to": "COV-0082"
+      }
+    ]
+  },
+  "policy_POL-0022.pdf": {
+    "entities": [
+      {
+        "label": "Policyholder",
+        "id": "PH-0022"
+      },
+      {
+        "label": "Policy",
+        "id": "POL-0022"
+      },
+      {
+        "label": "Coverage",
+        "id": "COV-0085"
+      }
+    ],
+    "relationships": [
+      {
+        "from": "PH-0022",
+        "type": "HAS_POLICY",
+        "to": "POL-0022"
+      },
+      {
+        "from": "POL-0022",
+        "type": "COVERS",
+        "to": "COV-0085"
+      }
+    ]
+  },
+  "policy_POL-0023.pdf": {
+    "entities": [
+      {
+        "label": "Policyholder",
+        "id": "PH-0023"
+      },
+      {
+        "label": "Policy",
+        "id": "POL-0023"
+      },
+      {
+        "label": "Coverage",
+        "id": "COV-0089"
+      },
+      {
+        "label": "Coverage",
+        "id": "COV-0090"
+      },
+      {
+        "label": "Endorsement",
+        "id": "END-0033"
+      }
+    ],
+    "relationships": [
+      {
+        "from": "PH-0023",
+        "type": "HAS_POLICY",
+        "to": "POL-0023"
+      },
+      {
+        "from": "POL-0023",
+        "type": "COVERS",
+        "to": "COV-0089"
+      },
+      {
+        "from": "POL-0023",
+        "type": "COVERS",
+        "to": "COV-0090"
+      },
+      {
+        "from": "POL-0023",
+        "type": "ENDORSED_BY",
+        "to": "END-0033"
+      }
+    ]
+  },
+  "policy_POL-0024.pdf": {
+    "entities": [
+      {
+        "label": "Policyholder",
+        "id": "PH-0024"
+      },
+      {
+        "label": "Policy",
+        "id": "POL-0024"
+      },
+      {
+        "label": "Coverage",
+        "id": "COV-0093"
+      },
+      {
+        "label": "Endorsement",
+        "id": "END-0009"
+      }
+    ],
+    "relationships": [
+      {
+        "from": "PH-0024",
+        "type": "HAS_POLICY",
+        "to": "POL-0024"
+      },
+      {
+        "from": "POL-0024",
+        "type": "COVERS",
+        "to": "COV-0093"
+      },
+      {
+        "from": "POL-0024",
+        "type": "ENDORSED_BY",
+        "to": "END-0009"
+      }
+    ]
+  },
+  "policy_POL-0025.pdf": {
+    "entities": [
+      {
+        "label": "Policyholder",
+        "id": "PH-0025"
+      },
+      {
+        "label": "Policy",
+        "id": "POL-0025"
+      },
+      {
+        "label": "Coverage",
+        "id": "COV-0097"
+      },
+      {
+        "label": "Coverage",
+        "id": "COV-0098"
+      },
+      {
+        "label": "Endorsement",
+        "id": "END-0045"
+      }
+    ],
+    "relationships": [
+      {
+        "from": "PH-0025",
+        "type": "HAS_POLICY",
+        "to": "POL-0025"
+      },
+      {
+        "from": "POL-0025",
+        "type": "COVERS",
+        "to": "COV-0097"
+      },
+      {
+        "from": "POL-0025",
+        "type": "COVERS",
+        "to": "COV-0098"
+      },
+      {
+        "from": "POL-0025",
+        "type": "ENDORSED_BY",
+        "to": "END-0045"
+      }
+    ]
+  },
+  "policy_POL-0026.pdf": {
+    "entities": [
+      {
+        "label": "Policyholder",
+        "id": "PH-0026"
+      },
+      {
+        "label": "Policy",
+        "id": "POL-0026"
+      },
+      {
+        "label": "Coverage",
+        "id": "COV-0101"
+      }
+    ],
+    "relationships": [
+      {
+        "from": "PH-0026",
+        "type": "HAS_POLICY",
+        "to": "POL-0026"
+      },
+      {
+        "from": "POL-0026",
+        "type": "COVERS",
+        "to": "COV-0101"
+      }
+    ]
+  },
+  "policy_POL-0027.pdf": {
+    "entities": [
+      {
+        "label": "Policyholder",
+        "id": "PH-0027"
+      },
+      {
+        "label": "Policy",
+        "id": "POL-0027"
+      },
+      {
+        "label": "Coverage",
+        "id": "COV-0105"
+      },
+      {
+        "label": "Endorsement",
+        "id": "END-0022"
+      },
+      {
+        "label": "Endorsement",
+        "id": "END-0049"
+      }
+    ],
+    "relationships": [
+      {
+        "from": "PH-0027",
+        "type": "HAS_POLICY",
+        "to": "POL-0027"
+      },
+      {
+        "from": "POL-0027",
+        "type": "COVERS",
+        "to": "COV-0105"
+      },
+      {
+        "from": "POL-0027",
+        "type": "ENDORSED_BY",
+        "to": "END-0022"
+      },
+      {
+        "from": "POL-0027",
+        "type": "ENDORSED_BY",
+        "to": "END-0049"
+      }
+    ]
+  },
+  "policy_POL-0028.pdf": {
+    "entities": [
+      {
+        "label": "Policyholder",
+        "id": "PH-0028"
+      },
+      {
+        "label": "Policy",
+        "id": "POL-0028"
+      },
+      {
+        "label": "Coverage",
+        "id": "COV-0109"
+      },
+      {
+        "label": "Endorsement",
+        "id": "END-0050"
+      }
+    ],
+    "relationships": [
+      {
+        "from": "PH-0028",
+        "type": "HAS_POLICY",
+        "to": "POL-0028"
+      },
+      {
+        "from": "POL-0028",
+        "type": "COVERS",
+        "to": "COV-0109"
+      },
+      {
+        "from": "POL-0028",
+        "type": "ENDORSED_BY",
+        "to": "END-0050"
+      }
+    ]
+  },
+  "policy_POL-0029.pdf": {
+    "entities": [
+      {
+        "label": "Policyholder",
+        "id": "PH-0029"
+      },
+      {
+        "label": "Policy",
+        "id": "POL-0029"
+      },
+      {
+        "label": "Coverage",
+        "id": "COV-0113"
+      },
+      {
+        "label": "Endorsement",
+        "id": "END-0031"
+      },
+      {
+        "label": "Endorsement",
+        "id": "END-0039"
+      }
+    ],
+    "relationships": [
+      {
+        "from": "PH-0029",
+        "type": "HAS_POLICY",
+        "to": "POL-0029"
+      },
+      {
+        "from": "POL-0029",
+        "type": "COVERS",
+        "to": "COV-0113"
+      },
+      {
+        "from": "POL-0029",
+        "type": "ENDORSED_BY",
+        "to": "END-0031"
+      },
+      {
+        "from": "POL-0029",
+        "type": "ENDORSED_BY",
+        "to": "END-0039"
+      }
+    ]
+  },
+  "policy_POL-0030.pdf": {
+    "entities": [
+      {
+        "label": "Policyholder",
+        "id": "PH-0030"
+      },
+      {
+        "label": "Policy",
+        "id": "POL-0030"
+      },
+      {
+        "label": "Coverage",
+        "id": "COV-0117"
+      },
+      {
+        "label": "Coverage",
+        "id": "COV-0118"
+      },
+      {
+        "label": "Endorsement",
+        "id": "END-0018"
+      }
+    ],
+    "relationships": [
+      {
+        "from": "PH-0030",
+        "type": "HAS_POLICY",
+        "to": "POL-0030"
+      },
+      {
+        "from": "POL-0030",
+        "type": "COVERS",
+        "to": "COV-0117"
+      },
+      {
+        "from": "POL-0030",
+        "type": "COVERS",
+        "to": "COV-0118"
+      },
+      {
+        "from": "POL-0030",
+        "type": "ENDORSED_BY",
+        "to": "END-0018"
+      }
+    ]
+  },
+  "policy_POL-0031.pdf": {
+    "entities": [
+      {
+        "label": "Policyholder",
+        "id": "PH-0031"
+      },
+      {
+        "label": "Policy",
+        "id": "POL-0031"
+      },
+      {
+        "label": "Coverage",
+        "id": "COV-0121"
+      },
+      {
+        "label": "Coverage",
+        "id": "COV-0122"
+      }
+    ],
+    "relationships": [
+      {
+        "from": "PH-0031",
+        "type": "HAS_POLICY",
+        "to": "POL-0031"
+      },
+      {
+        "from": "POL-0031",
+        "type": "COVERS",
+        "to": "COV-0121"
+      },
+      {
+        "from": "POL-0031",
+        "type": "COVERS",
+        "to": "COV-0122"
+      }
+    ]
+  },
+  "policy_POL-0032.pdf": {
+    "entities": [
+      {
+        "label": "Policyholder",
+        "id": "PH-0032"
+      },
+      {
+        "label": "Policy",
+        "id": "POL-0032"
+      },
+      {
+        "label": "Coverage",
+        "id": "COV-0125"
+      },
+      {
+        "label": "Coverage",
+        "id": "COV-0126"
+      }
+    ],
+    "relationships": [
+      {
+        "from": "PH-0032",
+        "type": "HAS_POLICY",
+        "to": "POL-0032"
+      },
+      {
+        "from": "POL-0032",
+        "type": "COVERS",
+        "to": "COV-0125"
+      },
+      {
+        "from": "POL-0032",
+        "type": "COVERS",
+        "to": "COV-0126"
+      }
+    ]
+  },
+  "policy_POL-0033.pdf": {
+    "entities": [
+      {
+        "label": "Policyholder",
+        "id": "PH-0033"
+      },
+      {
+        "label": "Policy",
+        "id": "POL-0033"
+      },
+      {
+        "label": "Coverage",
+        "id": "COV-0129"
+      },
+      {
+        "label": "Coverage",
+        "id": "COV-0130"
+      }
+    ],
+    "relationships": [
+      {
+        "from": "PH-0033",
+        "type": "HAS_POLICY",
+        "to": "POL-0033"
+      },
+      {
+        "from": "POL-0033",
+        "type": "COVERS",
+        "to": "COV-0129"
+      },
+      {
+        "from": "POL-0033",
+        "type": "COVERS",
+        "to": "COV-0130"
+      }
+    ]
+  },
+  "policy_POL-0034.pdf": {
+    "entities": [
+      {
+        "label": "Policyholder",
+        "id": "PH-0034"
+      },
+      {
+        "label": "Policy",
+        "id": "POL-0034"
+      },
+      {
+        "label": "Coverage",
+        "id": "COV-0133"
+      },
+      {
+        "label": "Coverage",
+        "id": "COV-0134"
+      }
+    ],
+    "relationships": [
+      {
+        "from": "PH-0034",
+        "type": "HAS_POLICY",
+        "to": "POL-0034"
+      },
+      {
+        "from": "POL-0034",
+        "type": "COVERS",
+        "to": "COV-0133"
+      },
+      {
+        "from": "POL-0034",
+        "type": "COVERS",
+        "to": "COV-0134"
+      }
+    ]
+  },
+  "policy_POL-0035.pdf": {
+    "entities": [
+      {
+        "label": "Policyholder",
+        "id": "PH-0035"
+      },
+      {
+        "label": "Policy",
+        "id": "POL-0035"
+      },
+      {
+        "label": "Coverage",
+        "id": "COV-0137"
+      },
+      {
+        "label": "Coverage",
+        "id": "COV-0138"
+      }
+    ],
+    "relationships": [
+      {
+        "from": "PH-0035",
+        "type": "HAS_POLICY",
+        "to": "POL-0035"
+      },
+      {
+        "from": "POL-0035",
+        "type": "COVERS",
+        "to": "COV-0137"
+      },
+      {
+        "from": "POL-0035",
+        "type": "COVERS",
+        "to": "COV-0138"
+      }
+    ]
+  },
+  "policy_POL-0036.pdf": {
+    "entities": [
+      {
+        "label": "Policyholder",
+        "id": "PH-0036"
+      },
+      {
+        "label": "Policy",
+        "id": "POL-0036"
+      },
+      {
+        "label": "Coverage",
+        "id": "COV-0141"
+      }
+    ],
+    "relationships": [
+      {
+        "from": "PH-0036",
+        "type": "HAS_POLICY",
+        "to": "POL-0036"
+      },
+      {
+        "from": "POL-0036",
+        "type": "COVERS",
+        "to": "COV-0141"
+      }
+    ]
+  },
+  "policy_POL-0037.pdf": {
+    "entities": [
+      {
+        "label": "Policyholder",
+        "id": "PH-0037"
+      },
+      {
+        "label": "Policy",
+        "id": "POL-0037"
+      },
+      {
+        "label": "Coverage",
+        "id": "COV-0145"
+      },
+      {
+        "label": "Coverage",
+        "id": "COV-0146"
+      }
+    ],
+    "relationships": [
+      {
+        "from": "PH-0037",
+        "type": "HAS_POLICY",
+        "to": "POL-0037"
+      },
+      {
+        "from": "POL-0037",
+        "type": "COVERS",
+        "to": "COV-0145"
+      },
+      {
+        "from": "POL-0037",
+        "type": "COVERS",
+        "to": "COV-0146"
+      }
+    ]
+  },
+  "policy_POL-0038.pdf": {
+    "entities": [
+      {
+        "label": "Policyholder",
+        "id": "PH-0038"
+      },
+      {
+        "label": "Policy",
+        "id": "POL-0038"
+      },
+      {
+        "label": "Coverage",
+        "id": "COV-0149"
+      },
+      {
+        "label": "Coverage",
+        "id": "COV-0150"
+      }
+    ],
+    "relationships": [
+      {
+        "from": "PH-0038",
+        "type": "HAS_POLICY",
+        "to": "POL-0038"
+      },
+      {
+        "from": "POL-0038",
+        "type": "COVERS",
+        "to": "COV-0149"
+      },
+      {
+        "from": "POL-0038",
+        "type": "COVERS",
+        "to": "COV-0150"
+      }
+    ]
+  },
+  "policy_POL-0039.pdf": {
+    "entities": [
+      {
+        "label": "Policyholder",
+        "id": "PH-0039"
+      },
+      {
+        "label": "Policy",
+        "id": "POL-0039"
+      },
+      {
+        "label": "Coverage",
+        "id": "COV-0153"
+      },
+      {
+        "label": "Coverage",
+        "id": "COV-0154"
+      },
+      {
+        "label": "Endorsement",
+        "id": "END-0016"
+      },
+      {
+        "label": "Endorsement",
+        "id": "END-0030"
+      }
+    ],
+    "relationships": [
+      {
+        "from": "PH-0039",
+        "type": "HAS_POLICY",
+        "to": "POL-0039"
+      },
+      {
+        "from": "POL-0039",
+        "type": "COVERS",
+        "to": "COV-0153"
+      },
+      {
+        "from": "POL-0039",
+        "type": "COVERS",
+        "to": "COV-0154"
+      },
+      {
+        "from": "POL-0039",
+        "type": "ENDORSED_BY",
+        "to": "END-0016"
+      },
+      {
+        "from": "POL-0039",
+        "type": "ENDORSED_BY",
+        "to": "END-0030"
+      }
+    ]
+  },
+  "policy_POL-0040.pdf": {
+    "entities": [
+      {
+        "label": "Policyholder",
+        "id": "PH-0040"
+      },
+      {
+        "label": "Policy",
+        "id": "POL-0040"
+      },
+      {
+        "label": "Coverage",
+        "id": "COV-0157"
+      },
+      {
+        "label": "Coverage",
+        "id": "COV-0158"
+      }
+    ],
+    "relationships": [
+      {
+        "from": "PH-0040",
+        "type": "HAS_POLICY",
+        "to": "POL-0040"
+      },
+      {
+        "from": "POL-0040",
+        "type": "COVERS",
+        "to": "COV-0157"
+      },
+      {
+        "from": "POL-0040",
+        "type": "COVERS",
+        "to": "COV-0158"
+      }
+    ]
+  },
+  "policy_POL-0041.pdf": {
+    "entities": [
+      {
+        "label": "Policyholder",
+        "id": "PH-0041"
+      },
+      {
+        "label": "Policy",
+        "id": "POL-0041"
+      },
+      {
+        "label": "Coverage",
+        "id": "COV-0161"
+      },
+      {
+        "label": "Endorsement",
+        "id": "END-0036"
+      }
+    ],
+    "relationships": [
+      {
+        "from": "PH-0041",
+        "type": "HAS_POLICY",
+        "to": "POL-0041"
+      },
+      {
+        "from": "POL-0041",
+        "type": "COVERS",
+        "to": "COV-0161"
+      },
+      {
+        "from": "POL-0041",
+        "type": "ENDORSED_BY",
+        "to": "END-0036"
+      }
+    ]
+  },
+  "policy_POL-0042.pdf": {
+    "entities": [
+      {
+        "label": "Policyholder",
+        "id": "PH-0042"
+      },
+      {
+        "label": "Policy",
+        "id": "POL-0042"
+      },
+      {
+        "label": "Coverage",
+        "id": "COV-0165"
+      },
+      {
+        "label": "Coverage",
+        "id": "COV-0166"
+      }
+    ],
+    "relationships": [
+      {
+        "from": "PH-0042",
+        "type": "HAS_POLICY",
+        "to": "POL-0042"
+      },
+      {
+        "from": "POL-0042",
+        "type": "COVERS",
+        "to": "COV-0165"
+      },
+      {
+        "from": "POL-0042",
+        "type": "COVERS",
+        "to": "COV-0166"
+      }
+    ]
+  },
+  "policy_POL-0043.pdf": {
+    "entities": [
+      {
+        "label": "Policyholder",
+        "id": "PH-0043"
+      },
+      {
+        "label": "Policy",
+        "id": "POL-0043"
+      },
+      {
+        "label": "Coverage",
+        "id": "COV-0169"
+      },
+      {
+        "label": "Coverage",
+        "id": "COV-0170"
+      },
+      {
+        "label": "Endorsement",
+        "id": "END-0043"
+      }
+    ],
+    "relationships": [
+      {
+        "from": "PH-0043",
+        "type": "HAS_POLICY",
+        "to": "POL-0043"
+      },
+      {
+        "from": "POL-0043",
+        "type": "COVERS",
+        "to": "COV-0169"
+      },
+      {
+        "from": "POL-0043",
+        "type": "COVERS",
+        "to": "COV-0170"
+      },
+      {
+        "from": "POL-0043",
+        "type": "ENDORSED_BY",
+        "to": "END-0043"
+      }
+    ]
+  },
+  "policy_POL-0044.pdf": {
+    "entities": [
+      {
+        "label": "Policyholder",
+        "id": "PH-0044"
+      },
+      {
+        "label": "Policy",
+        "id": "POL-0044"
+      },
+      {
+        "label": "Coverage",
+        "id": "COV-0173"
+      },
+      {
+        "label": "Coverage",
+        "id": "COV-0174"
+      }
+    ],
+    "relationships": [
+      {
+        "from": "PH-0044",
+        "type": "HAS_POLICY",
+        "to": "POL-0044"
+      },
+      {
+        "from": "POL-0044",
+        "type": "COVERS",
+        "to": "COV-0173"
+      },
+      {
+        "from": "POL-0044",
+        "type": "COVERS",
+        "to": "COV-0174"
+      }
+    ]
+  },
+  "policy_POL-0045.pdf": {
+    "entities": [
+      {
+        "label": "Policyholder",
+        "id": "PH-0045"
+      },
+      {
+        "label": "Policy",
+        "id": "POL-0045"
+      },
+      {
+        "label": "Coverage",
+        "id": "COV-0177"
+      },
+      {
+        "label": "Coverage",
+        "id": "COV-0178"
+      }
+    ],
+    "relationships": [
+      {
+        "from": "PH-0045",
+        "type": "HAS_POLICY",
+        "to": "POL-0045"
+      },
+      {
+        "from": "POL-0045",
+        "type": "COVERS",
+        "to": "COV-0177"
+      },
+      {
+        "from": "POL-0045",
+        "type": "COVERS",
+        "to": "COV-0178"
+      }
+    ]
+  },
+  "policy_POL-0046.pdf": {
+    "entities": [
+      {
+        "label": "Policyholder",
+        "id": "PH-0046"
+      },
+      {
+        "label": "Policy",
+        "id": "POL-0046"
+      },
+      {
+        "label": "Coverage",
+        "id": "COV-0181"
+      }
+    ],
+    "relationships": [
+      {
+        "from": "PH-0046",
+        "type": "HAS_POLICY",
+        "to": "POL-0046"
+      },
+      {
+        "from": "POL-0046",
+        "type": "COVERS",
+        "to": "COV-0181"
+      }
+    ]
+  },
+  "policy_POL-0047.pdf": {
+    "entities": [
+      {
+        "label": "Policyholder",
+        "id": "PH-0047"
+      },
+      {
+        "label": "Policy",
+        "id": "POL-0047"
+      },
+      {
+        "label": "Coverage",
+        "id": "COV-0185"
+      },
+      {
+        "label": "Coverage",
+        "id": "COV-0186"
+      }
+    ],
+    "relationships": [
+      {
+        "from": "PH-0047",
+        "type": "HAS_POLICY",
+        "to": "POL-0047"
+      },
+      {
+        "from": "POL-0047",
+        "type": "COVERS",
+        "to": "COV-0185"
+      },
+      {
+        "from": "POL-0047",
+        "type": "COVERS",
+        "to": "COV-0186"
+      }
+    ]
+  },
+  "policy_POL-0048.pdf": {
+    "entities": [
+      {
+        "label": "Policyholder",
+        "id": "PH-0048"
+      },
+      {
+        "label": "Policy",
+        "id": "POL-0048"
+      },
+      {
+        "label": "Coverage",
+        "id": "COV-0189"
+      },
+      {
+        "label": "Coverage",
+        "id": "COV-0190"
+      },
+      {
+        "label": "Endorsement",
+        "id": "END-0044"
+      }
+    ],
+    "relationships": [
+      {
+        "from": "PH-0048",
+        "type": "HAS_POLICY",
+        "to": "POL-0048"
+      },
+      {
+        "from": "POL-0048",
+        "type": "COVERS",
+        "to": "COV-0189"
+      },
+      {
+        "from": "POL-0048",
+        "type": "COVERS",
+        "to": "COV-0190"
+      },
+      {
+        "from": "POL-0048",
+        "type": "ENDORSED_BY",
+        "to": "END-0044"
+      }
+    ]
+  },
+  "policy_POL-0049.pdf": {
+    "entities": [
+      {
+        "label": "Policyholder",
+        "id": "PH-0049"
+      },
+      {
+        "label": "Policy",
+        "id": "POL-0049"
+      },
+      {
+        "label": "Coverage",
+        "id": "COV-0193"
+      },
+      {
+        "label": "Coverage",
+        "id": "COV-0194"
+      }
+    ],
+    "relationships": [
+      {
+        "from": "PH-0049",
+        "type": "HAS_POLICY",
+        "to": "POL-0049"
+      },
+      {
+        "from": "POL-0049",
+        "type": "COVERS",
+        "to": "COV-0193"
+      },
+      {
+        "from": "POL-0049",
+        "type": "COVERS",
+        "to": "COV-0194"
+      }
+    ]
+  },
+  "policy_POL-0050.pdf": {
+    "entities": [
+      {
+        "label": "Policyholder",
+        "id": "PH-0050"
+      },
+      {
+        "label": "Policy",
+        "id": "POL-0050"
+      },
+      {
+        "label": "Coverage",
+        "id": "COV-0197"
+      },
+      {
+        "label": "Endorsement",
+        "id": "END-0042"
+      }
+    ],
+    "relationships": [
+      {
+        "from": "PH-0050",
+        "type": "HAS_POLICY",
+        "to": "POL-0050"
+      },
+      {
+        "from": "POL-0050",
+        "type": "COVERS",
+        "to": "COV-0197"
+      },
+      {
+        "from": "POL-0050",
+        "type": "ENDORSED_BY",
+        "to": "END-0042"
+      }
+    ]
+  },
+  "claim_CLM-0001.pdf": {
+    "entities": [
+      {
+        "label": "Claim",
+        "id": "CLM-0001"
+      },
+      {
+        "label": "Investigator",
+        "id": "INV-0004"
+      }
+    ],
+    "relationships": [
+      {
+        "from": "POL-0007",
+        "type": "HAS_CLAIM",
+        "to": "CLM-0001"
+      },
+      {
+        "from": "INV-0004",
+        "type": "INVESTIGATES_CLAIM",
+        "to": "CLM-0001"
+      }
+    ]
+  },
+  "claim_CLM-0002.pdf": {
+    "entities": [
+      {
+        "label": "Claim",
+        "id": "CLM-0002"
+      }
+    ],
+    "relationships": [
+      {
+        "from": "POL-0033",
+        "type": "HAS_CLAIM",
+        "to": "CLM-0002"
+      }
+    ]
+  },
+  "claim_CLM-0003.pdf": {
+    "entities": [
+      {
+        "label": "Claim",
+        "id": "CLM-0003"
+      },
+      {
+        "label": "FraudFlag",
+        "id": "FRD-CLM-0003"
+      },
+      {
+        "label": "Investigator",
+        "id": "INV-0001"
+      }
+    ],
+    "relationships": [
+      {
+        "from": "POL-0084",
+        "type": "HAS_CLAIM",
+        "to": "CLM-0003"
+      },
+      {
+        "from": "CLM-0003",
+        "type": "FRAUD_DETECTED",
+        "to": "FRD-CLM-0003"
+      },
+      {
+        "from": "INV-0001",
+        "type": "INVESTIGATES_CLAIM",
+        "to": "CLM-0003"
+      }
+    ]
+  },
+  "claim_CLM-0004.pdf": {
+    "entities": [
+      {
+        "label": "Claim",
+        "id": "CLM-0004"
+      }
+    ],
+    "relationships": [
+      {
+        "from": "POL-0080",
+        "type": "HAS_CLAIM",
+        "to": "CLM-0004"
+      }
+    ]
+  },
+  "claim_CLM-0005.pdf": {
+    "entities": [
+      {
+        "label": "Claim",
+        "id": "CLM-0005"
+      },
+      {
+        "label": "Investigator",
+        "id": "INV-0002"
+      }
+    ],
+    "relationships": [
+      {
+        "from": "POL-0090",
+        "type": "HAS_CLAIM",
+        "to": "CLM-0005"
+      },
+      {
+        "from": "INV-0002",
+        "type": "INVESTIGATES_CLAIM",
+        "to": "CLM-0005"
+      }
+    ]
+  },
+  "claim_CLM-0006.pdf": {
+    "entities": [
+      {
+        "label": "Claim",
+        "id": "CLM-0006"
+      }
+    ],
+    "relationships": [
+      {
+        "from": "POL-0040",
+        "type": "HAS_CLAIM",
+        "to": "CLM-0006"
+      }
+    ]
+  },
+  "claim_CLM-0007.pdf": {
+    "entities": [
+      {
+        "label": "Claim",
+        "id": "CLM-0007"
+      }
+    ],
+    "relationships": [
+      {
+        "from": "POL-0049",
+        "type": "HAS_CLAIM",
+        "to": "CLM-0007"
+      }
+    ]
+  },
+  "claim_CLM-0008.pdf": {
+    "entities": [
+      {
+        "label": "Claim",
+        "id": "CLM-0008"
+      }
+    ],
+    "relationships": [
+      {
+        "from": "POL-0032",
+        "type": "HAS_CLAIM",
+        "to": "CLM-0008"
+      }
+    ]
+  },
+  "claim_CLM-0009.pdf": {
+    "entities": [
+      {
+        "label": "Claim",
+        "id": "CLM-0009"
+      },
+      {
+        "label": "Investigator",
+        "id": "INV-0004"
+      }
+    ],
+    "relationships": [
+      {
+        "from": "POL-0006",
+        "type": "HAS_CLAIM",
+        "to": "CLM-0009"
+      },
+      {
+        "from": "INV-0004",
+        "type": "INVESTIGATES_CLAIM",
+        "to": "CLM-0009"
+      }
+    ]
+  },
+  "claim_CLM-0010.pdf": {
+    "entities": [
+      {
+        "label": "Claim",
+        "id": "CLM-0010"
+      },
+      {
+        "label": "Investigator",
+        "id": "INV-0006"
+      }
+    ],
+    "relationships": [
+      {
+        "from": "POL-0063",
+        "type": "HAS_CLAIM",
+        "to": "CLM-0010"
+      },
+      {
+        "from": "INV-0006",
+        "type": "INVESTIGATES_CLAIM",
+        "to": "CLM-0010"
+      }
+    ]
+  },
+  "claim_CLM-0011.pdf": {
+    "entities": [
+      {
+        "label": "Claim",
+        "id": "CLM-0011"
+      }
+    ],
+    "relationships": [
+      {
+        "from": "POL-0035",
+        "type": "HAS_CLAIM",
+        "to": "CLM-0011"
+      }
+    ]
+  },
+  "claim_CLM-0012.pdf": {
+    "entities": [
+      {
+        "label": "Claim",
+        "id": "CLM-0012"
+      },
+      {
+        "label": "Investigator",
+        "id": "INV-0004"
+      }
+    ],
+    "relationships": [
+      {
+        "from": "POL-0012",
+        "type": "HAS_CLAIM",
+        "to": "CLM-0012"
+      },
+      {
+        "from": "INV-0004",
+        "type": "INVESTIGATES_CLAIM",
+        "to": "CLM-0012"
+      }
+    ]
+  },
+  "claim_CLM-0013.pdf": {
+    "entities": [
+      {
+        "label": "Claim",
+        "id": "CLM-0013"
+      }
+    ],
+    "relationships": [
+      {
+        "from": "POL-0042",
+        "type": "HAS_CLAIM",
+        "to": "CLM-0013"
+      }
+    ]
+  },
+  "claim_CLM-0014.pdf": {
+    "entities": [
+      {
+        "label": "Claim",
+        "id": "CLM-0014"
+      },
+      {
+        "label": "Investigator",
+        "id": "INV-0002"
+      }
+    ],
+    "relationships": [
+      {
+        "from": "POL-0036",
+        "type": "HAS_CLAIM",
+        "to": "CLM-0014"
+      },
+      {
+        "from": "INV-0002",
+        "type": "INVESTIGATES_CLAIM",
+        "to": "CLM-0014"
+      }
+    ]
+  },
+  "claim_CLM-0015.pdf": {
+    "entities": [
+      {
+        "label": "Claim",
+        "id": "CLM-0015"
+      }
+    ],
+    "relationships": [
+      {
+        "from": "POL-0089",
+        "type": "HAS_CLAIM",
+        "to": "CLM-0015"
+      }
+    ]
+  },
+  "claim_CLM-0016.pdf": {
+    "entities": [
+      {
+        "label": "Claim",
+        "id": "CLM-0016"
+      },
+      {
+        "label": "Investigator",
+        "id": "INV-0006"
+      }
+    ],
+    "relationships": [
+      {
+        "from": "POL-0052",
+        "type": "HAS_CLAIM",
+        "to": "CLM-0016"
+      },
+      {
+        "from": "INV-0006",
+        "type": "INVESTIGATES_CLAIM",
+        "to": "CLM-0016"
+      }
+    ]
+  },
+  "claim_CLM-0017.pdf": {
+    "entities": [
+      {
+        "label": "Claim",
+        "id": "CLM-0017"
+      }
+    ],
+    "relationships": [
+      {
+        "from": "POL-0071",
+        "type": "HAS_CLAIM",
+        "to": "CLM-0017"
+      }
+    ]
+  },
+  "claim_CLM-0018.pdf": {
+    "entities": [
+      {
+        "label": "Claim",
+        "id": "CLM-0018"
+      }
+    ],
+    "relationships": [
+      {
+        "from": "POL-0093",
+        "type": "HAS_CLAIM",
+        "to": "CLM-0018"
+      }
+    ]
+  },
+  "claim_CLM-0019.pdf": {
+    "entities": [
+      {
+        "label": "Claim",
+        "id": "CLM-0019"
+      }
+    ],
+    "relationships": [
+      {
+        "from": "POL-0062",
+        "type": "HAS_CLAIM",
+        "to": "CLM-0019"
+      }
+    ]
+  },
+  "claim_CLM-0020.pdf": {
+    "entities": [
+      {
+        "label": "Claim",
+        "id": "CLM-0020"
+      }
+    ],
+    "relationships": [
+      {
+        "from": "POL-0038",
+        "type": "HAS_CLAIM",
+        "to": "CLM-0020"
+      }
+    ]
+  },
+  "claim_CLM-0021.pdf": {
+    "entities": [
+      {
+        "label": "Claim",
+        "id": "CLM-0021"
+      },
+      {
+        "label": "FraudFlag",
+        "id": "FRD-CLM-0021"
+      },
+      {
+        "label": "Investigator",
+        "id": "INV-0004"
+      }
+    ],
+    "relationships": [
+      {
+        "from": "POL-0071",
+        "type": "HAS_CLAIM",
+        "to": "CLM-0021"
+      },
+      {
+        "from": "CLM-0021",
+        "type": "FRAUD_DETECTED",
+        "to": "FRD-CLM-0021"
+      },
+      {
+        "from": "INV-0004",
+        "type": "INVESTIGATES_CLAIM",
+        "to": "CLM-0021"
+      }
+    ]
+  },
+  "claim_CLM-0022.pdf": {
+    "entities": [
+      {
+        "label": "Claim",
+        "id": "CLM-0022"
+      },
+      {
+        "label": "FraudFlag",
+        "id": "FRD-CLM-0022"
+      },
+      {
+        "label": "Investigator",
+        "id": "INV-0006"
+      }
+    ],
+    "relationships": [
+      {
+        "from": "POL-0044",
+        "type": "HAS_CLAIM",
+        "to": "CLM-0022"
+      },
+      {
+        "from": "CLM-0022",
+        "type": "FRAUD_DETECTED",
+        "to": "FRD-CLM-0022"
+      },
+      {
+        "from": "INV-0006",
+        "type": "INVESTIGATES_CLAIM",
+        "to": "CLM-0022"
+      }
+    ]
+  },
+  "claim_CLM-0023.pdf": {
+    "entities": [
+      {
+        "label": "Claim",
+        "id": "CLM-0023"
+      }
+    ],
+    "relationships": [
+      {
+        "from": "POL-0088",
+        "type": "HAS_CLAIM",
+        "to": "CLM-0023"
+      }
+    ]
+  },
+  "claim_CLM-0024.pdf": {
+    "entities": [
+      {
+        "label": "Claim",
+        "id": "CLM-0024"
+      },
+      {
+        "label": "Investigator",
+        "id": "INV-0004"
+      }
+    ],
+    "relationships": [
+      {
+        "from": "POL-0016",
+        "type": "HAS_CLAIM",
+        "to": "CLM-0024"
+      },
+      {
+        "from": "INV-0004",
+        "type": "INVESTIGATES_CLAIM",
+        "to": "CLM-0024"
+      }
+    ]
+  },
+  "claim_CLM-0025.pdf": {
+    "entities": [
+      {
+        "label": "Claim",
+        "id": "CLM-0025"
+      }
+    ],
+    "relationships": [
+      {
+        "from": "POL-0039",
+        "type": "HAS_CLAIM",
+        "to": "CLM-0025"
+      }
+    ]
+  },
+  "claim_CLM-0026.pdf": {
+    "entities": [
+      {
+        "label": "Claim",
+        "id": "CLM-0026"
+      },
+      {
+        "label": "Investigator",
+        "id": "INV-0004"
+      }
+    ],
+    "relationships": [
+      {
+        "from": "POL-0027",
+        "type": "HAS_CLAIM",
+        "to": "CLM-0026"
+      },
+      {
+        "from": "INV-0004",
+        "type": "INVESTIGATES_CLAIM",
+        "to": "CLM-0026"
+      }
+    ]
+  },
+  "claim_CLM-0027.pdf": {
+    "entities": [
+      {
+        "label": "Claim",
+        "id": "CLM-0027"
+      }
+    ],
+    "relationships": [
+      {
+        "from": "POL-0058",
+        "type": "HAS_CLAIM",
+        "to": "CLM-0027"
+      }
+    ]
+  },
+  "claim_CLM-0028.pdf": {
+    "entities": [
+      {
+        "label": "Claim",
+        "id": "CLM-0028"
+      },
+      {
+        "label": "Investigator",
+        "id": "INV-0002"
+      }
+    ],
+    "relationships": [
+      {
+        "from": "POL-0010",
+        "type": "HAS_CLAIM",
+        "to": "CLM-0028"
+      },
+      {
+        "from": "INV-0002",
+        "type": "INVESTIGATES_CLAIM",
+        "to": "CLM-0028"
+      }
+    ]
+  },
+  "claim_CLM-0029.pdf": {
+    "entities": [
+      {
+        "label": "Claim",
+        "id": "CLM-0029"
+      }
+    ],
+    "relationships": [
+      {
+        "from": "POL-0035",
+        "type": "HAS_CLAIM",
+        "to": "CLM-0029"
+      }
+    ]
+  },
+  "claim_CLM-0030.pdf": {
+    "entities": [
+      {
+        "label": "Claim",
+        "id": "CLM-0030"
+      },
+      {
+        "label": "Investigator",
+        "id": "INV-0004"
+      }
+    ],
+    "relationships": [
+      {
+        "from": "POL-0037",
+        "type": "HAS_CLAIM",
+        "to": "CLM-0030"
+      },
+      {
+        "from": "INV-0004",
+        "type": "INVESTIGATES_CLAIM",
+        "to": "CLM-0030"
+      }
+    ]
+  },
+  "endorsement_END-0001.pdf": {
+    "entities": [
+      {
+        "label": "Endorsement",
+        "id": "END-0001"
+      }
+    ],
+    "relationships": []
+  },
+  "endorsement_END-0002.pdf": {
+    "entities": [
+      {
+        "label": "Endorsement",
+        "id": "END-0002"
+      }
+    ],
+    "relationships": []
+  },
+  "endorsement_END-0003.pdf": {
+    "entities": [
+      {
+        "label": "Endorsement",
+        "id": "END-0003"
+      }
+    ],
+    "relationships": []
+  },
+  "endorsement_END-0004.pdf": {
+    "entities": [
+      {
+        "label": "Endorsement",
+        "id": "END-0004"
+      }
+    ],
+    "relationships": []
+  },
+  "endorsement_END-0005.pdf": {
+    "entities": [
+      {
+        "label": "Endorsement",
+        "id": "END-0005"
+      }
+    ],
+    "relationships": []
+  },
+  "endorsement_END-0006.pdf": {
+    "entities": [
+      {
+        "label": "Endorsement",
+        "id": "END-0006"
+      }
+    ],
+    "relationships": []
+  },
+  "endorsement_END-0007.pdf": {
+    "entities": [
+      {
+        "label": "Endorsement",
+        "id": "END-0007"
+      }
+    ],
+    "relationships": []
+  },
+  "endorsement_END-0008.pdf": {
+    "entities": [
+      {
+        "label": "Endorsement",
+        "id": "END-0008"
+      }
+    ],
+    "relationships": []
+  },
+  "endorsement_END-0009.pdf": {
+    "entities": [
+      {
+        "label": "Endorsement",
+        "id": "END-0009"
+      }
+    ],
+    "relationships": []
+  },
+  "endorsement_END-0010.pdf": {
+    "entities": [
+      {
+        "label": "Endorsement",
+        "id": "END-0010"
+      }
+    ],
+    "relationships": []
+  },
+  "endorsement_END-0011.pdf": {
+    "entities": [
+      {
+        "label": "Endorsement",
+        "id": "END-0011"
+      }
+    ],
+    "relationships": []
+  },
+  "endorsement_END-0012.pdf": {
+    "entities": [
+      {
+        "label": "Endorsement",
+        "id": "END-0012"
+      }
+    ],
+    "relationships": []
+  },
+  "endorsement_END-0013.pdf": {
+    "entities": [
+      {
+        "label": "Endorsement",
+        "id": "END-0013"
+      }
+    ],
+    "relationships": []
+  },
+  "endorsement_END-0014.pdf": {
+    "entities": [
+      {
+        "label": "Endorsement",
+        "id": "END-0014"
+      }
+    ],
+    "relationships": []
+  },
+  "endorsement_END-0015.pdf": {
+    "entities": [
+      {
+        "label": "Endorsement",
+        "id": "END-0015"
+      }
+    ],
+    "relationships": []
+  },
+  "endorsement_END-0016.pdf": {
+    "entities": [
+      {
+        "label": "Endorsement",
+        "id": "END-0016"
+      }
+    ],
+    "relationships": []
+  },
+  "endorsement_END-0017.pdf": {
+    "entities": [
+      {
+        "label": "Endorsement",
+        "id": "END-0017"
+      }
+    ],
+    "relationships": []
+  },
+  "endorsement_END-0018.pdf": {
+    "entities": [
+      {
+        "label": "Endorsement",
+        "id": "END-0018"
+      }
+    ],
+    "relationships": []
+  },
+  "endorsement_END-0019.pdf": {
+    "entities": [
+      {
+        "label": "Endorsement",
+        "id": "END-0019"
+      }
+    ],
+    "relationships": []
+  },
+  "endorsement_END-0020.pdf": {
+    "entities": [
+      {
+        "label": "Endorsement",
+        "id": "END-0020"
+      }
+    ],
+    "relationships": []
+  }
+}

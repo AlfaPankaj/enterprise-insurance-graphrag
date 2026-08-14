@@ -1,0 +1,3618 @@
+[
+  {
+    "doc_id": "CLM-0001",
+    "claim": {
+      "id": "CLM-0001",
+      "claim_number": "CLM-2024-0001",
+      "policy_id": "POL-0007",
+      "date": "2024-01-29",
+      "amount": 100379.0,
+      "status": "IN_REVIEW",
+      "cause": "Product liability",
+      "description": "Employee injury reported on 2024-01-29 under policy PL-2023-0007. Estimated loss 87k USD."
+    },
+    "fraud_flag": null,
+    "investigator": {
+      "id": "INV-0004",
+      "name": "Abigail Shaffer",
+      "role": "INVESTIGATOR",
+      "email": "jpeterson@example.org"
+    }
+  },
+  {
+    "doc_id": "CLM-0002",
+    "claim": {
+      "id": "CLM-0002",
+      "claim_number": "CLM-2024-0002",
+      "policy_id": "POL-0033",
+      "date": "2024-11-16",
+      "amount": 124288.0,
+      "status": "SUBMITTED",
+      "cause": "Professional negligence",
+      "description": "Fire damage reported on 2024-11-16 under policy CGL-2024-0033. Estimated loss 244k USD."
+    },
+    "fraud_flag": null
+  },
+  {
+    "doc_id": "CLM-0003",
+    "claim": {
+      "id": "CLM-0003",
+      "claim_number": "CLM-2023-0003",
+      "policy_id": "POL-0084",
+      "date": "2023-11-16",
+      "amount": 205795.0,
+      "status": "PAID",
+      "cause": "Fire damage",
+      "description": "Fire damage reported on 2023-11-16 under policy AF-2023-0084. Estimated loss 244k USD."
+    },
+    "fraud_flag": {
+      "id": "FRD-CLM-0003",
+      "reason": "Claim amount exceeds 10x annual premium",
+      "confidence": 0.81,
+      "severity": "MEDIUM",
+      "created_by": "SYSTEM",
+      "created_at": "2023-11-16"
+    },
+    "investigator": {
+      "id": "INV-0001",
+      "name": "Allison Hill",
+      "role": "SENIOR_INVESTIGATOR",
+      "email": "donaldgarcia@example.net"
+    }
+  },
+  {
+    "doc_id": "CLM-0004",
+    "claim": {
+      "id": "CLM-0004",
+      "claim_number": "CLM-2024-0004",
+      "policy_id": "POL-0080",
+      "date": "2024-11-10",
+      "amount": 63533.0,
+      "status": "SUBMITTED",
+      "cause": "Water damage",
+      "description": "Vandalism reported on 2024-11-10 under policy CP-2024-0080. Estimated loss 243k USD."
+    },
+    "fraud_flag": null
+  },
+  {
+    "doc_id": "CLM-0005",
+    "claim": {
+      "id": "CLM-0005",
+      "claim_number": "CLM-2025-0005",
+      "policy_id": "POL-0090",
+      "date": "2025-11-12",
+      "amount": 202037.0,
+      "status": "IN_REVIEW",
+      "cause": "Vandalism",
+      "description": "Vandalism reported on 2025-11-12 under policy WC-2025-0090. Estimated loss 247k USD."
+    },
+    "fraud_flag": null,
+    "investigator": {
+      "id": "INV-0002",
+      "name": "Angie Henderson",
+      "role": "SENIOR_INVESTIGATOR",
+      "email": "davisjesse@example.net"
+    }
+  },
+  {
+    "doc_id": "CLM-0006",
+    "claim": {
+      "id": "CLM-0006",
+      "claim_number": "CLM-2024-0006",
+      "policy_id": "POL-0040",
+      "date": "2024-01-31",
+      "amount": 152698.0,
+      "status": "SUBMITTED",
+      "cause": "Property damage",
+      "description": "Vandalism reported on 2024-01-31 under policy CP-2023-0040. Estimated loss 174k USD."
+    },
+    "fraud_flag": null
+  },
+  {
+    "doc_id": "CLM-0007",
+    "claim": {
+      "id": "CLM-0007",
+      "claim_number": "CLM-2025-0007",
+      "policy_id": "POL-0049",
+      "date": "2025-04-15",
+      "amount": 247800.0,
+      "status": "DENIED",
+      "cause": "Water damage",
+      "description": "Vandalism reported on 2025-04-15 under policy CGL-2024-0049. Estimated loss 177k USD."
+    },
+    "fraud_flag": null
+  },
+  {
+    "doc_id": "CLM-0008",
+    "claim": {
+      "id": "CLM-0008",
+      "claim_number": "CLM-2024-0008",
+      "policy_id": "POL-0032",
+      "date": "2024-09-25",
+      "amount": 183764.0,
+      "status": "DENIED",
+      "cause": "Vandalism",
+      "description": "Water damage reported on 2024-09-25 under policy AF-2024-0032. Estimated loss 204k USD."
+    },
+    "fraud_flag": null
+  },
+  {
+    "doc_id": "CLM-0009",
+    "claim": {
+      "id": "CLM-0009",
+      "claim_number": "CLM-2026-0009",
+      "policy_id": "POL-0006",
+      "date": "2026-05-07",
+      "amount": 140655.0,
+      "status": "IN_REVIEW",
+      "cause": "Employee injury",
+      "description": "Water damage reported on 2026-05-07 under policy WC-2025-0006. Estimated loss 130k USD."
+    },
+    "fraud_flag": null,
+    "investigator": {
+      "id": "INV-0004",
+      "name": "Abigail Shaffer",
+      "role": "INVESTIGATOR",
+      "email": "jpeterson@example.org"
+    }
+  },
+  {
+    "doc_id": "CLM-0010",
+    "claim": {
+      "id": "CLM-0010",
+      "claim_number": "CLM-2024-0010",
+      "policy_id": "POL-0063",
+      "date": "2024-04-19",
+      "amount": 114645.0,
+      "status": "PAID",
+      "cause": "Product liability",
+      "description": "Theft / burglary reported on 2024-04-19 under policy CGL-2024-0063. Estimated loss 112k USD."
+    },
+    "fraud_flag": null,
+    "investigator": {
+      "id": "INV-0006",
+      "name": "Monica Herrera",
+      "role": "INVESTIGATOR",
+      "email": "smiller@example.net"
+    }
+  },
+  {
+    "doc_id": "CLM-0011",
+    "claim": {
+      "id": "CLM-0011",
+      "claim_number": "CLM-2025-0011",
+      "policy_id": "POL-0035",
+      "date": "2025-02-19",
+      "amount": 122863.0,
+      "status": "IN_REVIEW",
+      "cause": "Vandalism",
+      "description": "Property damage reported on 2025-02-19 under policy CP-2023-0035. Estimated loss 83k USD."
+    },
+    "fraud_flag": null
+  },
+  {
+    "doc_id": "CLM-0012",
+    "claim": {
+      "id": "CLM-0012",
+      "claim_number": "CLM-2024-0012",
+      "policy_id": "POL-0012",
+      "date": "2024-03-28",
+      "amount": 232114.0,
+      "status": "APPROVED",
+      "cause": "Product liability",
+      "description": "Vandalism reported on 2024-03-28 under policy CP-2023-0012. Estimated loss 157k USD."
+    },
+    "fraud_flag": null,
+    "investigator": {
+      "id": "INV-0004",
+      "name": "Abigail Shaffer",
+      "role": "INVESTIGATOR",
+      "email": "jpeterson@example.org"
+    }
+  },
+  {
+    "doc_id": "CLM-0013",
+    "claim": {
+      "id": "CLM-0013",
+      "claim_number": "CLM-2023-0013",
+      "policy_id": "POL-0042",
+      "date": "2023-12-23",
+      "amount": 128808.0,
+      "status": "IN_REVIEW",
+      "cause": "Property damage",
+      "description": "Employee injury reported on 2023-12-23 under policy CP-2023-0042. Estimated loss 72k USD."
+    },
+    "fraud_flag": null
+  },
+  {
+    "doc_id": "CLM-0014",
+    "claim": {
+      "id": "CLM-0014",
+      "claim_number": "CLM-2024-0014",
+      "policy_id": "POL-0036",
+      "date": "2024-08-23",
+      "amount": 136430.0,
+      "status": "PAID",
+      "cause": "Water damage",
+      "description": "Third-party bodily injury reported on 2024-08-23 under policy PL-2024-0036. Estimated loss 185k USD."
+    },
+    "fraud_flag": null,
+    "investigator": {
+      "id": "INV-0002",
+      "name": "Angie Henderson",
+      "role": "SENIOR_INVESTIGATOR",
+      "email": "davisjesse@example.net"
+    }
+  },
+  {
+    "doc_id": "CLM-0015",
+    "claim": {
+      "id": "CLM-0015",
+      "claim_number": "CLM-2026-0015",
+      "policy_id": "POL-0089",
+      "date": "2026-06-02",
+      "amount": 170319.0,
+      "status": "DENIED",
+      "cause": "Product liability",
+      "description": "Fire damage reported on 2026-06-02 under policy CP-2025-0089. Estimated loss 24k USD."
+    },
+    "fraud_flag": null
+  },
+  {
+    "doc_id": "CLM-0016",
+    "claim": {
+      "id": "CLM-0016",
+      "claim_number": "CLM-2023-0016",
+      "policy_id": "POL-0052",
+      "date": "2023-12-18",
+      "amount": 81270.0,
+      "status": "APPROVED",
+      "cause": "Employee injury",
+      "description": "Product liability reported on 2023-12-18 under policy PL-2023-0052. Estimated loss 142k USD."
+    },
+    "fraud_flag": null,
+    "investigator": {
+      "id": "INV-0006",
+      "name": "Monica Herrera",
+      "role": "INVESTIGATOR",
+      "email": "smiller@example.net"
+    }
+  },
+  {
+    "doc_id": "CLM-0017",
+    "claim": {
+      "id": "CLM-0017",
+      "claim_number": "CLM-2024-0017",
+      "policy_id": "POL-0071",
+      "date": "2024-06-04",
+      "amount": 93225.0,
+      "status": "DENIED",
+      "cause": "Property damage",
+      "description": "Property damage reported on 2024-06-04 under policy WC-2023-0071. Estimated loss 65k USD."
+    },
+    "fraud_flag": null
+  },
+  {
+    "doc_id": "CLM-0018",
+    "claim": {
+      "id": "CLM-0018",
+      "claim_number": "CLM-2023-0018",
+      "policy_id": "POL-0093",
+      "date": "2023-09-20",
+      "amount": 83719.0,
+      "status": "SUBMITTED",
+      "cause": "Professional negligence",
+      "description": "Theft / burglary reported on 2023-09-20 under policy CP-2023-0093. Estimated loss 50k USD."
+    },
+    "fraud_flag": null
+  },
+  {
+    "doc_id": "CLM-0019",
+    "claim": {
+      "id": "CLM-0019",
+      "claim_number": "CLM-2023-0019",
+      "policy_id": "POL-0062",
+      "date": "2023-11-22",
+      "amount": 190945.0,
+      "status": "APPROVED",
+      "cause": "Professional negligence",
+      "description": "Vandalism reported on 2023-11-22 under policy CP-2023-0062. Estimated loss 73k USD."
+    },
+    "fraud_flag": null
+  },
+  {
+    "doc_id": "CLM-0020",
+    "claim": {
+      "id": "CLM-0020",
+      "claim_number": "CLM-2025-0020",
+      "policy_id": "POL-0038",
+      "date": "2025-07-10",
+      "amount": 95602.0,
+      "status": "IN_REVIEW",
+      "cause": "Fire damage",
+      "description": "Professional negligence reported on 2025-07-10 under policy CGL-2024-0038. Estimated loss 33k USD."
+    },
+    "fraud_flag": null
+  },
+  {
+    "doc_id": "CLM-0021",
+    "claim": {
+      "id": "CLM-0021",
+      "claim_number": "CLM-2024-0021",
+      "policy_id": "POL-0071",
+      "date": "2024-04-26",
+      "amount": 183823.0,
+      "status": "PAID",
+      "cause": "Product liability",
+      "description": "Water damage reported on 2024-04-26 under policy WC-2023-0071. Estimated loss 224k USD."
+    },
+    "fraud_flag": {
+      "id": "FRD-CLM-0021",
+      "reason": "Inconsistent loss narrative across documents",
+      "confidence": 0.6,
+      "severity": "LOW",
+      "created_by": "SYSTEM",
+      "created_at": "2024-04-26"
+    },
+    "investigator": {
+      "id": "INV-0004",
+      "name": "Abigail Shaffer",
+      "role": "INVESTIGATOR",
+      "email": "jpeterson@example.org"
+    }
+  },
+  {
+    "doc_id": "CLM-0022",
+    "claim": {
+      "id": "CLM-0022",
+      "claim_number": "CLM-2024-0022",
+      "policy_id": "POL-0044",
+      "date": "2024-04-25",
+      "amount": 14468.0,
+      "status": "IN_REVIEW",
+      "cause": "Product liability",
+      "description": "Water damage reported on 2024-04-25 under policy AF-2023-0044. Estimated loss 211k USD."
+    },
+    "fraud_flag": {
+      "id": "FRD-CLM-0022",
+      "reason": "Loss predates policy inception",
+      "confidence": 0.6,
+      "severity": "LOW",
+      "created_by": "SYSTEM",
+      "created_at": "2024-04-25"
+    },
+    "investigator": {
+      "id": "INV-0006",
+      "name": "Monica Herrera",
+      "role": "INVESTIGATOR",
+      "email": "smiller@example.net"
+    }
+  },
+  {
+    "doc_id": "CLM-0023",
+    "claim": {
+      "id": "CLM-0023",
+      "claim_number": "CLM-2025-0023",
+      "policy_id": "POL-0088",
+      "date": "2025-06-07",
+      "amount": 40774.0,
+      "status": "SUBMITTED",
+      "cause": "Vandalism",
+      "description": "Property damage reported on 2025-06-07 under policy PL-2025-0088. Estimated loss 22k USD."
+    },
+    "fraud_flag": null
+  },
+  {
+    "doc_id": "CLM-0024",
+    "claim": {
+      "id": "CLM-0024",
+      "claim_number": "CLM-2024-0024",
+      "policy_id": "POL-0016",
+      "date": "2024-07-26",
+      "amount": 159942.0,
+      "status": "APPROVED",
+      "cause": "Vandalism",
+      "description": "Third-party bodily injury reported on 2024-07-26 under policy AF-2023-0016. Estimated loss 199k USD."
+    },
+    "fraud_flag": null,
+    "investigator": {
+      "id": "INV-0004",
+      "name": "Abigail Shaffer",
+      "role": "INVESTIGATOR",
+      "email": "jpeterson@example.org"
+    }
+  },
+  {
+    "doc_id": "CLM-0025",
+    "claim": {
+      "id": "CLM-0025",
+      "claim_number": "CLM-2024-0025",
+      "policy_id": "POL-0039",
+      "date": "2024-11-24",
+      "amount": 81053.0,
+      "status": "APPROVED",
+      "cause": "Fire damage",
+      "description": "Vandalism reported on 2024-11-24 under policy CGL-2023-0039. Estimated loss 246k USD."
+    },
+    "fraud_flag": null
+  },
+  {
+    "doc_id": "CLM-0026",
+    "claim": {
+      "id": "CLM-0026",
+      "claim_number": "CLM-2026-0026",
+      "policy_id": "POL-0027",
+      "date": "2026-01-20",
+      "amount": 70375.0,
+      "status": "APPROVED",
+      "cause": "Theft / burglary",
+      "description": "Third-party bodily injury reported on 2026-01-20 under policy WC-2025-0027. Estimated loss 45k USD."
+    },
+    "fraud_flag": null,
+    "investigator": {
+      "id": "INV-0004",
+      "name": "Abigail Shaffer",
+      "role": "INVESTIGATOR",
+      "email": "jpeterson@example.org"
+    }
+  },
+  {
+    "doc_id": "CLM-0027",
+    "claim": {
+      "id": "CLM-0027",
+      "claim_number": "CLM-2024-0027",
+      "policy_id": "POL-0058",
+      "date": "2024-07-29",
+      "amount": 77351.0,
+      "status": "SUBMITTED",
+      "cause": "Property damage",
+      "description": "Property damage reported on 2024-07-29 under policy CGL-2023-0058. Estimated loss 180k USD."
+    },
+    "fraud_flag": null
+  },
+  {
+    "doc_id": "CLM-0028",
+    "claim": {
+      "id": "CLM-0028",
+      "claim_number": "CLM-2024-0028",
+      "policy_id": "POL-0010",
+      "date": "2024-06-07",
+      "amount": 243197.0,
+      "status": "IN_REVIEW",
+      "cause": "Vandalism",
+      "description": "Third-party bodily injury reported on 2024-06-07 under policy AF-2023-0010. Estimated loss 109k USD."
+    },
+    "fraud_flag": null,
+    "investigator": {
+      "id": "INV-0002",
+      "name": "Angie Henderson",
+      "role": "SENIOR_INVESTIGATOR",
+      "email": "davisjesse@example.net"
+    }
+  },
+  {
+    "doc_id": "CLM-0029",
+    "claim": {
+      "id": "CLM-0029",
+      "claim_number": "CLM-2024-0029",
+      "policy_id": "POL-0035",
+      "date": "2024-03-06",
+      "amount": 19719.0,
+      "status": "SUBMITTED",
+      "cause": "Property damage",
+      "description": "Vandalism reported on 2024-03-06 under policy CP-2023-0035. Estimated loss 192k USD."
+    },
+    "fraud_flag": null
+  },
+  {
+    "doc_id": "CLM-0030",
+    "claim": {
+      "id": "CLM-0030",
+      "claim_number": "CLM-2024-0030",
+      "policy_id": "POL-0037",
+      "date": "2024-06-29",
+      "amount": 33598.0,
+      "status": "APPROVED",
+      "cause": "Property damage",
+      "description": "Auto collision reported on 2024-06-29 under policy CP-2023-0037. Estimated loss 242k USD."
+    },
+    "fraud_flag": null,
+    "investigator": {
+      "id": "INV-0004",
+      "name": "Abigail Shaffer",
+      "role": "INVESTIGATOR",
+      "email": "jpeterson@example.org"
+    }
+  },
+  {
+    "doc_id": "CLM-0031",
+    "claim": {
+      "id": "CLM-0031",
+      "claim_number": "CLM-2025-0031",
+      "policy_id": "POL-0011",
+      "date": "2025-01-28",
+      "amount": 234156.0,
+      "status": "IN_REVIEW",
+      "cause": "Employee injury",
+      "description": "Vandalism reported on 2025-01-28 under policy WC-2024-0011. Estimated loss 65k USD."
+    },
+    "fraud_flag": {
+      "id": "FRD-CLM-0031",
+      "reason": "Claimant unable to provide documentation",
+      "confidence": 0.6,
+      "severity": "LOW",
+      "created_by": "SYSTEM",
+      "created_at": "2025-01-28"
+    }
+  },
+  {
+    "doc_id": "CLM-0032",
+    "claim": {
+      "id": "CLM-0032",
+      "claim_number": "CLM-2024-0032",
+      "policy_id": "POL-0074",
+      "date": "2024-07-07",
+      "amount": 201477.0,
+      "status": "APPROVED",
+      "cause": "Property damage",
+      "description": "Vandalism reported on 2024-07-07 under policy CGL-2024-0074. Estimated loss 11k USD."
+    },
+    "fraud_flag": null,
+    "investigator": {
+      "id": "INV-0005",
+      "name": "Gabrielle Davis",
+      "role": "INVESTIGATOR",
+      "email": "howardmaurice@example.com"
+    }
+  },
+  {
+    "doc_id": "CLM-0033",
+    "claim": {
+      "id": "CLM-0033",
+      "claim_number": "CLM-2024-0033",
+      "policy_id": "POL-0084",
+      "date": "2024-12-02",
+      "amount": 241142.0,
+      "status": "IN_REVIEW",
+      "cause": "Vandalism",
+      "description": "Auto collision reported on 2024-12-02 under policy AF-2023-0084. Estimated loss 163k USD."
+    },
+    "fraud_flag": {
+      "id": "FRD-CLM-0033",
+      "reason": "Claim amount exceeds 10x annual premium",
+      "confidence": 0.81,
+      "severity": "MEDIUM",
+      "created_by": "SYSTEM",
+      "created_at": "2024-12-02"
+    }
+  },
+  {
+    "doc_id": "CLM-0034",
+    "claim": {
+      "id": "CLM-0034",
+      "claim_number": "CLM-2024-0034",
+      "policy_id": "POL-0012",
+      "date": "2024-10-10",
+      "amount": 92215.0,
+      "status": "IN_REVIEW",
+      "cause": "Employee injury",
+      "description": "Water damage reported on 2024-10-10 under policy CP-2023-0012. Estimated loss 220k USD."
+    },
+    "fraud_flag": null,
+    "investigator": {
+      "id": "INV-0004",
+      "name": "Abigail Shaffer",
+      "role": "INVESTIGATOR",
+      "email": "jpeterson@example.org"
+    }
+  },
+  {
+    "doc_id": "CLM-0035",
+    "claim": {
+      "id": "CLM-0035",
+      "claim_number": "CLM-2024-0035",
+      "policy_id": "POL-0037",
+      "date": "2024-05-21",
+      "amount": 214271.0,
+      "status": "DENIED",
+      "cause": "Fire damage",
+      "description": "Product liability reported on 2024-05-21 under policy CP-2023-0037. Estimated loss 23k USD."
+    },
+    "fraud_flag": {
+      "id": "FRD-CLM-0035",
+      "reason": "Claim amount exceeds 10x annual premium",
+      "confidence": 0.81,
+      "severity": "MEDIUM",
+      "created_by": "SYSTEM",
+      "created_at": "2024-05-21"
+    }
+  },
+  {
+    "doc_id": "CLM-0036",
+    "claim": {
+      "id": "CLM-0036",
+      "claim_number": "CLM-2023-0036",
+      "policy_id": "POL-0041",
+      "date": "2023-12-25",
+      "amount": 85744.0,
+      "status": "SUBMITTED",
+      "cause": "Auto collision",
+      "description": "Professional negligence reported on 2023-12-25 under policy PL-2023-0041. Estimated loss 212k USD."
+    },
+    "fraud_flag": {
+      "id": "FRD-CLM-0036",
+      "reason": "Claim amount exceeds 10x annual premium",
+      "confidence": 0.81,
+      "severity": "MEDIUM",
+      "created_by": "SYSTEM",
+      "created_at": "2023-12-25"
+    }
+  },
+  {
+    "doc_id": "CLM-0037",
+    "claim": {
+      "id": "CLM-0037",
+      "claim_number": "CLM-2026-0037",
+      "policy_id": "POL-0001",
+      "date": "2026-03-11",
+      "amount": 109330.0,
+      "status": "SUBMITTED",
+      "cause": "Professional negligence",
+      "description": "Employee injury reported on 2026-03-11 under policy CGL-2024-0001. Estimated loss 160k USD."
+    },
+    "fraud_flag": null
+  },
+  {
+    "doc_id": "CLM-0038",
+    "claim": {
+      "id": "CLM-0038",
+      "claim_number": "CLM-2025-0038",
+      "policy_id": "POL-0081",
+      "date": "2025-03-06",
+      "amount": 200226.0,
+      "status": "SUBMITTED",
+      "cause": "Property damage",
+      "description": "Professional negligence reported on 2025-03-06 under policy PL-2023-0081. Estimated loss 34k USD."
+    },
+    "fraud_flag": {
+      "id": "FRD-CLM-0038",
+      "reason": "Claim amount exceeds 10x annual premium",
+      "confidence": 0.81,
+      "severity": "MEDIUM",
+      "created_by": "SYSTEM",
+      "created_at": "2025-03-06"
+    }
+  },
+  {
+    "doc_id": "CLM-0039",
+    "claim": {
+      "id": "CLM-0039",
+      "claim_number": "CLM-2024-0039",
+      "policy_id": "POL-0037",
+      "date": "2024-06-28",
+      "amount": 231908.0,
+      "status": "APPROVED",
+      "cause": "Water damage",
+      "description": "Fire damage reported on 2024-06-28 under policy CP-2023-0037. Estimated loss 250k USD."
+    },
+    "fraud_flag": {
+      "id": "FRD-CLM-0039",
+      "reason": "Claim amount exceeds 10x annual premium",
+      "confidence": 0.81,
+      "severity": "MEDIUM",
+      "created_by": "SYSTEM",
+      "created_at": "2024-06-28"
+    }
+  },
+  {
+    "doc_id": "CLM-0040",
+    "claim": {
+      "id": "CLM-0040",
+      "claim_number": "CLM-2025-0040",
+      "policy_id": "POL-0031",
+      "date": "2025-06-11",
+      "amount": 82461.0,
+      "status": "APPROVED",
+      "cause": "Professional negligence",
+      "description": "Auto collision reported on 2025-06-11 under policy CP-2024-0031. Estimated loss 24k USD."
+    },
+    "fraud_flag": null
+  },
+  {
+    "doc_id": "CLM-0041",
+    "claim": {
+      "id": "CLM-0041",
+      "claim_number": "CLM-2026-0041",
+      "policy_id": "POL-0015",
+      "date": "2026-10-01",
+      "amount": 249266.0,
+      "status": "SUBMITTED",
+      "cause": "Theft / burglary",
+      "description": "Product liability reported on 2026-10-01 under policy PL-2025-0015. Estimated loss 239k USD."
+    },
+    "fraud_flag": null
+  },
+  {
+    "doc_id": "CLM-0042",
+    "claim": {
+      "id": "CLM-0042",
+      "claim_number": "CLM-2025-0042",
+      "policy_id": "POL-0066",
+      "date": "2025-12-16",
+      "amount": 109918.0,
+      "status": "PAID",
+      "cause": "Product liability",
+      "description": "Third-party bodily injury reported on 2025-12-16 under policy WC-2025-0066. Estimated loss 117k USD."
+    },
+    "fraud_flag": null,
+    "investigator": {
+      "id": "INV-0005",
+      "name": "Gabrielle Davis",
+      "role": "INVESTIGATOR",
+      "email": "howardmaurice@example.com"
+    }
+  },
+  {
+    "doc_id": "CLM-0043",
+    "claim": {
+      "id": "CLM-0043",
+      "claim_number": "CLM-2025-0043",
+      "policy_id": "POL-0066",
+      "date": "2025-07-29",
+      "amount": 227499.0,
+      "status": "SUBMITTED",
+      "cause": "Auto collision",
+      "description": "Employee injury reported on 2025-07-29 under policy WC-2025-0066. Estimated loss 240k USD."
+    },
+    "fraud_flag": null
+  },
+  {
+    "doc_id": "CLM-0044",
+    "claim": {
+      "id": "CLM-0044",
+      "claim_number": "CLM-2023-0044",
+      "policy_id": "POL-0035",
+      "date": "2023-10-15",
+      "amount": 75144.0,
+      "status": "DENIED",
+      "cause": "Vandalism",
+      "description": "Vandalism reported on 2023-10-15 under policy CP-2023-0035. Estimated loss 169k USD."
+    },
+    "fraud_flag": {
+      "id": "FRD-CLM-0044",
+      "reason": "Claim filed within 7 days of policy inception",
+      "confidence": 0.92,
+      "severity": "HIGH",
+      "created_by": "SYSTEM",
+      "created_at": "2023-10-15"
+    }
+  },
+  {
+    "doc_id": "CLM-0045",
+    "claim": {
+      "id": "CLM-0045",
+      "claim_number": "CLM-2024-0045",
+      "policy_id": "POL-0063",
+      "date": "2024-06-02",
+      "amount": 118059.0,
+      "status": "APPROVED",
+      "cause": "Employee injury",
+      "description": "Employee injury reported on 2024-06-02 under policy CGL-2024-0063. Estimated loss 142k USD."
+    },
+    "fraud_flag": null,
+    "investigator": {
+      "id": "INV-0003",
+      "name": "Cristian Santos",
+      "role": "FRAUD_SPECIALIST",
+      "email": "lrobinson@example.com"
+    }
+  },
+  {
+    "doc_id": "CLM-0046",
+    "claim": {
+      "id": "CLM-0046",
+      "claim_number": "CLM-2024-0046",
+      "policy_id": "POL-0025",
+      "date": "2024-02-05",
+      "amount": 150893.0,
+      "status": "IN_REVIEW",
+      "cause": "Auto collision",
+      "description": "Fire damage reported on 2024-02-05 under policy CP-2023-0025. Estimated loss 82k USD."
+    },
+    "fraud_flag": null
+  },
+  {
+    "doc_id": "CLM-0047",
+    "claim": {
+      "id": "CLM-0047",
+      "claim_number": "CLM-2025-0047",
+      "policy_id": "POL-0049",
+      "date": "2025-04-04",
+      "amount": 174982.0,
+      "status": "DENIED",
+      "cause": "Theft / burglary",
+      "description": "Product liability reported on 2025-04-04 under policy CGL-2024-0049. Estimated loss 247k USD."
+    },
+    "fraud_flag": {
+      "id": "FRD-CLM-0047",
+      "reason": "Inconsistent loss narrative across documents",
+      "confidence": 0.6,
+      "severity": "LOW",
+      "created_by": "SYSTEM",
+      "created_at": "2025-04-04"
+    }
+  },
+  {
+    "doc_id": "CLM-0048",
+    "claim": {
+      "id": "CLM-0048",
+      "claim_number": "CLM-2024-0048",
+      "policy_id": "POL-0013",
+      "date": "2024-11-05",
+      "amount": 27138.0,
+      "status": "APPROVED",
+      "cause": "Product liability",
+      "description": "Fire damage reported on 2024-11-05 under policy PL-2023-0013. Estimated loss 185k USD."
+    },
+    "fraud_flag": null
+  },
+  {
+    "doc_id": "CLM-0049",
+    "claim": {
+      "id": "CLM-0049",
+      "claim_number": "CLM-2024-0049",
+      "policy_id": "POL-0020",
+      "date": "2024-04-15",
+      "amount": 124074.0,
+      "status": "DENIED",
+      "cause": "Property damage",
+      "description": "Employee injury reported on 2024-04-15 under policy CGL-2024-0020. Estimated loss 160k USD."
+    },
+    "fraud_flag": null
+  },
+  {
+    "doc_id": "CLM-0050",
+    "claim": {
+      "id": "CLM-0050",
+      "claim_number": "CLM-2023-0050",
+      "policy_id": "POL-0084",
+      "date": "2023-11-28",
+      "amount": 224285.0,
+      "status": "IN_REVIEW",
+      "cause": "Professional negligence",
+      "description": "Auto collision reported on 2023-11-28 under policy AF-2023-0084. Estimated loss 245k USD."
+    },
+    "fraud_flag": {
+      "id": "FRD-CLM-0050",
+      "reason": "Claim amount exceeds 10x annual premium",
+      "confidence": 0.81,
+      "severity": "MEDIUM",
+      "created_by": "SYSTEM",
+      "created_at": "2023-11-28"
+    },
+    "investigator": {
+      "id": "INV-0006",
+      "name": "Monica Herrera",
+      "role": "INVESTIGATOR",
+      "email": "smiller@example.net"
+    }
+  },
+  {
+    "doc_id": "CLM-0051",
+    "claim": {
+      "id": "CLM-0051",
+      "claim_number": "CLM-2025-0051",
+      "policy_id": "POL-0098",
+      "date": "2025-04-23",
+      "amount": 229689.0,
+      "status": "APPROVED",
+      "cause": "Vandalism",
+      "description": "Water damage reported on 2025-04-23 under policy AF-2023-0098. Estimated loss 61k USD."
+    },
+    "fraud_flag": null
+  },
+  {
+    "doc_id": "CLM-0052",
+    "claim": {
+      "id": "CLM-0052",
+      "claim_number": "CLM-2023-0052",
+      "policy_id": "POL-0030",
+      "date": "2023-12-30",
+      "amount": 114763.0,
+      "status": "PAID",
+      "cause": "Water damage",
+      "description": "Product liability reported on 2023-12-30 under policy CP-2023-0030. Estimated loss 43k USD."
+    },
+    "fraud_flag": null
+  },
+  {
+    "doc_id": "CLM-0053",
+    "claim": {
+      "id": "CLM-0053",
+      "claim_number": "CLM-2026-0053",
+      "policy_id": "POL-0006",
+      "date": "2026-04-14",
+      "amount": 209704.0,
+      "status": "SUBMITTED",
+      "cause": "Employee injury",
+      "description": "Employee injury reported on 2026-04-14 under policy WC-2025-0006. Estimated loss 111k USD."
+    },
+    "fraud_flag": null
+  },
+  {
+    "doc_id": "CLM-0054",
+    "claim": {
+      "id": "CLM-0054",
+      "claim_number": "CLM-2025-0054",
+      "policy_id": "POL-0068",
+      "date": "2025-02-18",
+      "amount": 149354.0,
+      "status": "APPROVED",
+      "cause": "Theft / burglary",
+      "description": "Theft / burglary reported on 2025-02-18 under policy AF-2023-0068. Estimated loss 45k USD."
+    },
+    "fraud_flag": {
+      "id": "FRD-CLM-0054",
+      "reason": "Loss predates policy inception",
+      "confidence": 0.6,
+      "severity": "LOW",
+      "created_by": "SYSTEM",
+      "created_at": "2025-02-18"
+    }
+  },
+  {
+    "doc_id": "CLM-0055",
+    "claim": {
+      "id": "CLM-0055",
+      "claim_number": "CLM-2026-0055",
+      "policy_id": "POL-0031",
+      "date": "2026-05-24",
+      "amount": 240292.0,
+      "status": "APPROVED",
+      "cause": "Third-party bodily injury",
+      "description": "Product liability reported on 2026-05-24 under policy CP-2024-0031. Estimated loss 164k USD."
+    },
+    "fraud_flag": null,
+    "investigator": {
+      "id": "INV-0001",
+      "name": "Allison Hill",
+      "role": "SENIOR_INVESTIGATOR",
+      "email": "donaldgarcia@example.net"
+    }
+  },
+  {
+    "doc_id": "CLM-0056",
+    "claim": {
+      "id": "CLM-0056",
+      "claim_number": "CLM-2025-0056",
+      "policy_id": "POL-0060",
+      "date": "2025-05-18",
+      "amount": 178631.0,
+      "status": "APPROVED",
+      "cause": "Water damage",
+      "description": "Product liability reported on 2025-05-18 under policy AF-2024-0060. Estimated loss 242k USD."
+    },
+    "fraud_flag": {
+      "id": "FRD-CLM-0056",
+      "reason": "Claim amount exceeds 10x annual premium",
+      "confidence": 0.81,
+      "severity": "MEDIUM",
+      "created_by": "SYSTEM",
+      "created_at": "2025-05-18"
+    },
+    "investigator": {
+      "id": "INV-0005",
+      "name": "Gabrielle Davis",
+      "role": "INVESTIGATOR",
+      "email": "howardmaurice@example.com"
+    }
+  },
+  {
+    "doc_id": "CLM-0057",
+    "claim": {
+      "id": "CLM-0057",
+      "claim_number": "CLM-2024-0057",
+      "policy_id": "POL-0039",
+      "date": "2024-11-19",
+      "amount": 181961.0,
+      "status": "IN_REVIEW",
+      "cause": "Property damage",
+      "description": "Third-party bodily injury reported on 2024-11-19 under policy CGL-2023-0039. Estimated loss 99k USD."
+    },
+    "fraud_flag": {
+      "id": "FRD-CLM-0057",
+      "reason": "Claim amount exceeds 10x annual premium",
+      "confidence": 0.81,
+      "severity": "MEDIUM",
+      "created_by": "SYSTEM",
+      "created_at": "2024-11-19"
+    }
+  },
+  {
+    "doc_id": "CLM-0058",
+    "claim": {
+      "id": "CLM-0058",
+      "claim_number": "CLM-2025-0058",
+      "policy_id": "POL-0014",
+      "date": "2025-12-19",
+      "amount": 100972.0,
+      "status": "APPROVED",
+      "cause": "Vandalism",
+      "description": "Property damage reported on 2025-12-19 under policy CP-2025-0014. Estimated loss 180k USD."
+    },
+    "fraud_flag": {
+      "id": "FRD-CLM-0058",
+      "reason": "Claim amount exceeds 10x annual premium",
+      "confidence": 0.81,
+      "severity": "MEDIUM",
+      "created_by": "SYSTEM",
+      "created_at": "2025-12-19"
+    },
+    "investigator": {
+      "id": "INV-0006",
+      "name": "Monica Herrera",
+      "role": "INVESTIGATOR",
+      "email": "smiller@example.net"
+    }
+  },
+  {
+    "doc_id": "CLM-0059",
+    "claim": {
+      "id": "CLM-0059",
+      "claim_number": "CLM-2024-0059",
+      "policy_id": "POL-0051",
+      "date": "2024-08-27",
+      "amount": 3122.0,
+      "status": "APPROVED",
+      "cause": "Fire damage",
+      "description": "Vandalism reported on 2024-08-27 under policy AF-2023-0051. Estimated loss 191k USD."
+    },
+    "fraud_flag": null
+  },
+  {
+    "doc_id": "CLM-0060",
+    "claim": {
+      "id": "CLM-0060",
+      "claim_number": "CLM-2023-0060",
+      "policy_id": "POL-0037",
+      "date": "2023-11-28",
+      "amount": 160138.0,
+      "status": "PAID",
+      "cause": "Third-party bodily injury",
+      "description": "Third-party bodily injury reported on 2023-11-28 under policy CP-2023-0037. Estimated loss 159k USD."
+    },
+    "fraud_flag": {
+      "id": "FRD-CLM-0060",
+      "reason": "Claim amount exceeds 10x annual premium",
+      "confidence": 0.81,
+      "severity": "MEDIUM",
+      "created_by": "SYSTEM",
+      "created_at": "2023-11-28"
+    },
+    "investigator": {
+      "id": "INV-0006",
+      "name": "Monica Herrera",
+      "role": "INVESTIGATOR",
+      "email": "smiller@example.net"
+    }
+  },
+  {
+    "doc_id": "CLM-0061",
+    "claim": {
+      "id": "CLM-0061",
+      "claim_number": "CLM-2025-0061",
+      "policy_id": "POL-0099",
+      "date": "2025-02-16",
+      "amount": 165691.0,
+      "status": "SUBMITTED",
+      "cause": "Fire damage",
+      "description": "Property damage reported on 2025-02-16 under policy CP-2024-0099. Estimated loss 202k USD."
+    },
+    "fraud_flag": null
+  },
+  {
+    "doc_id": "CLM-0062",
+    "claim": {
+      "id": "CLM-0062",
+      "claim_number": "CLM-2025-0062",
+      "policy_id": "POL-0075",
+      "date": "2025-10-08",
+      "amount": 192983.0,
+      "status": "SUBMITTED",
+      "cause": "Property damage",
+      "description": "Employee injury reported on 2025-10-08 under policy WC-2024-0075. Estimated loss 192k USD."
+    },
+    "fraud_flag": null
+  },
+  {
+    "doc_id": "CLM-0063",
+    "claim": {
+      "id": "CLM-0063",
+      "claim_number": "CLM-2023-0063",
+      "policy_id": "POL-0026",
+      "date": "2023-05-16",
+      "amount": 207179.0,
+      "status": "APPROVED",
+      "cause": "Employee injury",
+      "description": "Professional negligence reported on 2023-05-16 under policy PL-2023-0026. Estimated loss 129k USD."
+    },
+    "fraud_flag": null
+  },
+  {
+    "doc_id": "CLM-0064",
+    "claim": {
+      "id": "CLM-0064",
+      "claim_number": "CLM-2025-0064",
+      "policy_id": "POL-0033",
+      "date": "2025-12-31",
+      "amount": 212416.0,
+      "status": "IN_REVIEW",
+      "cause": "Employee injury",
+      "description": "Water damage reported on 2025-12-31 under policy CGL-2024-0033. Estimated loss 120k USD."
+    },
+    "fraud_flag": null,
+    "investigator": {
+      "id": "INV-0002",
+      "name": "Angie Henderson",
+      "role": "SENIOR_INVESTIGATOR",
+      "email": "davisjesse@example.net"
+    }
+  },
+  {
+    "doc_id": "CLM-0065",
+    "claim": {
+      "id": "CLM-0065",
+      "claim_number": "CLM-2026-0065",
+      "policy_id": "POL-0087",
+      "date": "2026-05-11",
+      "amount": 222706.0,
+      "status": "PAID",
+      "cause": "Employee injury",
+      "description": "Water damage reported on 2026-05-11 under policy CP-2025-0087. Estimated loss 203k USD."
+    },
+    "fraud_flag": null,
+    "investigator": {
+      "id": "INV-0001",
+      "name": "Allison Hill",
+      "role": "SENIOR_INVESTIGATOR",
+      "email": "donaldgarcia@example.net"
+    }
+  },
+  {
+    "doc_id": "CLM-0066",
+    "claim": {
+      "id": "CLM-0066",
+      "claim_number": "CLM-2026-0066",
+      "policy_id": "POL-0059",
+      "date": "2026-03-12",
+      "amount": 177377.0,
+      "status": "DENIED",
+      "cause": "Property damage",
+      "description": "Vandalism reported on 2026-03-12 under policy WC-2025-0059. Estimated loss 98k USD."
+    },
+    "fraud_flag": {
+      "id": "FRD-CLM-0066",
+      "reason": "Claim amount exceeds 10x annual premium",
+      "confidence": 0.81,
+      "severity": "MEDIUM",
+      "created_by": "SYSTEM",
+      "created_at": "2026-03-12"
+    }
+  },
+  {
+    "doc_id": "CLM-0067",
+    "claim": {
+      "id": "CLM-0067",
+      "claim_number": "CLM-2024-0067",
+      "policy_id": "POL-0082",
+      "date": "2024-06-14",
+      "amount": 29402.0,
+      "status": "APPROVED",
+      "cause": "Product liability",
+      "description": "Fire damage reported on 2024-06-14 under policy CP-2023-0082. Estimated loss 159k USD."
+    },
+    "fraud_flag": null,
+    "investigator": {
+      "id": "INV-0005",
+      "name": "Gabrielle Davis",
+      "role": "INVESTIGATOR",
+      "email": "howardmaurice@example.com"
+    }
+  },
+  {
+    "doc_id": "CLM-0068",
+    "claim": {
+      "id": "CLM-0068",
+      "claim_number": "CLM-2025-0068",
+      "policy_id": "POL-0029",
+      "date": "2025-04-28",
+      "amount": 167567.0,
+      "status": "PAID",
+      "cause": "Property damage",
+      "description": "Auto collision reported on 2025-04-28 under policy PL-2025-0029. Estimated loss 30k USD."
+    },
+    "fraud_flag": {
+      "id": "FRD-CLM-0068",
+      "reason": "Claim amount exceeds 10x annual premium",
+      "confidence": 0.81,
+      "severity": "MEDIUM",
+      "created_by": "SYSTEM",
+      "created_at": "2025-04-28"
+    },
+    "investigator": {
+      "id": "INV-0001",
+      "name": "Allison Hill",
+      "role": "SENIOR_INVESTIGATOR",
+      "email": "donaldgarcia@example.net"
+    }
+  },
+  {
+    "doc_id": "CLM-0069",
+    "claim": {
+      "id": "CLM-0069",
+      "claim_number": "CLM-2025-0069",
+      "policy_id": "POL-0039",
+      "date": "2025-01-28",
+      "amount": 31440.0,
+      "status": "SUBMITTED",
+      "cause": "Professional negligence",
+      "description": "Theft / burglary reported on 2025-01-28 under policy CGL-2023-0039. Estimated loss 100k USD."
+    },
+    "fraud_flag": null
+  },
+  {
+    "doc_id": "CLM-0070",
+    "claim": {
+      "id": "CLM-0070",
+      "claim_number": "CLM-2025-0070",
+      "policy_id": "POL-0086",
+      "date": "2025-06-23",
+      "amount": 154967.0,
+      "status": "DENIED",
+      "cause": "Theft / burglary",
+      "description": "Auto collision reported on 2025-06-23 under policy PL-2024-0086. Estimated loss 168k USD."
+    },
+    "fraud_flag": {
+      "id": "FRD-CLM-0070",
+      "reason": "Claim amount exceeds 10x annual premium",
+      "confidence": 0.81,
+      "severity": "MEDIUM",
+      "created_by": "SYSTEM",
+      "created_at": "2025-06-23"
+    }
+  },
+  {
+    "doc_id": "CLM-0071",
+    "claim": {
+      "id": "CLM-0071",
+      "claim_number": "CLM-2024-0071",
+      "policy_id": "POL-0013",
+      "date": "2024-12-26",
+      "amount": 162389.0,
+      "status": "IN_REVIEW",
+      "cause": "Property damage",
+      "description": "Fire damage reported on 2024-12-26 under policy PL-2023-0013. Estimated loss 177k USD."
+    },
+    "fraud_flag": null,
+    "investigator": {
+      "id": "INV-0002",
+      "name": "Angie Henderson",
+      "role": "SENIOR_INVESTIGATOR",
+      "email": "davisjesse@example.net"
+    }
+  },
+  {
+    "doc_id": "CLM-0072",
+    "claim": {
+      "id": "CLM-0072",
+      "claim_number": "CLM-2023-0072",
+      "policy_id": "POL-0047",
+      "date": "2023-06-21",
+      "amount": 180746.0,
+      "status": "IN_REVIEW",
+      "cause": "Employee injury",
+      "description": "Fire damage reported on 2023-06-21 under policy CP-2023-0047. Estimated loss 102k USD."
+    },
+    "fraud_flag": null
+  },
+  {
+    "doc_id": "CLM-0073",
+    "claim": {
+      "id": "CLM-0073",
+      "claim_number": "CLM-2025-0073",
+      "policy_id": "POL-0059",
+      "date": "2025-06-01",
+      "amount": 174740.0,
+      "status": "IN_REVIEW",
+      "cause": "Vandalism",
+      "description": "Fire damage reported on 2025-06-01 under policy WC-2025-0059. Estimated loss 13k USD."
+    },
+    "fraud_flag": {
+      "id": "FRD-CLM-0073",
+      "reason": "Claim amount exceeds 10x annual premium",
+      "confidence": 0.81,
+      "severity": "MEDIUM",
+      "created_by": "SYSTEM",
+      "created_at": "2025-06-01"
+    }
+  },
+  {
+    "doc_id": "CLM-0074",
+    "claim": {
+      "id": "CLM-0074",
+      "claim_number": "CLM-2024-0074",
+      "policy_id": "POL-0032",
+      "date": "2024-10-19",
+      "amount": 207301.0,
+      "status": "APPROVED",
+      "cause": "Water damage",
+      "description": "Professional negligence reported on 2024-10-19 under policy AF-2024-0032. Estimated loss 54k USD."
+    },
+    "fraud_flag": null
+  },
+  {
+    "doc_id": "CLM-0075",
+    "claim": {
+      "id": "CLM-0075",
+      "claim_number": "CLM-2024-0075",
+      "policy_id": "POL-0030",
+      "date": "2024-08-30",
+      "amount": 203996.0,
+      "status": "SUBMITTED",
+      "cause": "Vandalism",
+      "description": "Fire damage reported on 2024-08-30 under policy CP-2023-0030. Estimated loss 71k USD."
+    },
+    "fraud_flag": null
+  },
+  {
+    "doc_id": "CLM-0076",
+    "claim": {
+      "id": "CLM-0076",
+      "claim_number": "CLM-2023-0076",
+      "policy_id": "POL-0019",
+      "date": "2023-10-17",
+      "amount": 142614.0,
+      "status": "IN_REVIEW",
+      "cause": "Theft / burglary",
+      "description": "Water damage reported on 2023-10-17 under policy CGL-2023-0019. Estimated loss 170k USD."
+    },
+    "fraud_flag": null,
+    "investigator": {
+      "id": "INV-0003",
+      "name": "Cristian Santos",
+      "role": "FRAUD_SPECIALIST",
+      "email": "lrobinson@example.com"
+    }
+  },
+  {
+    "doc_id": "CLM-0077",
+    "claim": {
+      "id": "CLM-0077",
+      "claim_number": "CLM-2025-0077",
+      "policy_id": "POL-0031",
+      "date": "2025-11-27",
+      "amount": 5136.0,
+      "status": "IN_REVIEW",
+      "cause": "Fire damage",
+      "description": "Theft / burglary reported on 2025-11-27 under policy CP-2024-0031. Estimated loss 190k USD."
+    },
+    "fraud_flag": null,
+    "investigator": {
+      "id": "INV-0001",
+      "name": "Allison Hill",
+      "role": "SENIOR_INVESTIGATOR",
+      "email": "donaldgarcia@example.net"
+    }
+  },
+  {
+    "doc_id": "CLM-0078",
+    "claim": {
+      "id": "CLM-0078",
+      "claim_number": "CLM-2025-0078",
+      "policy_id": "POL-0061",
+      "date": "2025-10-14",
+      "amount": 204952.0,
+      "status": "IN_REVIEW",
+      "cause": "Vandalism",
+      "description": "Water damage reported on 2025-10-14 under policy CP-2024-0061. Estimated loss 116k USD."
+    },
+    "fraud_flag": {
+      "id": "FRD-CLM-0078",
+      "reason": "Claim amount exceeds 10x annual premium",
+      "confidence": 0.81,
+      "severity": "MEDIUM",
+      "created_by": "SYSTEM",
+      "created_at": "2025-10-14"
+    },
+    "investigator": {
+      "id": "INV-0005",
+      "name": "Gabrielle Davis",
+      "role": "INVESTIGATOR",
+      "email": "howardmaurice@example.com"
+    }
+  },
+  {
+    "doc_id": "CLM-0079",
+    "claim": {
+      "id": "CLM-0079",
+      "claim_number": "CLM-2026-0079",
+      "policy_id": "POL-0006",
+      "date": "2026-11-01",
+      "amount": 80070.0,
+      "status": "APPROVED",
+      "cause": "Fire damage",
+      "description": "Fire damage reported on 2026-11-01 under policy WC-2025-0006. Estimated loss 123k USD."
+    },
+    "fraud_flag": null,
+    "investigator": {
+      "id": "INV-0001",
+      "name": "Allison Hill",
+      "role": "SENIOR_INVESTIGATOR",
+      "email": "donaldgarcia@example.net"
+    }
+  },
+  {
+    "doc_id": "CLM-0080",
+    "claim": {
+      "id": "CLM-0080",
+      "claim_number": "CLM-2025-0080",
+      "policy_id": "POL-0063",
+      "date": "2025-03-31",
+      "amount": 20265.0,
+      "status": "PAID",
+      "cause": "Employee injury",
+      "description": "Vandalism reported on 2025-03-31 under policy CGL-2024-0063. Estimated loss 38k USD."
+    },
+    "fraud_flag": {
+      "id": "FRD-CLM-0080",
+      "reason": "Inconsistent loss narrative across documents",
+      "confidence": 0.6,
+      "severity": "LOW",
+      "created_by": "SYSTEM",
+      "created_at": "2025-03-31"
+    }
+  },
+  {
+    "doc_id": "CLM-0081",
+    "claim": {
+      "id": "CLM-0081",
+      "claim_number": "CLM-2025-0081",
+      "policy_id": "POL-0075",
+      "date": "2025-08-28",
+      "amount": 100851.0,
+      "status": "PAID",
+      "cause": "Professional negligence",
+      "description": "Property damage reported on 2025-08-28 under policy WC-2024-0075. Estimated loss 117k USD."
+    },
+    "fraud_flag": null,
+    "investigator": {
+      "id": "INV-0006",
+      "name": "Monica Herrera",
+      "role": "INVESTIGATOR",
+      "email": "smiller@example.net"
+    }
+  },
+  {
+    "doc_id": "CLM-0082",
+    "claim": {
+      "id": "CLM-0082",
+      "claim_number": "CLM-2026-0082",
+      "policy_id": "POL-0015",
+      "date": "2026-01-22",
+      "amount": 113740.0,
+      "status": "APPROVED",
+      "cause": "Third-party bodily injury",
+      "description": "Auto collision reported on 2026-01-22 under policy PL-2025-0015. Estimated loss 87k USD."
+    },
+    "fraud_flag": null,
+    "investigator": {
+      "id": "INV-0006",
+      "name": "Monica Herrera",
+      "role": "INVESTIGATOR",
+      "email": "smiller@example.net"
+    }
+  },
+  {
+    "doc_id": "CLM-0083",
+    "claim": {
+      "id": "CLM-0083",
+      "claim_number": "CLM-2024-0083",
+      "policy_id": "POL-0013",
+      "date": "2024-06-28",
+      "amount": 112873.0,
+      "status": "IN_REVIEW",
+      "cause": "Property damage",
+      "description": "Employee injury reported on 2024-06-28 under policy PL-2023-0013. Estimated loss 245k USD."
+    },
+    "fraud_flag": null
+  },
+  {
+    "doc_id": "CLM-0084",
+    "claim": {
+      "id": "CLM-0084",
+      "claim_number": "CLM-2025-0084",
+      "policy_id": "POL-0009",
+      "date": "2025-06-03",
+      "amount": 219044.0,
+      "status": "SUBMITTED",
+      "cause": "Auto collision",
+      "description": "Water damage reported on 2025-06-03 under policy CP-2025-0009. Estimated loss 191k USD."
+    },
+    "fraud_flag": null
+  },
+  {
+    "doc_id": "CLM-0085",
+    "claim": {
+      "id": "CLM-0085",
+      "claim_number": "CLM-2025-0085",
+      "policy_id": "POL-0017",
+      "date": "2025-04-05",
+      "amount": 154738.0,
+      "status": "PAID",
+      "cause": "Professional negligence",
+      "description": "Employee injury reported on 2025-04-05 under policy WC-2025-0017. Estimated loss 172k USD."
+    },
+    "fraud_flag": null,
+    "investigator": {
+      "id": "INV-0006",
+      "name": "Monica Herrera",
+      "role": "INVESTIGATOR",
+      "email": "smiller@example.net"
+    }
+  },
+  {
+    "doc_id": "CLM-0086",
+    "claim": {
+      "id": "CLM-0086",
+      "claim_number": "CLM-2024-0086",
+      "policy_id": "POL-0097",
+      "date": "2024-10-20",
+      "amount": 228565.0,
+      "status": "PAID",
+      "cause": "Fire damage",
+      "description": "Property damage reported on 2024-10-20 under policy PL-2023-0097. Estimated loss 154k USD."
+    },
+    "fraud_flag": null,
+    "investigator": {
+      "id": "INV-0005",
+      "name": "Gabrielle Davis",
+      "role": "INVESTIGATOR",
+      "email": "howardmaurice@example.com"
+    }
+  },
+  {
+    "doc_id": "CLM-0087",
+    "claim": {
+      "id": "CLM-0087",
+      "claim_number": "CLM-2023-0087",
+      "policy_id": "POL-0028",
+      "date": "2023-08-27",
+      "amount": 173159.0,
+      "status": "APPROVED",
+      "cause": "Water damage",
+      "description": "Employee injury reported on 2023-08-27 under policy PL-2023-0028. Estimated loss 217k USD."
+    },
+    "fraud_flag": {
+      "id": "FRD-CLM-0087",
+      "reason": "Claim amount exceeds 10x annual premium",
+      "confidence": 0.81,
+      "severity": "MEDIUM",
+      "created_by": "SYSTEM",
+      "created_at": "2023-08-27"
+    },
+    "investigator": {
+      "id": "INV-0001",
+      "name": "Allison Hill",
+      "role": "SENIOR_INVESTIGATOR",
+      "email": "donaldgarcia@example.net"
+    }
+  },
+  {
+    "doc_id": "CLM-0088",
+    "claim": {
+      "id": "CLM-0088",
+      "claim_number": "CLM-2024-0088",
+      "policy_id": "POL-0098",
+      "date": "2024-09-21",
+      "amount": 151496.0,
+      "status": "IN_REVIEW",
+      "cause": "Auto collision",
+      "description": "Professional negligence reported on 2024-09-21 under policy AF-2023-0098. Estimated loss 250k USD."
+    },
+    "fraud_flag": null
+  },
+  {
+    "doc_id": "CLM-0089",
+    "claim": {
+      "id": "CLM-0089",
+      "claim_number": "CLM-2025-0089",
+      "policy_id": "POL-0087",
+      "date": "2025-04-26",
+      "amount": 160644.0,
+      "status": "PAID",
+      "cause": "Property damage",
+      "description": "Fire damage reported on 2025-04-26 under policy CP-2025-0087. Estimated loss 47k USD."
+    },
+    "fraud_flag": null
+  },
+  {
+    "doc_id": "CLM-0090",
+    "claim": {
+      "id": "CLM-0090",
+      "claim_number": "CLM-2024-0090",
+      "policy_id": "POL-0044",
+      "date": "2024-10-13",
+      "amount": 2600.0,
+      "status": "IN_REVIEW",
+      "cause": "Theft / burglary",
+      "description": "Vandalism reported on 2024-10-13 under policy AF-2023-0044. Estimated loss 169k USD."
+    },
+    "fraud_flag": null,
+    "investigator": {
+      "id": "INV-0006",
+      "name": "Monica Herrera",
+      "role": "INVESTIGATOR",
+      "email": "smiller@example.net"
+    }
+  },
+  {
+    "doc_id": "CLM-0091",
+    "claim": {
+      "id": "CLM-0091",
+      "claim_number": "CLM-2025-0091",
+      "policy_id": "POL-0004",
+      "date": "2025-05-20",
+      "amount": 196588.0,
+      "status": "APPROVED",
+      "cause": "Auto collision",
+      "description": "Auto collision reported on 2025-05-20 under policy CGL-2025-0004. Estimated loss 117k USD."
+    },
+    "fraud_flag": null,
+    "investigator": {
+      "id": "INV-0006",
+      "name": "Monica Herrera",
+      "role": "INVESTIGATOR",
+      "email": "smiller@example.net"
+    }
+  },
+  {
+    "doc_id": "CLM-0092",
+    "claim": {
+      "id": "CLM-0092",
+      "claim_number": "CLM-2023-0092",
+      "policy_id": "POL-0042",
+      "date": "2023-09-14",
+      "amount": 232562.0,
+      "status": "SUBMITTED",
+      "cause": "Theft / burglary",
+      "description": "Vandalism reported on 2023-09-14 under policy CP-2023-0042. Estimated loss 13k USD."
+    },
+    "fraud_flag": null
+  },
+  {
+    "doc_id": "CLM-0093",
+    "claim": {
+      "id": "CLM-0093",
+      "claim_number": "CLM-2025-0093",
+      "policy_id": "POL-0035",
+      "date": "2025-01-08",
+      "amount": 174523.0,
+      "status": "IN_REVIEW",
+      "cause": "Vandalism",
+      "description": "Product liability reported on 2025-01-08 under policy CP-2023-0035. Estimated loss 107k USD."
+    },
+    "fraud_flag": null
+  },
+  {
+    "doc_id": "CLM-0094",
+    "claim": {
+      "id": "CLM-0094",
+      "claim_number": "CLM-2026-0094",
+      "policy_id": "POL-0015",
+      "date": "2026-06-04",
+      "amount": 113699.0,
+      "status": "SUBMITTED",
+      "cause": "Vandalism",
+      "description": "Product liability reported on 2026-06-04 under policy PL-2025-0015. Estimated loss 135k USD."
+    },
+    "fraud_flag": null
+  },
+  {
+    "doc_id": "CLM-0095",
+    "claim": {
+      "id": "CLM-0095",
+      "claim_number": "CLM-2025-0095",
+      "policy_id": "POL-0006",
+      "date": "2025-12-28",
+      "amount": 104615.0,
+      "status": "PAID",
+      "cause": "Fire damage",
+      "description": "Fire damage reported on 2025-12-28 under policy WC-2025-0006. Estimated loss 53k USD."
+    },
+    "fraud_flag": null,
+    "investigator": {
+      "id": "INV-0002",
+      "name": "Angie Henderson",
+      "role": "SENIOR_INVESTIGATOR",
+      "email": "davisjesse@example.net"
+    }
+  },
+  {
+    "doc_id": "CLM-0096",
+    "claim": {
+      "id": "CLM-0096",
+      "claim_number": "CLM-2024-0096",
+      "policy_id": "POL-0098",
+      "date": "2024-08-28",
+      "amount": 76876.0,
+      "status": "IN_REVIEW",
+      "cause": "Fire damage",
+      "description": "Product liability reported on 2024-08-28 under policy AF-2023-0098. Estimated loss 192k USD."
+    },
+    "fraud_flag": null,
+    "investigator": {
+      "id": "INV-0005",
+      "name": "Gabrielle Davis",
+      "role": "INVESTIGATOR",
+      "email": "howardmaurice@example.com"
+    }
+  },
+  {
+    "doc_id": "CLM-0097",
+    "claim": {
+      "id": "CLM-0097",
+      "claim_number": "CLM-2025-0097",
+      "policy_id": "POL-0091",
+      "date": "2025-08-23",
+      "amount": 132140.0,
+      "status": "APPROVED",
+      "cause": "Employee injury",
+      "description": "Water damage reported on 2025-08-23 under policy CGL-2024-0091. Estimated loss 102k USD."
+    },
+    "fraud_flag": null,
+    "investigator": {
+      "id": "INV-0001",
+      "name": "Allison Hill",
+      "role": "SENIOR_INVESTIGATOR",
+      "email": "donaldgarcia@example.net"
+    }
+  },
+  {
+    "doc_id": "CLM-0098",
+    "claim": {
+      "id": "CLM-0098",
+      "claim_number": "CLM-2025-0098",
+      "policy_id": "POL-0059",
+      "date": "2025-05-18",
+      "amount": 226996.0,
+      "status": "IN_REVIEW",
+      "cause": "Auto collision",
+      "description": "Vandalism reported on 2025-05-18 under policy WC-2025-0059. Estimated loss 104k USD."
+    },
+    "fraud_flag": {
+      "id": "FRD-CLM-0098",
+      "reason": "Claim amount exceeds 10x annual premium",
+      "confidence": 0.81,
+      "severity": "MEDIUM",
+      "created_by": "SYSTEM",
+      "created_at": "2025-05-18"
+    }
+  },
+  {
+    "doc_id": "CLM-0099",
+    "claim": {
+      "id": "CLM-0099",
+      "claim_number": "CLM-2025-0099",
+      "policy_id": "POL-0054",
+      "date": "2025-10-13",
+      "amount": 31192.0,
+      "status": "IN_REVIEW",
+      "cause": "Employee injury",
+      "description": "Theft / burglary reported on 2025-10-13 under policy PL-2024-0054. Estimated loss 206k USD."
+    },
+    "fraud_flag": null,
+    "investigator": {
+      "id": "INV-0006",
+      "name": "Monica Herrera",
+      "role": "INVESTIGATOR",
+      "email": "smiller@example.net"
+    }
+  },
+  {
+    "doc_id": "CLM-0100",
+    "claim": {
+      "id": "CLM-0100",
+      "claim_number": "CLM-2023-0100",
+      "policy_id": "POL-0047",
+      "date": "2023-06-10",
+      "amount": 115481.0,
+      "status": "PAID",
+      "cause": "Third-party bodily injury",
+      "description": "Auto collision reported on 2023-06-10 under policy CP-2023-0047. Estimated loss 151k USD."
+    },
+    "fraud_flag": null,
+    "investigator": {
+      "id": "INV-0003",
+      "name": "Cristian Santos",
+      "role": "FRAUD_SPECIALIST",
+      "email": "lrobinson@example.com"
+    }
+  },
+  {
+    "doc_id": "CLM-0101",
+    "claim": {
+      "id": "CLM-0101",
+      "claim_number": "CLM-2026-0101",
+      "policy_id": "POL-0096",
+      "date": "2026-01-23",
+      "amount": 59083.0,
+      "status": "IN_REVIEW",
+      "cause": "Theft / burglary",
+      "description": "Water damage reported on 2026-01-23 under policy WC-2025-0096. Estimated loss 131k USD."
+    },
+    "fraud_flag": null,
+    "investigator": {
+      "id": "INV-0002",
+      "name": "Angie Henderson",
+      "role": "SENIOR_INVESTIGATOR",
+      "email": "davisjesse@example.net"
+    }
+  },
+  {
+    "doc_id": "CLM-0102",
+    "claim": {
+      "id": "CLM-0102",
+      "claim_number": "CLM-2024-0102",
+      "policy_id": "POL-0100",
+      "date": "2024-03-18",
+      "amount": 93038.0,
+      "status": "DENIED",
+      "cause": "Theft / burglary",
+      "description": "Third-party bodily injury reported on 2024-03-18 under policy CGL-2023-0100. Estimated loss 27k USD."
+    },
+    "fraud_flag": null
+  },
+  {
+    "doc_id": "CLM-0103",
+    "claim": {
+      "id": "CLM-0103",
+      "claim_number": "CLM-2023-0103",
+      "policy_id": "POL-0026",
+      "date": "2023-06-27",
+      "amount": 158915.0,
+      "status": "IN_REVIEW",
+      "cause": "Water damage",
+      "description": "Theft / burglary reported on 2023-06-27 under policy PL-2023-0026. Estimated loss 244k USD."
+    },
+    "fraud_flag": null,
+    "investigator": {
+      "id": "INV-0005",
+      "name": "Gabrielle Davis",
+      "role": "INVESTIGATOR",
+      "email": "howardmaurice@example.com"
+    }
+  },
+  {
+    "doc_id": "CLM-0104",
+    "claim": {
+      "id": "CLM-0104",
+      "claim_number": "CLM-2025-0104",
+      "policy_id": "POL-0098",
+      "date": "2025-03-14",
+      "amount": 179555.0,
+      "status": "PAID",
+      "cause": "Vandalism",
+      "description": "Vandalism reported on 2025-03-14 under policy AF-2023-0098. Estimated loss 83k USD."
+    },
+    "fraud_flag": null
+  },
+  {
+    "doc_id": "CLM-0105",
+    "claim": {
+      "id": "CLM-0105",
+      "claim_number": "CLM-2025-0105",
+      "policy_id": "POL-0020",
+      "date": "2025-04-24",
+      "amount": 18900.0,
+      "status": "APPROVED",
+      "cause": "Property damage",
+      "description": "Property damage reported on 2025-04-24 under policy CGL-2024-0020. Estimated loss 152k USD."
+    },
+    "fraud_flag": {
+      "id": "FRD-CLM-0105",
+      "reason": "Multiple claims on same vehicle within 90 days",
+      "confidence": 0.6,
+      "severity": "LOW",
+      "created_by": "SYSTEM",
+      "created_at": "2025-04-24"
+    },
+    "investigator": {
+      "id": "INV-0004",
+      "name": "Abigail Shaffer",
+      "role": "INVESTIGATOR",
+      "email": "jpeterson@example.org"
+    }
+  },
+  {
+    "doc_id": "CLM-0106",
+    "claim": {
+      "id": "CLM-0106",
+      "claim_number": "CLM-2023-0106",
+      "policy_id": "POL-0005",
+      "date": "2023-10-06",
+      "amount": 97662.0,
+      "status": "PAID",
+      "cause": "Water damage",
+      "description": "Water damage reported on 2023-10-06 under policy CP-2023-0005. Estimated loss 158k USD."
+    },
+    "fraud_flag": null,
+    "investigator": {
+      "id": "INV-0005",
+      "name": "Gabrielle Davis",
+      "role": "INVESTIGATOR",
+      "email": "howardmaurice@example.com"
+    }
+  },
+  {
+    "doc_id": "CLM-0107",
+    "claim": {
+      "id": "CLM-0107",
+      "claim_number": "CLM-2023-0107",
+      "policy_id": "POL-0071",
+      "date": "2023-08-13",
+      "amount": 118894.0,
+      "status": "PAID",
+      "cause": "Vandalism",
+      "description": "Third-party bodily injury reported on 2023-08-13 under policy WC-2023-0071. Estimated loss 83k USD."
+    },
+    "fraud_flag": null,
+    "investigator": {
+      "id": "INV-0001",
+      "name": "Allison Hill",
+      "role": "SENIOR_INVESTIGATOR",
+      "email": "donaldgarcia@example.net"
+    }
+  },
+  {
+    "doc_id": "CLM-0108",
+    "claim": {
+      "id": "CLM-0108",
+      "claim_number": "CLM-2023-0108",
+      "policy_id": "POL-0058",
+      "date": "2023-07-19",
+      "amount": 213590.0,
+      "status": "PAID",
+      "cause": "Employee injury",
+      "description": "Water damage reported on 2023-07-19 under policy CGL-2023-0058. Estimated loss 130k USD."
+    },
+    "fraud_flag": null,
+    "investigator": {
+      "id": "INV-0006",
+      "name": "Monica Herrera",
+      "role": "INVESTIGATOR",
+      "email": "smiller@example.net"
+    }
+  },
+  {
+    "doc_id": "CLM-0109",
+    "claim": {
+      "id": "CLM-0109",
+      "claim_number": "CLM-2026-0109",
+      "policy_id": "POL-0057",
+      "date": "2026-02-26",
+      "amount": 138381.0,
+      "status": "APPROVED",
+      "cause": "Theft / burglary",
+      "description": "Employee injury reported on 2026-02-26 under policy CP-2024-0057. Estimated loss 96k USD."
+    },
+    "fraud_flag": null,
+    "investigator": {
+      "id": "INV-0003",
+      "name": "Cristian Santos",
+      "role": "FRAUD_SPECIALIST",
+      "email": "lrobinson@example.com"
+    }
+  },
+  {
+    "doc_id": "CLM-0110",
+    "claim": {
+      "id": "CLM-0110",
+      "claim_number": "CLM-2025-0110",
+      "policy_id": "POL-0087",
+      "date": "2025-05-23",
+      "amount": 207891.0,
+      "status": "APPROVED",
+      "cause": "Employee injury",
+      "description": "Water damage reported on 2025-05-23 under policy CP-2025-0087. Estimated loss 85k USD."
+    },
+    "fraud_flag": {
+      "id": "FRD-CLM-0110",
+      "reason": "Loss predates policy inception",
+      "confidence": 0.6,
+      "severity": "LOW",
+      "created_by": "SYSTEM",
+      "created_at": "2025-05-23"
+    },
+    "investigator": {
+      "id": "INV-0006",
+      "name": "Monica Herrera",
+      "role": "INVESTIGATOR",
+      "email": "smiller@example.net"
+    }
+  },
+  {
+    "doc_id": "CLM-0111",
+    "claim": {
+      "id": "CLM-0111",
+      "claim_number": "CLM-2025-0111",
+      "policy_id": "POL-0085",
+      "date": "2025-08-08",
+      "amount": 88388.0,
+      "status": "SUBMITTED",
+      "cause": "Theft / burglary",
+      "description": "Employee injury reported on 2025-08-08 under policy CGL-2025-0085. Estimated loss 80k USD."
+    },
+    "fraud_flag": null
+  },
+  {
+    "doc_id": "CLM-0112",
+    "claim": {
+      "id": "CLM-0112",
+      "claim_number": "CLM-2026-0112",
+      "policy_id": "POL-0090",
+      "date": "2026-03-31",
+      "amount": 34803.0,
+      "status": "APPROVED",
+      "cause": "Water damage",
+      "description": "Property damage reported on 2026-03-31 under policy WC-2025-0090. Estimated loss 144k USD."
+    },
+    "fraud_flag": null
+  },
+  {
+    "doc_id": "CLM-0113",
+    "claim": {
+      "id": "CLM-0113",
+      "claim_number": "CLM-2026-0113",
+      "policy_id": "POL-0017",
+      "date": "2026-07-27",
+      "amount": 25498.0,
+      "status": "APPROVED",
+      "cause": "Auto collision",
+      "description": "Professional negligence reported on 2026-07-27 under policy WC-2025-0017. Estimated loss 93k USD."
+    },
+    "fraud_flag": {
+      "id": "FRD-CLM-0113",
+      "reason": "Inconsistent loss narrative across documents",
+      "confidence": 0.6,
+      "severity": "LOW",
+      "created_by": "SYSTEM",
+      "created_at": "2026-07-27"
+    },
+    "investigator": {
+      "id": "INV-0002",
+      "name": "Angie Henderson",
+      "role": "SENIOR_INVESTIGATOR",
+      "email": "davisjesse@example.net"
+    }
+  },
+  {
+    "doc_id": "CLM-0114",
+    "claim": {
+      "id": "CLM-0114",
+      "claim_number": "CLM-2025-0114",
+      "policy_id": "POL-0044",
+      "date": "2025-02-28",
+      "amount": 51333.0,
+      "status": "IN_REVIEW",
+      "cause": "Theft / burglary",
+      "description": "Theft / burglary reported on 2025-02-28 under policy AF-2023-0044. Estimated loss 20k USD."
+    },
+    "fraud_flag": null
+  },
+  {
+    "doc_id": "CLM-0115",
+    "claim": {
+      "id": "CLM-0115",
+      "claim_number": "CLM-2026-0115",
+      "policy_id": "POL-0065",
+      "date": "2026-09-20",
+      "amount": 10895.0,
+      "status": "APPROVED",
+      "cause": "Vandalism",
+      "description": "Theft / burglary reported on 2026-09-20 under policy CP-2025-0065. Estimated loss 153k USD."
+    },
+    "fraud_flag": null,
+    "investigator": {
+      "id": "INV-0006",
+      "name": "Monica Herrera",
+      "role": "INVESTIGATOR",
+      "email": "smiller@example.net"
+    }
+  },
+  {
+    "doc_id": "CLM-0116",
+    "claim": {
+      "id": "CLM-0116",
+      "claim_number": "CLM-2025-0116",
+      "policy_id": "POL-0099",
+      "date": "2025-03-17",
+      "amount": 190053.0,
+      "status": "IN_REVIEW",
+      "cause": "Auto collision",
+      "description": "Employee injury reported on 2025-03-17 under policy CP-2024-0099. Estimated loss 174k USD."
+    },
+    "fraud_flag": null
+  },
+  {
+    "doc_id": "CLM-0117",
+    "claim": {
+      "id": "CLM-0117",
+      "claim_number": "CLM-2024-0117",
+      "policy_id": "POL-0079",
+      "date": "2024-05-21",
+      "amount": 198234.0,
+      "status": "DENIED",
+      "cause": "Product liability",
+      "description": "Third-party bodily injury reported on 2024-05-21 under policy WC-2023-0079. Estimated loss 137k USD."
+    },
+    "fraud_flag": null
+  },
+  {
+    "doc_id": "CLM-0118",
+    "claim": {
+      "id": "CLM-0118",
+      "claim_number": "CLM-2025-0118",
+      "policy_id": "POL-0061",
+      "date": "2025-01-26",
+      "amount": 97427.0,
+      "status": "APPROVED",
+      "cause": "Vandalism",
+      "description": "Product liability reported on 2025-01-26 under policy CP-2024-0061. Estimated loss 119k USD."
+    },
+    "fraud_flag": {
+      "id": "FRD-CLM-0118",
+      "reason": "Claim amount exceeds 10x annual premium",
+      "confidence": 0.81,
+      "severity": "MEDIUM",
+      "created_by": "SYSTEM",
+      "created_at": "2025-01-26"
+    }
+  },
+  {
+    "doc_id": "CLM-0119",
+    "claim": {
+      "id": "CLM-0119",
+      "claim_number": "CLM-2024-0119",
+      "policy_id": "POL-0100",
+      "date": "2024-04-21",
+      "amount": 132833.0,
+      "status": "APPROVED",
+      "cause": "Theft / burglary",
+      "description": "Third-party bodily injury reported on 2024-04-21 under policy CGL-2023-0100. Estimated loss 206k USD."
+    },
+    "fraud_flag": null
+  },
+  {
+    "doc_id": "CLM-0120",
+    "claim": {
+      "id": "CLM-0120",
+      "claim_number": "CLM-2024-0120",
+      "policy_id": "POL-0007",
+      "date": "2024-09-11",
+      "amount": 230144.0,
+      "status": "IN_REVIEW",
+      "cause": "Water damage",
+      "description": "Professional negligence reported on 2024-09-11 under policy PL-2023-0007. Estimated loss 218k USD."
+    },
+    "fraud_flag": null,
+    "investigator": {
+      "id": "INV-0002",
+      "name": "Angie Henderson",
+      "role": "SENIOR_INVESTIGATOR",
+      "email": "davisjesse@example.net"
+    }
+  },
+  {
+    "doc_id": "CLM-0121",
+    "claim": {
+      "id": "CLM-0121",
+      "claim_number": "CLM-2025-0121",
+      "policy_id": "POL-0035",
+      "date": "2025-01-15",
+      "amount": 238320.0,
+      "status": "APPROVED",
+      "cause": "Auto collision",
+      "description": "Water damage reported on 2025-01-15 under policy CP-2023-0035. Estimated loss 243k USD."
+    },
+    "fraud_flag": null
+  },
+  {
+    "doc_id": "CLM-0122",
+    "claim": {
+      "id": "CLM-0122",
+      "claim_number": "CLM-2024-0122",
+      "policy_id": "POL-0045",
+      "date": "2024-09-12",
+      "amount": 109762.0,
+      "status": "SUBMITTED",
+      "cause": "Professional negligence",
+      "description": "Employee injury reported on 2024-09-12 under policy CGL-2024-0045. Estimated loss 61k USD."
+    },
+    "fraud_flag": null
+  },
+  {
+    "doc_id": "CLM-0123",
+    "claim": {
+      "id": "CLM-0123",
+      "claim_number": "CLM-2026-0123",
+      "policy_id": "POL-0011",
+      "date": "2026-01-06",
+      "amount": 59861.0,
+      "status": "SUBMITTED",
+      "cause": "Water damage",
+      "description": "Employee injury reported on 2026-01-06 under policy WC-2024-0011. Estimated loss 203k USD."
+    },
+    "fraud_flag": null
+  },
+  {
+    "doc_id": "CLM-0124",
+    "claim": {
+      "id": "CLM-0124",
+      "claim_number": "CLM-2024-0124",
+      "policy_id": "POL-0005",
+      "date": "2024-05-28",
+      "amount": 241489.0,
+      "status": "PAID",
+      "cause": "Theft / burglary",
+      "description": "Product liability reported on 2024-05-28 under policy CP-2023-0005. Estimated loss 115k USD."
+    },
+    "fraud_flag": null
+  },
+  {
+    "doc_id": "CLM-0125",
+    "claim": {
+      "id": "CLM-0125",
+      "claim_number": "CLM-2024-0125",
+      "policy_id": "POL-0003",
+      "date": "2024-11-22",
+      "amount": 57532.0,
+      "status": "PAID",
+      "cause": "Professional negligence",
+      "description": "Vandalism reported on 2024-11-22 under policy PL-2024-0003. Estimated loss 136k USD."
+    },
+    "fraud_flag": null
+  },
+  {
+    "doc_id": "CLM-0126",
+    "claim": {
+      "id": "CLM-0126",
+      "claim_number": "CLM-2025-0126",
+      "policy_id": "POL-0031",
+      "date": "2025-11-04",
+      "amount": 32941.0,
+      "status": "SUBMITTED",
+      "cause": "Auto collision",
+      "description": "Vandalism reported on 2025-11-04 under policy CP-2024-0031. Estimated loss 118k USD."
+    },
+    "fraud_flag": {
+      "id": "FRD-CLM-0126",
+      "reason": "Loss predates policy inception",
+      "confidence": 0.6,
+      "severity": "LOW",
+      "created_by": "SYSTEM",
+      "created_at": "2025-11-04"
+    }
+  },
+  {
+    "doc_id": "CLM-0127",
+    "claim": {
+      "id": "CLM-0127",
+      "claim_number": "CLM-2023-0127",
+      "policy_id": "POL-0077",
+      "date": "2023-08-01",
+      "amount": 166663.0,
+      "status": "APPROVED",
+      "cause": "Third-party bodily injury",
+      "description": "Theft / burglary reported on 2023-08-01 under policy CP-2023-0077. Estimated loss 75k USD."
+    },
+    "fraud_flag": null
+  },
+  {
+    "doc_id": "CLM-0128",
+    "claim": {
+      "id": "CLM-0128",
+      "claim_number": "CLM-2026-0128",
+      "policy_id": "POL-0031",
+      "date": "2026-03-02",
+      "amount": 50103.0,
+      "status": "APPROVED",
+      "cause": "Water damage",
+      "description": "Professional negligence reported on 2026-03-02 under policy CP-2024-0031. Estimated loss 250k USD."
+    },
+    "fraud_flag": null
+  },
+  {
+    "doc_id": "CLM-0129",
+    "claim": {
+      "id": "CLM-0129",
+      "claim_number": "CLM-2025-0129",
+      "policy_id": "POL-0070",
+      "date": "2025-07-17",
+      "amount": 207153.0,
+      "status": "PAID",
+      "cause": "Professional negligence",
+      "description": "Fire damage reported on 2025-07-17 under policy PL-2024-0070. Estimated loss 100k USD."
+    },
+    "fraud_flag": null,
+    "investigator": {
+      "id": "INV-0004",
+      "name": "Abigail Shaffer",
+      "role": "INVESTIGATOR",
+      "email": "jpeterson@example.org"
+    }
+  },
+  {
+    "doc_id": "CLM-0130",
+    "claim": {
+      "id": "CLM-0130",
+      "claim_number": "CLM-2026-0130",
+      "policy_id": "POL-0048",
+      "date": "2026-03-16",
+      "amount": 196904.0,
+      "status": "SUBMITTED",
+      "cause": "Water damage",
+      "description": "Employee injury reported on 2026-03-16 under policy CGL-2025-0048. Estimated loss 62k USD."
+    },
+    "fraud_flag": null
+  },
+  {
+    "doc_id": "CLM-0131",
+    "claim": {
+      "id": "CLM-0131",
+      "claim_number": "CLM-2024-0131",
+      "policy_id": "POL-0081",
+      "date": "2024-03-25",
+      "amount": 203244.0,
+      "status": "APPROVED",
+      "cause": "Employee injury",
+      "description": "Theft / burglary reported on 2024-03-25 under policy PL-2023-0081. Estimated loss 12k USD."
+    },
+    "fraud_flag": {
+      "id": "FRD-CLM-0131",
+      "reason": "Claim amount exceeds 10x annual premium",
+      "confidence": 0.81,
+      "severity": "MEDIUM",
+      "created_by": "SYSTEM",
+      "created_at": "2024-03-25"
+    },
+    "investigator": {
+      "id": "INV-0003",
+      "name": "Cristian Santos",
+      "role": "FRAUD_SPECIALIST",
+      "email": "lrobinson@example.com"
+    }
+  },
+  {
+    "doc_id": "CLM-0132",
+    "claim": {
+      "id": "CLM-0132",
+      "claim_number": "CLM-2024-0132",
+      "policy_id": "POL-0083",
+      "date": "2024-10-07",
+      "amount": 218680.0,
+      "status": "DENIED",
+      "cause": "Product liability",
+      "description": "Product liability reported on 2024-10-07 under policy CGL-2024-0083. Estimated loss 162k USD."
+    },
+    "fraud_flag": null
+  },
+  {
+    "doc_id": "CLM-0133",
+    "claim": {
+      "id": "CLM-0133",
+      "claim_number": "CLM-2023-0133",
+      "policy_id": "POL-0018",
+      "date": "2023-07-25",
+      "amount": 188706.0,
+      "status": "DENIED",
+      "cause": "Product liability",
+      "description": "Fire damage reported on 2023-07-25 under policy CP-2023-0018. Estimated loss 76k USD."
+    },
+    "fraud_flag": null
+  },
+  {
+    "doc_id": "CLM-0134",
+    "claim": {
+      "id": "CLM-0134",
+      "claim_number": "CLM-2023-0134",
+      "policy_id": "POL-0026",
+      "date": "2023-02-12",
+      "amount": 83731.0,
+      "status": "PAID",
+      "cause": "Professional negligence",
+      "description": "Auto collision reported on 2023-02-12 under policy PL-2023-0026. Estimated loss 209k USD."
+    },
+    "fraud_flag": null,
+    "investigator": {
+      "id": "INV-0006",
+      "name": "Monica Herrera",
+      "role": "INVESTIGATOR",
+      "email": "smiller@example.net"
+    }
+  },
+  {
+    "doc_id": "CLM-0135",
+    "claim": {
+      "id": "CLM-0135",
+      "claim_number": "CLM-2024-0135",
+      "policy_id": "POL-0025",
+      "date": "2024-03-24",
+      "amount": 94578.0,
+      "status": "PAID",
+      "cause": "Fire damage",
+      "description": "Employee injury reported on 2024-03-24 under policy CP-2023-0025. Estimated loss 70k USD."
+    },
+    "fraud_flag": null,
+    "investigator": {
+      "id": "INV-0004",
+      "name": "Abigail Shaffer",
+      "role": "INVESTIGATOR",
+      "email": "jpeterson@example.org"
+    }
+  },
+  {
+    "doc_id": "CLM-0136",
+    "claim": {
+      "id": "CLM-0136",
+      "claim_number": "CLM-2026-0136",
+      "policy_id": "POL-0096",
+      "date": "2026-05-06",
+      "amount": 235523.0,
+      "status": "PAID",
+      "cause": "Employee injury",
+      "description": "Theft / burglary reported on 2026-05-06 under policy WC-2025-0096. Estimated loss 128k USD."
+    },
+    "fraud_flag": null,
+    "investigator": {
+      "id": "INV-0005",
+      "name": "Gabrielle Davis",
+      "role": "INVESTIGATOR",
+      "email": "howardmaurice@example.com"
+    }
+  },
+  {
+    "doc_id": "CLM-0137",
+    "claim": {
+      "id": "CLM-0137",
+      "claim_number": "CLM-2024-0137",
+      "policy_id": "POL-0035",
+      "date": "2024-01-05",
+      "amount": 191600.0,
+      "status": "IN_REVIEW",
+      "cause": "Auto collision",
+      "description": "Vandalism reported on 2024-01-05 under policy CP-2023-0035. Estimated loss 211k USD."
+    },
+    "fraud_flag": null,
+    "investigator": {
+      "id": "INV-0001",
+      "name": "Allison Hill",
+      "role": "SENIOR_INVESTIGATOR",
+      "email": "donaldgarcia@example.net"
+    }
+  },
+  {
+    "doc_id": "CLM-0138",
+    "claim": {
+      "id": "CLM-0138",
+      "claim_number": "CLM-2025-0138",
+      "policy_id": "POL-0011",
+      "date": "2025-11-19",
+      "amount": 174256.0,
+      "status": "IN_REVIEW",
+      "cause": "Product liability",
+      "description": "Vandalism reported on 2025-11-19 under policy WC-2024-0011. Estimated loss 184k USD."
+    },
+    "fraud_flag": null
+  },
+  {
+    "doc_id": "CLM-0139",
+    "claim": {
+      "id": "CLM-0139",
+      "claim_number": "CLM-2025-0139",
+      "policy_id": "POL-0045",
+      "date": "2025-11-16",
+      "amount": 12103.0,
+      "status": "DENIED",
+      "cause": "Employee injury",
+      "description": "Vandalism reported on 2025-11-16 under policy CGL-2024-0045. Estimated loss 112k USD."
+    },
+    "fraud_flag": null
+  },
+  {
+    "doc_id": "CLM-0140",
+    "claim": {
+      "id": "CLM-0140",
+      "claim_number": "CLM-2025-0140",
+      "policy_id": "POL-0008",
+      "date": "2025-09-09",
+      "amount": 176946.0,
+      "status": "APPROVED",
+      "cause": "Employee injury",
+      "description": "Professional negligence reported on 2025-09-09 under policy PL-2025-0008. Estimated loss 206k USD."
+    },
+    "fraud_flag": null,
+    "investigator": {
+      "id": "INV-0001",
+      "name": "Allison Hill",
+      "role": "SENIOR_INVESTIGATOR",
+      "email": "donaldgarcia@example.net"
+    }
+  },
+  {
+    "doc_id": "CLM-0141",
+    "claim": {
+      "id": "CLM-0141",
+      "claim_number": "CLM-2024-0141",
+      "policy_id": "POL-0019",
+      "date": "2024-08-27",
+      "amount": 10122.0,
+      "status": "SUBMITTED",
+      "cause": "Third-party bodily injury",
+      "description": "Employee injury reported on 2024-08-27 under policy CGL-2023-0019. Estimated loss 93k USD."
+    },
+    "fraud_flag": null
+  },
+  {
+    "doc_id": "CLM-0142",
+    "claim": {
+      "id": "CLM-0142",
+      "claim_number": "CLM-2024-0142",
+      "policy_id": "POL-0073",
+      "date": "2024-03-03",
+      "amount": 159621.0,
+      "status": "IN_REVIEW",
+      "cause": "Product liability",
+      "description": "Employee injury reported on 2024-03-03 under policy CGL-2024-0073. Estimated loss 96k USD."
+    },
+    "fraud_flag": null,
+    "investigator": {
+      "id": "INV-0002",
+      "name": "Angie Henderson",
+      "role": "SENIOR_INVESTIGATOR",
+      "email": "davisjesse@example.net"
+    }
+  },
+  {
+    "doc_id": "CLM-0143",
+    "claim": {
+      "id": "CLM-0143",
+      "claim_number": "CLM-2025-0143",
+      "policy_id": "POL-0068",
+      "date": "2025-01-03",
+      "amount": 105342.0,
+      "status": "IN_REVIEW",
+      "cause": "Property damage",
+      "description": "Third-party bodily injury reported on 2025-01-03 under policy AF-2023-0068. Estimated loss 246k USD."
+    },
+    "fraud_flag": null
+  },
+  {
+    "doc_id": "CLM-0144",
+    "claim": {
+      "id": "CLM-0144",
+      "claim_number": "CLM-2026-0144",
+      "policy_id": "POL-0064",
+      "date": "2026-12-06",
+      "amount": 102446.0,
+      "status": "PAID",
+      "cause": "Water damage",
+      "description": "Property damage reported on 2026-12-06 under policy PL-2025-0064. Estimated loss 199k USD."
+    },
+    "fraud_flag": null,
+    "investigator": {
+      "id": "INV-0005",
+      "name": "Gabrielle Davis",
+      "role": "INVESTIGATOR",
+      "email": "howardmaurice@example.com"
+    }
+  },
+  {
+    "doc_id": "CLM-0145",
+    "claim": {
+      "id": "CLM-0145",
+      "claim_number": "CLM-2024-0145",
+      "policy_id": "POL-0037",
+      "date": "2024-08-21",
+      "amount": 53475.0,
+      "status": "SUBMITTED",
+      "cause": "Water damage",
+      "description": "Product liability reported on 2024-08-21 under policy CP-2023-0037. Estimated loss 45k USD."
+    },
+    "fraud_flag": null
+  },
+  {
+    "doc_id": "CLM-0146",
+    "claim": {
+      "id": "CLM-0146",
+      "claim_number": "CLM-2025-0146",
+      "policy_id": "POL-0057",
+      "date": "2025-03-03",
+      "amount": 213471.0,
+      "status": "APPROVED",
+      "cause": "Employee injury",
+      "description": "Employee injury reported on 2025-03-03 under policy CP-2024-0057. Estimated loss 182k USD."
+    },
+    "fraud_flag": {
+      "id": "FRD-CLM-0146",
+      "reason": "Inconsistent loss narrative across documents",
+      "confidence": 0.6,
+      "severity": "LOW",
+      "created_by": "SYSTEM",
+      "created_at": "2025-03-03"
+    }
+  },
+  {
+    "doc_id": "CLM-0147",
+    "claim": {
+      "id": "CLM-0147",
+      "claim_number": "CLM-2025-0147",
+      "policy_id": "POL-0021",
+      "date": "2025-05-24",
+      "amount": 209062.0,
+      "status": "IN_REVIEW",
+      "cause": "Third-party bodily injury",
+      "description": "Water damage reported on 2025-05-24 under policy CGL-2024-0021. Estimated loss 52k USD."
+    },
+    "fraud_flag": null,
+    "investigator": {
+      "id": "INV-0004",
+      "name": "Abigail Shaffer",
+      "role": "INVESTIGATOR",
+      "email": "jpeterson@example.org"
+    }
+  },
+  {
+    "doc_id": "CLM-0148",
+    "claim": {
+      "id": "CLM-0148",
+      "claim_number": "CLM-2026-0148",
+      "policy_id": "POL-0004",
+      "date": "2026-02-20",
+      "amount": 146233.0,
+      "status": "APPROVED",
+      "cause": "Product liability",
+      "description": "Professional negligence reported on 2026-02-20 under policy CGL-2025-0004. Estimated loss 34k USD."
+    },
+    "fraud_flag": null,
+    "investigator": {
+      "id": "INV-0003",
+      "name": "Cristian Santos",
+      "role": "FRAUD_SPECIALIST",
+      "email": "lrobinson@example.com"
+    }
+  },
+  {
+    "doc_id": "CLM-0149",
+    "claim": {
+      "id": "CLM-0149",
+      "claim_number": "CLM-2025-0149",
+      "policy_id": "POL-0051",
+      "date": "2025-03-24",
+      "amount": 138807.0,
+      "status": "IN_REVIEW",
+      "cause": "Auto collision",
+      "description": "Vandalism reported on 2025-03-24 under policy AF-2023-0051. Estimated loss 19k USD."
+    },
+    "fraud_flag": null,
+    "investigator": {
+      "id": "INV-0001",
+      "name": "Allison Hill",
+      "role": "SENIOR_INVESTIGATOR",
+      "email": "donaldgarcia@example.net"
+    }
+  },
+  {
+    "doc_id": "CLM-0150",
+    "claim": {
+      "id": "CLM-0150",
+      "claim_number": "CLM-2024-0150",
+      "policy_id": "POL-0058",
+      "date": "2024-07-25",
+      "amount": 179286.0,
+      "status": "APPROVED",
+      "cause": "Theft / burglary",
+      "description": "Professional negligence reported on 2024-07-25 under policy CGL-2023-0058. Estimated loss 164k USD."
+    },
+    "fraud_flag": null
+  },
+  {
+    "doc_id": "CLM-0151",
+    "claim": {
+      "id": "CLM-0151",
+      "claim_number": "CLM-2026-0151",
+      "policy_id": "POL-0017",
+      "date": "2026-04-22",
+      "amount": 132822.0,
+      "status": "PAID",
+      "cause": "Fire damage",
+      "description": "Water damage reported on 2026-04-22 under policy WC-2025-0017. Estimated loss 133k USD."
+    },
+    "fraud_flag": null,
+    "investigator": {
+      "id": "INV-0003",
+      "name": "Cristian Santos",
+      "role": "FRAUD_SPECIALIST",
+      "email": "lrobinson@example.com"
+    }
+  },
+  {
+    "doc_id": "CLM-0152",
+    "claim": {
+      "id": "CLM-0152",
+      "claim_number": "CLM-2025-0152",
+      "policy_id": "POL-0091",
+      "date": "2025-08-18",
+      "amount": 91707.0,
+      "status": "PAID",
+      "cause": "Professional negligence",
+      "description": "Property damage reported on 2025-08-18 under policy CGL-2024-0091. Estimated loss 217k USD."
+    },
+    "fraud_flag": {
+      "id": "FRD-CLM-0152",
+      "reason": "Claimant unable to provide documentation",
+      "confidence": 0.6,
+      "severity": "LOW",
+      "created_by": "SYSTEM",
+      "created_at": "2025-08-18"
+    }
+  },
+  {
+    "doc_id": "CLM-0153",
+    "claim": {
+      "id": "CLM-0153",
+      "claim_number": "CLM-2024-0153",
+      "policy_id": "POL-0071",
+      "date": "2024-04-08",
+      "amount": 33812.0,
+      "status": "APPROVED",
+      "cause": "Vandalism",
+      "description": "Professional negligence reported on 2024-04-08 under policy WC-2023-0071. Estimated loss 24k USD."
+    },
+    "fraud_flag": null,
+    "investigator": {
+      "id": "INV-0005",
+      "name": "Gabrielle Davis",
+      "role": "INVESTIGATOR",
+      "email": "howardmaurice@example.com"
+    }
+  },
+  {
+    "doc_id": "CLM-0154",
+    "claim": {
+      "id": "CLM-0154",
+      "claim_number": "CLM-2024-0154",
+      "policy_id": "POL-0020",
+      "date": "2024-07-23",
+      "amount": 173682.0,
+      "status": "APPROVED",
+      "cause": "Vandalism",
+      "description": "Employee injury reported on 2024-07-23 under policy CGL-2024-0020. Estimated loss 216k USD."
+    },
+    "fraud_flag": null,
+    "investigator": {
+      "id": "INV-0001",
+      "name": "Allison Hill",
+      "role": "SENIOR_INVESTIGATOR",
+      "email": "donaldgarcia@example.net"
+    }
+  },
+  {
+    "doc_id": "CLM-0155",
+    "claim": {
+      "id": "CLM-0155",
+      "claim_number": "CLM-2025-0155",
+      "policy_id": "POL-0011",
+      "date": "2025-02-03",
+      "amount": 249655.0,
+      "status": "APPROVED",
+      "cause": "Vandalism",
+      "description": "Property damage reported on 2025-02-03 under policy WC-2024-0011. Estimated loss 167k USD."
+    },
+    "fraud_flag": null,
+    "investigator": {
+      "id": "INV-0005",
+      "name": "Gabrielle Davis",
+      "role": "INVESTIGATOR",
+      "email": "howardmaurice@example.com"
+    }
+  },
+  {
+    "doc_id": "CLM-0156",
+    "claim": {
+      "id": "CLM-0156",
+      "claim_number": "CLM-2023-0156",
+      "policy_id": "POL-0082",
+      "date": "2023-07-01",
+      "amount": 131557.0,
+      "status": "PAID",
+      "cause": "Professional negligence",
+      "description": "Property damage reported on 2023-07-01 under policy CP-2023-0082. Estimated loss 165k USD."
+    },
+    "fraud_flag": {
+      "id": "FRD-CLM-0156",
+      "reason": "Claim amount exceeds 10x annual premium",
+      "confidence": 0.81,
+      "severity": "MEDIUM",
+      "created_by": "SYSTEM",
+      "created_at": "2023-07-01"
+    }
+  },
+  {
+    "doc_id": "CLM-0157",
+    "claim": {
+      "id": "CLM-0157",
+      "claim_number": "CLM-2023-0157",
+      "policy_id": "POL-0062",
+      "date": "2023-10-20",
+      "amount": 211944.0,
+      "status": "PAID",
+      "cause": "Auto collision",
+      "description": "Property damage reported on 2023-10-20 under policy CP-2023-0062. Estimated loss 117k USD."
+    },
+    "fraud_flag": {
+      "id": "FRD-CLM-0157",
+      "reason": "Multiple claims on same vehicle within 90 days",
+      "confidence": 0.6,
+      "severity": "LOW",
+      "created_by": "SYSTEM",
+      "created_at": "2023-10-20"
+    },
+    "investigator": {
+      "id": "INV-0004",
+      "name": "Abigail Shaffer",
+      "role": "INVESTIGATOR",
+      "email": "jpeterson@example.org"
+    }
+  },
+  {
+    "doc_id": "CLM-0158",
+    "claim": {
+      "id": "CLM-0158",
+      "claim_number": "CLM-2024-0158",
+      "policy_id": "POL-0062",
+      "date": "2024-06-01",
+      "amount": 54483.0,
+      "status": "IN_REVIEW",
+      "cause": "Theft / burglary",
+      "description": "Employee injury reported on 2024-06-01 under policy CP-2023-0062. Estimated loss 221k USD."
+    },
+    "fraud_flag": null
+  },
+  {
+    "doc_id": "CLM-0159",
+    "claim": {
+      "id": "CLM-0159",
+      "claim_number": "CLM-2025-0159",
+      "policy_id": "POL-0045",
+      "date": "2025-09-28",
+      "amount": 35279.0,
+      "status": "DENIED",
+      "cause": "Professional negligence",
+      "description": "Professional negligence reported on 2025-09-28 under policy CGL-2024-0045. Estimated loss 28k USD."
+    },
+    "fraud_flag": null
+  },
+  {
+    "doc_id": "CLM-0160",
+    "claim": {
+      "id": "CLM-0160",
+      "claim_number": "CLM-2024-0160",
+      "policy_id": "POL-0060",
+      "date": "2024-11-30",
+      "amount": 71116.0,
+      "status": "IN_REVIEW",
+      "cause": "Theft / burglary",
+      "description": "Water damage reported on 2024-11-30 under policy AF-2024-0060. Estimated loss 13k USD."
+    },
+    "fraud_flag": {
+      "id": "FRD-CLM-0160",
+      "reason": "Claim amount exceeds 10x annual premium",
+      "confidence": 0.81,
+      "severity": "MEDIUM",
+      "created_by": "SYSTEM",
+      "created_at": "2024-11-30"
+    },
+    "investigator": {
+      "id": "INV-0004",
+      "name": "Abigail Shaffer",
+      "role": "INVESTIGATOR",
+      "email": "jpeterson@example.org"
+    }
+  },
+  {
+    "doc_id": "CLM-0161",
+    "claim": {
+      "id": "CLM-0161",
+      "claim_number": "CLM-2024-0161",
+      "policy_id": "POL-0079",
+      "date": "2024-10-05",
+      "amount": 66082.0,
+      "status": "PAID",
+      "cause": "Theft / burglary",
+      "description": "Employee injury reported on 2024-10-05 under policy WC-2023-0079. Estimated loss 240k USD."
+    },
+    "fraud_flag": null,
+    "investigator": {
+      "id": "INV-0002",
+      "name": "Angie Henderson",
+      "role": "SENIOR_INVESTIGATOR",
+      "email": "davisjesse@example.net"
+    }
+  },
+  {
+    "doc_id": "CLM-0162",
+    "claim": {
+      "id": "CLM-0162",
+      "claim_number": "CLM-2026-0162",
+      "policy_id": "POL-0064",
+      "date": "2026-12-03",
+      "amount": 123372.0,
+      "status": "APPROVED",
+      "cause": "Property damage",
+      "description": "Product liability reported on 2026-12-03 under policy PL-2025-0064. Estimated loss 6k USD."
+    },
+    "fraud_flag": {
+      "id": "FRD-CLM-0162",
+      "reason": "Loss predates policy inception",
+      "confidence": 0.6,
+      "severity": "LOW",
+      "created_by": "SYSTEM",
+      "created_at": "2026-12-03"
+    },
+    "investigator": {
+      "id": "INV-0002",
+      "name": "Angie Henderson",
+      "role": "SENIOR_INVESTIGATOR",
+      "email": "davisjesse@example.net"
+    }
+  },
+  {
+    "doc_id": "CLM-0163",
+    "claim": {
+      "id": "CLM-0163",
+      "claim_number": "CLM-2024-0163",
+      "policy_id": "POL-0028",
+      "date": "2024-03-17",
+      "amount": 13755.0,
+      "status": "SUBMITTED",
+      "cause": "Product liability",
+      "description": "Vandalism reported on 2024-03-17 under policy PL-2023-0028. Estimated loss 226k USD."
+    },
+    "fraud_flag": null
+  },
+  {
+    "doc_id": "CLM-0164",
+    "claim": {
+      "id": "CLM-0164",
+      "claim_number": "CLM-2026-0164",
+      "policy_id": "POL-0087",
+      "date": "2026-07-25",
+      "amount": 75907.0,
+      "status": "APPROVED",
+      "cause": "Water damage",
+      "description": "Auto collision reported on 2026-07-25 under policy CP-2025-0087. Estimated loss 35k USD."
+    },
+    "fraud_flag": null
+  },
+  {
+    "doc_id": "CLM-0165",
+    "claim": {
+      "id": "CLM-0165",
+      "claim_number": "CLM-2025-0165",
+      "policy_id": "POL-0098",
+      "date": "2025-01-26",
+      "amount": 96928.0,
+      "status": "SUBMITTED",
+      "cause": "Fire damage",
+      "description": "Vandalism reported on 2025-01-26 under policy AF-2023-0098. Estimated loss 144k USD."
+    },
+    "fraud_flag": null
+  },
+  {
+    "doc_id": "CLM-0166",
+    "claim": {
+      "id": "CLM-0166",
+      "claim_number": "CLM-2024-0166",
+      "policy_id": "POL-0071",
+      "date": "2024-04-22",
+      "amount": 20275.0,
+      "status": "IN_REVIEW",
+      "cause": "Product liability",
+      "description": "Professional negligence reported on 2024-04-22 under policy WC-2023-0071. Estimated loss 72k USD."
+    },
+    "fraud_flag": null
+  },
+  {
+    "doc_id": "CLM-0167",
+    "claim": {
+      "id": "CLM-0167",
+      "claim_number": "CLM-2023-0167",
+      "policy_id": "POL-0079",
+      "date": "2023-12-03",
+      "amount": 34728.0,
+      "status": "PAID",
+      "cause": "Auto collision",
+      "description": "Employee injury reported on 2023-12-03 under policy WC-2023-0079. Estimated loss 204k USD."
+    },
+    "fraud_flag": null,
+    "investigator": {
+      "id": "INV-0003",
+      "name": "Cristian Santos",
+      "role": "FRAUD_SPECIALIST",
+      "email": "lrobinson@example.com"
+    }
+  },
+  {
+    "doc_id": "CLM-0168",
+    "claim": {
+      "id": "CLM-0168",
+      "claim_number": "CLM-2024-0168",
+      "policy_id": "POL-0097",
+      "date": "2024-01-08",
+      "amount": 53181.0,
+      "status": "APPROVED",
+      "cause": "Auto collision",
+      "description": "Professional negligence reported on 2024-01-08 under policy PL-2023-0097. Estimated loss 11k USD."
+    },
+    "fraud_flag": {
+      "id": "FRD-CLM-0168",
+      "reason": "Claimant unable to provide documentation",
+      "confidence": 0.6,
+      "severity": "LOW",
+      "created_by": "SYSTEM",
+      "created_at": "2024-01-08"
+    }
+  },
+  {
+    "doc_id": "CLM-0169",
+    "claim": {
+      "id": "CLM-0169",
+      "claim_number": "CLM-2025-0169",
+      "policy_id": "POL-0061",
+      "date": "2025-12-25",
+      "amount": 120796.0,
+      "status": "SUBMITTED",
+      "cause": "Professional negligence",
+      "description": "Theft / burglary reported on 2025-12-25 under policy CP-2024-0061. Estimated loss 84k USD."
+    },
+    "fraud_flag": {
+      "id": "FRD-CLM-0169",
+      "reason": "Claim amount exceeds 10x annual premium",
+      "confidence": 0.81,
+      "severity": "MEDIUM",
+      "created_by": "SYSTEM",
+      "created_at": "2025-12-25"
+    }
+  },
+  {
+    "doc_id": "CLM-0170",
+    "claim": {
+      "id": "CLM-0170",
+      "claim_number": "CLM-2024-0170",
+      "policy_id": "POL-0079",
+      "date": "2024-06-25",
+      "amount": 43598.0,
+      "status": "IN_REVIEW",
+      "cause": "Vandalism",
+      "description": "Property damage reported on 2024-06-25 under policy WC-2023-0079. Estimated loss 152k USD."
+    },
+    "fraud_flag": null
+  },
+  {
+    "doc_id": "CLM-0171",
+    "claim": {
+      "id": "CLM-0171",
+      "claim_number": "CLM-2025-0171",
+      "policy_id": "POL-0069",
+      "date": "2025-04-17",
+      "amount": 186791.0,
+      "status": "APPROVED",
+      "cause": "Product liability",
+      "description": "Fire damage reported on 2025-04-17 under policy AF-2023-0069. Estimated loss 95k USD."
+    },
+    "fraud_flag": null,
+    "investigator": {
+      "id": "INV-0004",
+      "name": "Abigail Shaffer",
+      "role": "INVESTIGATOR",
+      "email": "jpeterson@example.org"
+    }
+  },
+  {
+    "doc_id": "CLM-0172",
+    "claim": {
+      "id": "CLM-0172",
+      "claim_number": "CLM-2025-0172",
+      "policy_id": "POL-0075",
+      "date": "2025-08-11",
+      "amount": 209864.0,
+      "status": "PAID",
+      "cause": "Fire damage",
+      "description": "Vandalism reported on 2025-08-11 under policy WC-2024-0075. Estimated loss 122k USD."
+    },
+    "fraud_flag": null
+  },
+  {
+    "doc_id": "CLM-0173",
+    "claim": {
+      "id": "CLM-0173",
+      "claim_number": "CLM-2023-0173",
+      "policy_id": "POL-0100",
+      "date": "2023-11-15",
+      "amount": 190110.0,
+      "status": "SUBMITTED",
+      "cause": "Product liability",
+      "description": "Theft / burglary reported on 2023-11-15 under policy CGL-2023-0100. Estimated loss 135k USD."
+    },
+    "fraud_flag": null
+  },
+  {
+    "doc_id": "CLM-0174",
+    "claim": {
+      "id": "CLM-0174",
+      "claim_number": "CLM-2025-0174",
+      "policy_id": "POL-0080",
+      "date": "2025-07-01",
+      "amount": 39738.0,
+      "status": "PAID",
+      "cause": "Third-party bodily injury",
+      "description": "Fire damage reported on 2025-07-01 under policy CP-2024-0080. Estimated loss 147k USD."
+    },
+    "fraud_flag": null,
+    "investigator": {
+      "id": "INV-0001",
+      "name": "Allison Hill",
+      "role": "SENIOR_INVESTIGATOR",
+      "email": "donaldgarcia@example.net"
+    }
+  },
+  {
+    "doc_id": "CLM-0175",
+    "claim": {
+      "id": "CLM-0175",
+      "claim_number": "CLM-2025-0175",
+      "policy_id": "POL-0057",
+      "date": "2025-10-21",
+      "amount": 110780.0,
+      "status": "IN_REVIEW",
+      "cause": "Third-party bodily injury",
+      "description": "Auto collision reported on 2025-10-21 under policy CP-2024-0057. Estimated loss 129k USD."
+    },
+    "fraud_flag": null
+  },
+  {
+    "doc_id": "CLM-0176",
+    "claim": {
+      "id": "CLM-0176",
+      "claim_number": "CLM-2025-0176",
+      "policy_id": "POL-0095",
+      "date": "2025-07-29",
+      "amount": 186014.0,
+      "status": "SUBMITTED",
+      "cause": "Third-party bodily injury",
+      "description": "Professional negligence reported on 2025-07-29 under policy CGL-2025-0095. Estimated loss 84k USD."
+    },
+    "fraud_flag": null
+  },
+  {
+    "doc_id": "CLM-0177",
+    "claim": {
+      "id": "CLM-0177",
+      "claim_number": "CLM-2024-0177",
+      "policy_id": "POL-0062",
+      "date": "2024-08-03",
+      "amount": 99782.0,
+      "status": "IN_REVIEW",
+      "cause": "Theft / burglary",
+      "description": "Product liability reported on 2024-08-03 under policy CP-2023-0062. Estimated loss 234k USD."
+    },
+    "fraud_flag": null,
+    "investigator": {
+      "id": "INV-0006",
+      "name": "Monica Herrera",
+      "role": "INVESTIGATOR",
+      "email": "smiller@example.net"
+    }
+  },
+  {
+    "doc_id": "CLM-0178",
+    "claim": {
+      "id": "CLM-0178",
+      "claim_number": "CLM-2025-0178",
+      "policy_id": "POL-0099",
+      "date": "2025-06-26",
+      "amount": 160927.0,
+      "status": "APPROVED",
+      "cause": "Third-party bodily injury",
+      "description": "Property damage reported on 2025-06-26 under policy CP-2024-0099. Estimated loss 143k USD."
+    },
+    "fraud_flag": null
+  },
+  {
+    "doc_id": "CLM-0179",
+    "claim": {
+      "id": "CLM-0179",
+      "claim_number": "CLM-2024-0179",
+      "policy_id": "POL-0039",
+      "date": "2024-07-03",
+      "amount": 185785.0,
+      "status": "IN_REVIEW",
+      "cause": "Product liability",
+      "description": "Employee injury reported on 2024-07-03 under policy CGL-2023-0039. Estimated loss 123k USD."
+    },
+    "fraud_flag": {
+      "id": "FRD-CLM-0179",
+      "reason": "Claim amount exceeds 10x annual premium",
+      "confidence": 0.81,
+      "severity": "MEDIUM",
+      "created_by": "SYSTEM",
+      "created_at": "2024-07-03"
+    },
+    "investigator": {
+      "id": "INV-0006",
+      "name": "Monica Herrera",
+      "role": "INVESTIGATOR",
+      "email": "smiller@example.net"
+    }
+  },
+  {
+    "doc_id": "CLM-0180",
+    "claim": {
+      "id": "CLM-0180",
+      "claim_number": "CLM-2025-0180",
+      "policy_id": "POL-0036",
+      "date": "2025-06-03",
+      "amount": 32948.0,
+      "status": "APPROVED",
+      "cause": "Professional negligence",
+      "description": "Auto collision reported on 2025-06-03 under policy PL-2024-0036. Estimated loss 230k USD."
+    },
+    "fraud_flag": null
+  },
+  {
+    "doc_id": "CLM-0181",
+    "claim": {
+      "id": "CLM-0181",
+      "claim_number": "CLM-2025-0181",
+      "policy_id": "POL-0099",
+      "date": "2025-02-25",
+      "amount": 77140.0,
+      "status": "SUBMITTED",
+      "cause": "Water damage",
+      "description": "Employee injury reported on 2025-02-25 under policy CP-2024-0099. Estimated loss 237k USD."
+    },
+    "fraud_flag": null
+  },
+  {
+    "doc_id": "CLM-0182",
+    "claim": {
+      "id": "CLM-0182",
+      "claim_number": "CLM-2025-0182",
+      "policy_id": "POL-0033",
+      "date": "2025-12-28",
+      "amount": 57095.0,
+      "status": "IN_REVIEW",
+      "cause": "Professional negligence",
+      "description": "Property damage reported on 2025-12-28 under policy CGL-2024-0033. Estimated loss 239k USD."
+    },
+    "fraud_flag": null,
+    "investigator": {
+      "id": "INV-0001",
+      "name": "Allison Hill",
+      "role": "SENIOR_INVESTIGATOR",
+      "email": "donaldgarcia@example.net"
+    }
+  },
+  {
+    "doc_id": "CLM-0183",
+    "claim": {
+      "id": "CLM-0183",
+      "claim_number": "CLM-2024-0183",
+      "policy_id": "POL-0079",
+      "date": "2024-04-05",
+      "amount": 64558.0,
+      "status": "SUBMITTED",
+      "cause": "Professional negligence",
+      "description": "Third-party bodily injury reported on 2024-04-05 under policy WC-2023-0079. Estimated loss 164k USD."
+    },
+    "fraud_flag": null
+  },
+  {
+    "doc_id": "CLM-0184",
+    "claim": {
+      "id": "CLM-0184",
+      "claim_number": "CLM-2024-0184",
+      "policy_id": "POL-0013",
+      "date": "2024-10-09",
+      "amount": 87584.0,
+      "status": "DENIED",
+      "cause": "Water damage",
+      "description": "Theft / burglary reported on 2024-10-09 under policy PL-2023-0013. Estimated loss 2k USD."
+    },
+    "fraud_flag": null
+  },
+  {
+    "doc_id": "CLM-0185",
+    "claim": {
+      "id": "CLM-0185",
+      "claim_number": "CLM-2026-0185",
+      "policy_id": "POL-0021",
+      "date": "2026-01-17",
+      "amount": 172151.0,
+      "status": "PAID",
+      "cause": "Product liability",
+      "description": "Product liability reported on 2026-01-17 under policy CGL-2024-0021. Estimated loss 167k USD."
+    },
+    "fraud_flag": null
+  },
+  {
+    "doc_id": "CLM-0186",
+    "claim": {
+      "id": "CLM-0186",
+      "claim_number": "CLM-2024-0186",
+      "policy_id": "POL-0042",
+      "date": "2024-04-07",
+      "amount": 170318.0,
+      "status": "SUBMITTED",
+      "cause": "Water damage",
+      "description": "Vandalism reported on 2024-04-07 under policy CP-2023-0042. Estimated loss 60k USD."
+    },
+    "fraud_flag": null
+  },
+  {
+    "doc_id": "CLM-0187",
+    "claim": {
+      "id": "CLM-0187",
+      "claim_number": "CLM-2023-0187",
+      "policy_id": "POL-0093",
+      "date": "2023-04-14",
+      "amount": 240397.0,
+      "status": "PAID",
+      "cause": "Auto collision",
+      "description": "Theft / burglary reported on 2023-04-14 under policy CP-2023-0093. Estimated loss 240k USD."
+    },
+    "fraud_flag": null
+  },
+  {
+    "doc_id": "CLM-0188",
+    "claim": {
+      "id": "CLM-0188",
+      "claim_number": "CLM-2025-0188",
+      "policy_id": "POL-0051",
+      "date": "2025-04-10",
+      "amount": 49840.0,
+      "status": "PAID",
+      "cause": "Property damage",
+      "description": "Fire damage reported on 2025-04-10 under policy AF-2023-0051. Estimated loss 3k USD."
+    },
+    "fraud_flag": null
+  },
+  {
+    "doc_id": "CLM-0189",
+    "claim": {
+      "id": "CLM-0189",
+      "claim_number": "CLM-2024-0189",
+      "policy_id": "POL-0043",
+      "date": "2024-04-04",
+      "amount": 120104.0,
+      "status": "PAID",
+      "cause": "Professional negligence",
+      "description": "Professional negligence reported on 2024-04-04 under policy CGL-2023-0043. Estimated loss 127k USD."
+    },
+    "fraud_flag": null,
+    "investigator": {
+      "id": "INV-0005",
+      "name": "Gabrielle Davis",
+      "role": "INVESTIGATOR",
+      "email": "howardmaurice@example.com"
+    }
+  },
+  {
+    "doc_id": "CLM-0190",
+    "claim": {
+      "id": "CLM-0190",
+      "claim_number": "CLM-2025-0190",
+      "policy_id": "POL-0060",
+      "date": "2025-05-03",
+      "amount": 51544.0,
+      "status": "PAID",
+      "cause": "Employee injury",
+      "description": "Theft / burglary reported on 2025-05-03 under policy AF-2024-0060. Estimated loss 188k USD."
+    },
+    "fraud_flag": {
+      "id": "FRD-CLM-0190",
+      "reason": "Claim amount exceeds 10x annual premium",
+      "confidence": 0.81,
+      "severity": "MEDIUM",
+      "created_by": "SYSTEM",
+      "created_at": "2025-05-03"
+    },
+    "investigator": {
+      "id": "INV-0003",
+      "name": "Cristian Santos",
+      "role": "FRAUD_SPECIALIST",
+      "email": "lrobinson@example.com"
+    }
+  },
+  {
+    "doc_id": "CLM-0191",
+    "claim": {
+      "id": "CLM-0191",
+      "claim_number": "CLM-2023-0191",
+      "policy_id": "POL-0092",
+      "date": "2023-09-30",
+      "amount": 4692.0,
+      "status": "DENIED",
+      "cause": "Property damage",
+      "description": "Vandalism reported on 2023-09-30 under policy PL-2023-0092. Estimated loss 173k USD."
+    },
+    "fraud_flag": null
+  },
+  {
+    "doc_id": "CLM-0192",
+    "claim": {
+      "id": "CLM-0192",
+      "claim_number": "CLM-2024-0192",
+      "policy_id": "POL-0023",
+      "date": "2024-02-23",
+      "amount": 217790.0,
+      "status": "IN_REVIEW",
+      "cause": "Employee injury",
+      "description": "Water damage reported on 2024-02-23 under policy AF-2023-0023. Estimated loss 103k USD."
+    },
+    "fraud_flag": null,
+    "investigator": {
+      "id": "INV-0002",
+      "name": "Angie Henderson",
+      "role": "SENIOR_INVESTIGATOR",
+      "email": "davisjesse@example.net"
+    }
+  },
+  {
+    "doc_id": "CLM-0193",
+    "claim": {
+      "id": "CLM-0193",
+      "claim_number": "CLM-2024-0193",
+      "policy_id": "POL-0062",
+      "date": "2024-01-09",
+      "amount": 246321.0,
+      "status": "IN_REVIEW",
+      "cause": "Property damage",
+      "description": "Auto collision reported on 2024-01-09 under policy CP-2023-0062. Estimated loss 61k USD."
+    },
+    "fraud_flag": {
+      "id": "FRD-CLM-0193",
+      "reason": "Claim amount exceeds 10x annual premium",
+      "confidence": 0.81,
+      "severity": "MEDIUM",
+      "created_by": "SYSTEM",
+      "created_at": "2024-01-09"
+    },
+    "investigator": {
+      "id": "INV-0003",
+      "name": "Cristian Santos",
+      "role": "FRAUD_SPECIALIST",
+      "email": "lrobinson@example.com"
+    }
+  },
+  {
+    "doc_id": "CLM-0194",
+    "claim": {
+      "id": "CLM-0194",
+      "claim_number": "CLM-2024-0194",
+      "policy_id": "POL-0043",
+      "date": "2024-04-22",
+      "amount": 153688.0,
+      "status": "DENIED",
+      "cause": "Fire damage",
+      "description": "Property damage reported on 2024-04-22 under policy CGL-2023-0043. Estimated loss 168k USD."
+    },
+    "fraud_flag": null
+  },
+  {
+    "doc_id": "CLM-0195",
+    "claim": {
+      "id": "CLM-0195",
+      "claim_number": "CLM-2025-0195",
+      "policy_id": "POL-0031",
+      "date": "2025-03-04",
+      "amount": 176056.0,
+      "status": "SUBMITTED",
+      "cause": "Property damage",
+      "description": "Theft / burglary reported on 2025-03-04 under policy CP-2024-0031. Estimated loss 104k USD."
+    },
+    "fraud_flag": null
+  },
+  {
+    "doc_id": "CLM-0196",
+    "claim": {
+      "id": "CLM-0196",
+      "claim_number": "CLM-2025-0196",
+      "policy_id": "POL-0091",
+      "date": "2025-11-14",
+      "amount": 181955.0,
+      "status": "SUBMITTED",
+      "cause": "Property damage",
+      "description": "Employee injury reported on 2025-11-14 under policy CGL-2024-0091. Estimated loss 158k USD."
+    },
+    "fraud_flag": null
+  },
+  {
+    "doc_id": "CLM-0197",
+    "claim": {
+      "id": "CLM-0197",
+      "claim_number": "CLM-2024-0197",
+      "policy_id": "POL-0018",
+      "date": "2024-09-22",
+      "amount": 41156.0,
+      "status": "APPROVED",
+      "cause": "Vandalism",
+      "description": "Employee injury reported on 2024-09-22 under policy CP-2023-0018. Estimated loss 107k USD."
+    },
+    "fraud_flag": null
+  },
+  {
+    "doc_id": "CLM-0198",
+    "claim": {
+      "id": "CLM-0198",
+      "claim_number": "CLM-2024-0198",
+      "policy_id": "POL-0097",
+      "date": "2024-03-24",
+      "amount": 200716.0,
+      "status": "IN_REVIEW",
+      "cause": "Vandalism",
+      "description": "Water damage reported on 2024-03-24 under policy PL-2023-0097. Estimated loss 135k USD."
+    },
+    "fraud_flag": null
+  },
+  {
+    "doc_id": "CLM-0199",
+    "claim": {
+      "id": "CLM-0199",
+      "claim_number": "CLM-2024-0199",
+      "policy_id": "POL-0010",
+      "date": "2024-02-03",
+      "amount": 17189.0,
+      "status": "PAID",
+      "cause": "Professional negligence",
+      "description": "Third-party bodily injury reported on 2024-02-03 under policy AF-2023-0010. Estimated loss 147k USD."
+    },
+    "fraud_flag": null,
+    "investigator": {
+      "id": "INV-0005",
+      "name": "Gabrielle Davis",
+      "role": "INVESTIGATOR",
+      "email": "howardmaurice@example.com"
+    }
+  },
+  {
+    "doc_id": "CLM-0200",
+    "claim": {
+      "id": "CLM-0200",
+      "claim_number": "CLM-2025-0200",
+      "policy_id": "POL-0057",
+      "date": "2025-04-02",
+      "amount": 179335.0,
+      "status": "IN_REVIEW",
+      "cause": "Vandalism",
+      "description": "Product liability reported on 2025-04-02 under policy CP-2024-0057. Estimated loss 24k USD."
+    },
+    "fraud_flag": null,
+    "investigator": {
+      "id": "INV-0001",
+      "name": "Allison Hill",
+      "role": "SENIOR_INVESTIGATOR",
+      "email": "donaldgarcia@example.net"
+    }
+  }
+]

@@ -1,0 +1,68 @@
+# GraphRAG Insurance Claims System — production stack (Phase 5)
+#
+#   docker compose up -d                # neo4j + api
+#   docker compose --profile dashboard up -d   # + streamlit dashboard
+#
+# Neo4j password comes from .env (NEO4J_PASSWORD, default graphrag-demo).
+# Ollama stays on the host — point LLAMA_API_URL at
+# http://host.docker.internal:11434 on Docker Desktop (Windows/Mac).
+
+services:
+  neo4j:
+    image: neo4j:5.26-community
+    container_name: graphrag-neo4j
+    environment:
+      NEO4J_AUTH: "neo4j/${NEO4J_PASSWORD:-graphrag-demo}"
+      NEO4J_server_memory_heap_max__size: "512M"
+    ports:
+      - "7474:7474"   # browser
+      - "7687:7687"   # bolt
+    volumes:
+      - neo4j_data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:7474 >/dev/null 2>&1 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+
+  api:
+    build: .
+    container_name: graphrag-api
+    environment:
+      NEO4J_URI: bolt://neo4j:7687
+      NEO4J_USER: neo4j
+      NEO4J_PASSWORD: "${NEO4J_PASSWORD:-graphrag-demo}"
+      API_KEY: "${API_KEY:-}"
+      CORS_ORIGINS: "http://localhost:8501,http://localhost:8502"
+      LLAMA_API_URL: "${LLAMA_API_URL:-http://host.docker.internal:11434}"
+    ports:
+      - "8000:8000"
+    depends_on:
+      neo4j:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request;urllib.request.urlopen('http://localhost:8000/health/live')\""]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
+  dashboard:
+    build:
+      context: .
+      dockerfile: Dockerfile.dashboard
+    container_name: graphrag-dashboard
+    environment:
+      NEO4J_URI: bolt://neo4j:7687
+      NEO4J_USER: neo4j
+      NEO4J_PASSWORD: "${NEO4J_PASSWORD:-graphrag-demo}"
+      LLAMA_API_URL: "${LLAMA_API_URL:-http://host.docker.internal:11434}"
+    ports:
+      - "8501:8501"
+    depends_on:
+      neo4j:
+        condition: service_healthy
+    profiles: ["dashboard"]
+
+volumes:
+  neo4j_data:

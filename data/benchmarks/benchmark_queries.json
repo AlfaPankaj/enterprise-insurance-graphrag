@@ -1,0 +1,180 @@
+[
+  {
+    "id": "q01",
+    "category": "policy_fact",
+    "query": "What is the status of policy POL-0001?",
+    "expected": [
+      "POL-0001"
+    ]
+  },
+  {
+    "id": "q02",
+    "category": "policy_fact",
+    "query": "What is the annual premium of policy POL-0010?",
+    "expected": [
+      "POL-0010"
+    ]
+  },
+  {
+    "id": "q03",
+    "category": "policy_fact",
+    "query": "What type is policy POL-0020?",
+    "expected": [
+      "POL-0020"
+    ]
+  },
+  {
+    "id": "q04",
+    "category": "policy_fact",
+    "query": "What is the deductible of policy POL-0030?",
+    "expected": [
+      "POL-0030"
+    ]
+  },
+  {
+    "id": "q05",
+    "category": "policyholder",
+    "query": "Who is the policyholder of policy POL-0005?",
+    "expected": [
+      "PH-0005",
+      "POL-0005"
+    ]
+  },
+  {
+    "id": "q06",
+    "category": "coverage",
+    "query": "List the coverages of policy POL-0005",
+    "expected": [
+      "POL-0005",
+      "COV-0017",
+      "COV-0018"
+    ]
+  },
+  {
+    "id": "q07",
+    "category": "keyword",
+    "query": "Find the policies held by Scott Brown",
+    "expected": [
+      "PH-0005",
+      "POL-0005"
+    ]
+  },
+  {
+    "id": "q08",
+    "category": "fraud",
+    "query": "Does claim CLM-0003 have a fraud flag?",
+    "expected": [
+      "CLM-0003",
+      "FRD-CLM-0003"
+    ]
+  },
+  {
+    "id": "q09",
+    "category": "investigator",
+    "query": "Who investigates claim CLM-0001?",
+    "expected": [
+      "CLM-0001",
+      "INV-0004"
+    ]
+  },
+  {
+    "id": "q10",
+    "category": "claim_fact",
+    "query": "Find the policy for claim CLM-0003",
+    "expected": [
+      "CLM-0003",
+      "POL-0084"
+    ]
+  },
+  {
+    "id": "q11",
+    "category": "claim_fact",
+    "query": "What is the status of claim CLM-0001?",
+    "expected": [
+      "CLM-0001"
+    ]
+  },
+  {
+    "id": "q12",
+    "category": "multi_hop",
+    "query": "Which coverages apply to claim CLM-0106?",
+    "expected": [
+      "CLM-0106",
+      "POL-0005",
+      "COV-0017",
+      "COV-0018"
+    ]
+  },
+  {
+    "id": "q13",
+    "category": "endorsement",
+    "query": "What endorsements amend policy POL-0003?",
+    "expected": [
+      "POL-0003",
+      "END-0004"
+    ]
+  },
+  {
+    "id": "q14",
+    "category": "endorsement",
+    "query": "Which exclusion added endorsements are on policy POL-0003?",
+    "expected": [
+      "POL-0003",
+      "END-0004"
+    ]
+  },
+  {
+    "id": "q15",
+    "category": "keyword_filter",
+    "query": "Show me claims on policy POL-0084 caused by fire damage",
+    "expected": [
+      "POL-0084",
+      "CLM-0003"
+    ]
+  },
+  {
+    "id": "q16",
+    "category": "status_filter",
+    "query": "Which claims under policy POL-0084 are paid?",
+    "expected": [
+      "POL-0084",
+      "CLM-0003"
+    ]
+  },
+  {
+    "id": "q17",
+    "category": "amount_filter",
+    "query": "Show claims over $100,000 on policy POL-0007",
+    "expected": [
+      "POL-0007",
+      "CLM-0001"
+    ]
+  },
+  {
+    "id": "q18",
+    "category": "investigator",
+    "query": "Which claims are handled by a FRAUD_SPECIALIST?",
+    "expected": [
+      "INV-0003",
+      "CLM-0045"
+    ]
+  },
+  {
+    "id": "q19",
+    "category": "fraud",
+    "query": "What is the severity of the fraud flag on claim CLM-0003?",
+    "expected": [
+      "CLM-0003",
+      "FRD-CLM-0003"
+    ]
+  },
+  {
+    "id": "q20",
+    "category": "policyholder",
+    "query": "What is the risk score of Sandra Jones?",
+    "expected": [
+      "PH-0072",
+      "POL-0072"
+    ]
+  }
+]

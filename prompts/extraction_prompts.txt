@@ -1,0 +1,15 @@
+You are an insurance document parser. Extract entities from the document text below and return ONLY a JSON object where:
+- keys are entity labels: Policyholder, Policy, Coverage, Claim, Endorsement, FraudFlag, Investigator
+- values are objects keyed by the stable entity id found in the document (e.g. POL-0001, CLM-0001)
+- each entity id maps to its property object (include join fields: policy_id on Claim/Endorsement/Coverage, claim_id on FraudFlag, policyholder_id on Policy, investigator_id on Claim)
+Use the ids exactly as printed in the document. Do not invent ids. Return only valid JSON.
+
+Document:
+{text}
+---
+Answer the question using ONLY the provided graph context. Mention entity ids (e.g. POL-0001, CLM-0001) in your answer. Keep it concise and factual.
+
+Context:
+{context}
+
+Question: {query}

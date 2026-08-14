@@ -1,0 +1,1109 @@
+{
+  "audit_id": "02dd84161fd7",
+  "timestamp": "2026-08-12T22:25:16",
+  "query": "Show me all claims over $100,000",
+  "answer": "Most relevant context: CLM-0001 (Claim) \u2014 16 nodes retained.",
+  "answer_mode": "extractive",
+  "reranker": "lexical",
+  "max_hops": 2,
+  "retrieval": {
+    "seeds": [
+      "CLM-0001",
+      "CLM-0002",
+      "CLM-0003",
+      "CLM-0005",
+      "CLM-0006"
+    ],
+    "seed_kinds": [
+      "keyword",
+      "keyword",
+      "keyword",
+      "keyword",
+      "keyword"
+    ],
+    "node_count": 72,
+    "edge_count": 70
+  },
+  "traversal": {
+    "nodes_visited": [
+      "CLM-0001",
+      "POL-0007",
+      "COV-0025",
+      "CLM-0120",
+      "PH-0007",
+      "INV-0004",
+      "CLM-0009",
+      "CLM-0012",
+      "CLM-0021",
+      "CLM-0024",
+      "CLM-0026",
+      "CLM-0030",
+      "CLM-0034",
+      "CLM-0105",
+      "CLM-0129",
+      "CLM-0135",
+      "CLM-0147",
+      "CLM-0157",
+      "CLM-0160",
+      "CLM-0171",
+      "CLM-0002",
+      "POL-0033",
+      "COV-0129",
+      "COV-0130",
+      "CLM-0064",
+      "CLM-0182",
+      "PH-0033",
+      "CLM-0003",
+      "CLM-0005",
+      "CLM-0006",
+      "CLM-0014",
+      "CLM-0028",
+      "CLM-0033",
+      "CLM-0050",
+      "CLM-0055",
+      "CLM-0065",
+      "CLM-0068",
+      "CLM-0071",
+      "CLM-0077",
+      "CLM-0079",
+      "CLM-0087",
+      "CLM-0095",
+      "CLM-0097",
+      "CLM-0101",
+      "CLM-0107",
+      "CLM-0112",
+      "CLM-0113",
+      "CLM-0137",
+      "CLM-0140",
+      "CLM-0142",
+      "CLM-0149",
+      "CLM-0154",
+      "CLM-0161",
+      "CLM-0162",
+      "CLM-0174",
+      "CLM-0192",
+      "CLM-0200",
+      "COV-0157",
+      "COV-0158",
+      "COV-0333",
+      "COV-0334",
+      "COV-0357",
+      "END-0013",
+      "FRD-CLM-0003",
+      "INV-0001",
+      "INV-0002",
+      "PH-0040",
+      "PH-0084",
+      "PH-0090",
+      "POL-0040",
+      "POL-0084",
+      "POL-0090"
+    ],
+    "edges_traversed": [
+      [
+        "CLM-0003",
+        "FRAUD_DETECTED",
+        "FRD-CLM-0003"
+      ],
+      [
+        "POL-0007",
+        "HAS_CLAIM",
+        "CLM-0001"
+      ],
+      [
+        "POL-0033",
+        "HAS_CLAIM",
+        "CLM-0002"
+      ],
+      [
+        "POL-0084",
+        "HAS_CLAIM",
+        "CLM-0003"
+      ],
+      [
+        "POL-0090",
+        "HAS_CLAIM",
+        "CLM-0005"
+      ],
+      [
+        "POL-0040",
+        "HAS_CLAIM",
+        "CLM-0006"
+      ],
+      [
+        "INV-0004",
+        "INVESTIGATES_CLAIM",
+        "CLM-0001"
+      ],
+      [
+        "INV-0001",
+        "INVESTIGATES_CLAIM",
+        "CLM-0003"
+      ],
+      [
+        "INV-0002",
+        "INVESTIGATES_CLAIM",
+        "CLM-0005"
+      ],
+      [
+        "POL-0007",
+        "COVERS",
+        "COV-0025"
+      ],
+      [
+        "POL-0033",
+        "COVERS",
+        "COV-0129"
+      ],
+      [
+        "POL-0033",
+        "COVERS",
+        "COV-0130"
+      ],
+      [
+        "POL-0040",
+        "COVERS",
+        "COV-0157"
+      ],
+      [
+        "POL-0040",
+        "COVERS",
+        "COV-0158"
+      ],
+      [
+        "POL-0084",
+        "COVERS",
+        "COV-0333"
+      ],
+      [
+        "POL-0084",
+        "COVERS",
+        "COV-0334"
+      ],
+      [
+        "POL-0090",
+        "COVERS",
+        "COV-0357"
+      ],
+      [
+        "POL-0084",
+        "ENDORSED_BY",
+        "END-0013"
+      ],
+      [
+        "POL-0084",
+        "HAS_CLAIM",
+        "CLM-0033"
+      ],
+      [
+        "POL-0084",
+        "HAS_CLAIM",
+        "CLM-0050"
+      ],
+      [
+        "POL-0033",
+        "HAS_CLAIM",
+        "CLM-0064"
+      ],
+      [
+        "POL-0090",
+        "HAS_CLAIM",
+        "CLM-0112"
+      ],
+      [
+        "POL-0007",
+        "HAS_CLAIM",
+        "CLM-0120"
+      ],
+      [
+        "POL-0033",
+        "HAS_CLAIM",
+        "CLM-0182"
+      ],
+      [
+        "INV-0004",
+        "INVESTIGATES_CLAIM",
+        "CLM-0009"
+      ],
+      [
+        "INV-0004",
+        "INVESTIGATES_CLAIM",
+        "CLM-0012"
+      ],
+      [
+        "INV-0002",
+        "INVESTIGATES_CLAIM",
+        "CLM-0014"
+      ],
+      [
+        "INV-0004",
+        "INVESTIGATES_CLAIM",
+        "CLM-0021"
+      ],
+      [
+        "INV-0004",
+        "INVESTIGATES_CLAIM",
+        "CLM-0024"
+      ],
+      [
+        "INV-0004",
+        "INVESTIGATES_CLAIM",
+        "CLM-0026"
+      ],
+      [
+        "INV-0002",
+        "INVESTIGATES_CLAIM",
+        "CLM-0028"
+      ],
+      [
+        "INV-0004",
+        "INVESTIGATES_CLAIM",
+        "CLM-0030"
+      ],
+      [
+        "INV-0004",
+        "INVESTIGATES_CLAIM",
+        "CLM-0034"
+      ],
+      [
+        "INV-0001",
+        "INVESTIGATES_CLAIM",
+        "CLM-0055"
+      ],
+      [
+        "INV-0002",
+        "INVESTIGATES_CLAIM",
+        "CLM-0064"
+      ],
+      [
+        "INV-0001",
+        "INVESTIGATES_CLAIM",
+        "CLM-0065"
+      ],
+      [
+        "INV-0001",
+        "INVESTIGATES_CLAIM",
+        "CLM-0068"
+      ],
+      [
+        "INV-0002",
+        "INVESTIGATES_CLAIM",
+        "CLM-0071"
+      ],
+      [
+        "INV-0001",
+        "INVESTIGATES_CLAIM",
+        "CLM-0077"
+      ],
+      [
+        "INV-0001",
+        "INVESTIGATES_CLAIM",
+        "CLM-0079"
+      ],
+      [
+        "INV-0001",
+        "INVESTIGATES_CLAIM",
+        "CLM-0087"
+      ],
+      [
+        "INV-0002",
+        "INVESTIGATES_CLAIM",
+        "CLM-0095"
+      ],
+      [
+        "INV-0001",
+        "INVESTIGATES_CLAIM",
+        "CLM-0097"
+      ],
+      [
+        "INV-0002",
+        "INVESTIGATES_CLAIM",
+        "CLM-0101"
+      ],
+      [
+        "INV-0004",
+        "INVESTIGATES_CLAIM",
+        "CLM-0105"
+      ],
+      [
+        "INV-0001",
+        "INVESTIGATES_CLAIM",
+        "CLM-0107"
+      ],
+      [
+        "INV-0002",
+        "INVESTIGATES_CLAIM",
+        "CLM-0113"
+      ],
+      [
+        "INV-0002",
+        "INVESTIGATES_CLAIM",
+        "CLM-0120"
+      ],
+      [
+        "INV-0004",
+        "INVESTIGATES_CLAIM",
+        "CLM-0129"
+      ],
+      [
+        "INV-0004",
+        "INVESTIGATES_CLAIM",
+        "CLM-0135"
+      ],
+      [
+        "INV-0001",
+        "INVESTIGATES_CLAIM",
+        "CLM-0137"
+      ],
+      [
+        "INV-0001",
+        "INVESTIGATES_CLAIM",
+        "CLM-0140"
+      ],
+      [
+        "INV-0002",
+        "INVESTIGATES_CLAIM",
+        "CLM-0142"
+      ],
+      [
+        "INV-0004",
+        "INVESTIGATES_CLAIM",
+        "CLM-0147"
+      ],
+      [
+        "INV-0001",
+        "INVESTIGATES_CLAIM",
+        "CLM-0149"
+      ],
+      [
+        "INV-0001",
+        "INVESTIGATES_CLAIM",
+        "CLM-0154"
+      ],
+      [
+        "INV-0004",
+        "INVESTIGATES_CLAIM",
+        "CLM-0157"
+      ],
+      [
+        "INV-0004",
+        "INVESTIGATES_CLAIM",
+        "CLM-0160"
+      ],
+      [
+        "INV-0002",
+        "INVESTIGATES_CLAIM",
+        "CLM-0161"
+      ],
+      [
+        "INV-0002",
+        "INVESTIGATES_CLAIM",
+        "CLM-0162"
+      ],
+      [
+        "INV-0004",
+        "INVESTIGATES_CLAIM",
+        "CLM-0171"
+      ],
+      [
+        "INV-0001",
+        "INVESTIGATES_CLAIM",
+        "CLM-0174"
+      ],
+      [
+        "INV-0001",
+        "INVESTIGATES_CLAIM",
+        "CLM-0182"
+      ],
+      [
+        "INV-0002",
+        "INVESTIGATES_CLAIM",
+        "CLM-0192"
+      ],
+      [
+        "INV-0001",
+        "INVESTIGATES_CLAIM",
+        "CLM-0200"
+      ],
+      [
+        "PH-0007",
+        "HAS_POLICY",
+        "POL-0007"
+      ],
+      [
+        "PH-0033",
+        "HAS_POLICY",
+        "POL-0033"
+      ],
+      [
+        "PH-0040",
+        "HAS_POLICY",
+        "POL-0040"
+      ],
+      [
+        "PH-0084",
+        "HAS_POLICY",
+        "POL-0084"
+      ],
+      [
+        "PH-0090",
+        "HAS_POLICY",
+        "POL-0090"
+      ]
+    ],
+    "paths": [
+      {
+        "nodes": [
+          "CLM-0001",
+          "POL-0007"
+        ],
+        "edges": [
+          [
+            "CLM-0001",
+            "HAS_CLAIM",
+            "POL-0007"
+          ]
+        ]
+      },
+      {
+        "nodes": [
+          "CLM-0001",
+          "POL-0007",
+          "COV-0025"
+        ],
+        "edges": [
+          [
+            "CLM-0001",
+            "HAS_CLAIM",
+            "POL-0007"
+          ],
+          [
+            "POL-0007",
+            "COVERS",
+            "COV-0025"
+          ]
+        ]
+      },
+      {
+        "nodes": [
+          "CLM-0001",
+          "POL-0007",
+          "CLM-0120"
+        ],
+        "edges": [
+          [
+            "CLM-0001",
+            "HAS_CLAIM",
+            "POL-0007"
+          ],
+          [
+            "POL-0007",
+            "HAS_CLAIM",
+            "CLM-0120"
+          ]
+        ]
+      },
+      {
+        "nodes": [
+          "CLM-0001",
+          "POL-0007",
+          "PH-0007"
+        ],
+        "edges": [
+          [
+            "CLM-0001",
+            "HAS_CLAIM",
+            "POL-0007"
+          ],
+          [
+            "POL-0007",
+            "HAS_POLICY",
+            "PH-0007"
+          ]
+        ]
+      },
+      {
+        "nodes": [
+          "CLM-0001",
+          "INV-0004"
+        ],
+        "edges": [
+          [
+            "CLM-0001",
+            "INVESTIGATES_CLAIM",
+            "INV-0004"
+          ]
+        ]
+      },
+      {
+        "nodes": [
+          "CLM-0001",
+          "INV-0004",
+          "CLM-0009"
+        ],
+        "edges": [
+          [
+            "CLM-0001",
+            "INVESTIGATES_CLAIM",
+            "INV-0004"
+          ],
+          [
+            "INV-0004",
+            "INVESTIGATES_CLAIM",
+            "CLM-0009"
+          ]
+        ]
+      },
+      {
+        "nodes": [
+          "CLM-0001",
+          "INV-0004",
+          "CLM-0012"
+        ],
+        "edges": [
+          [
+            "CLM-0001",
+            "INVESTIGATES_CLAIM",
+            "INV-0004"
+          ],
+          [
+            "INV-0004",
+            "INVESTIGATES_CLAIM",
+            "CLM-0012"
+          ]
+        ]
+      },
+      {
+        "nodes": [
+          "CLM-0001",
+          "INV-0004",
+          "CLM-0021"
+        ],
+        "edges": [
+          [
+            "CLM-0001",
+            "INVESTIGATES_CLAIM",
+            "INV-0004"
+          ],
+          [
+            "INV-0004",
+            "INVESTIGATES_CLAIM",
+            "CLM-0021"
+          ]
+        ]
+      },
+      {
+        "nodes": [
+          "CLM-0001",
+          "INV-0004",
+          "CLM-0024"
+        ],
+        "edges": [
+          [
+            "CLM-0001",
+            "INVESTIGATES_CLAIM",
+            "INV-0004"
+          ],
+          [
+            "INV-0004",
+            "INVESTIGATES_CLAIM",
+            "CLM-0024"
+          ]
+        ]
+      },
+      {
+        "nodes": [
+          "CLM-0001",
+          "INV-0004",
+          "CLM-0026"
+        ],
+        "edges": [
+          [
+            "CLM-0001",
+            "INVESTIGATES_CLAIM",
+            "INV-0004"
+          ],
+          [
+            "INV-0004",
+            "INVESTIGATES_CLAIM",
+            "CLM-0026"
+          ]
+        ]
+      },
+      {
+        "nodes": [
+          "CLM-0001",
+          "INV-0004",
+          "CLM-0030"
+        ],
+        "edges": [
+          [
+            "CLM-0001",
+            "INVESTIGATES_CLAIM",
+            "INV-0004"
+          ],
+          [
+            "INV-0004",
+            "INVESTIGATES_CLAIM",
+            "CLM-0030"
+          ]
+        ]
+      },
+      {
+        "nodes": [
+          "CLM-0001",
+          "INV-0004",
+          "CLM-0034"
+        ],
+        "edges": [
+          [
+            "CLM-0001",
+            "INVESTIGATES_CLAIM",
+            "INV-0004"
+          ],
+          [
+            "INV-0004",
+            "INVESTIGATES_CLAIM",
+            "CLM-0034"
+          ]
+        ]
+      },
+      {
+        "nodes": [
+          "CLM-0001",
+          "INV-0004",
+          "CLM-0105"
+        ],
+        "edges": [
+          [
+            "CLM-0001",
+            "INVESTIGATES_CLAIM",
+            "INV-0004"
+          ],
+          [
+            "INV-0004",
+            "INVESTIGATES_CLAIM",
+            "CLM-0105"
+          ]
+        ]
+      },
+      {
+        "nodes": [
+          "CLM-0001",
+          "INV-0004",
+          "CLM-0129"
+        ],
+        "edges": [
+          [
+            "CLM-0001",
+            "INVESTIGATES_CLAIM",
+            "INV-0004"
+          ],
+          [
+            "INV-0004",
+            "INVESTIGATES_CLAIM",
+            "CLM-0129"
+          ]
+        ]
+      },
+      {
+        "nodes": [
+          "CLM-0001",
+          "INV-0004",
+          "CLM-0135"
+        ],
+        "edges": [
+          [
+            "CLM-0001",
+            "INVESTIGATES_CLAIM",
+            "INV-0004"
+          ],
+          [
+            "INV-0004",
+            "INVESTIGATES_CLAIM",
+            "CLM-0135"
+          ]
+        ]
+      },
+      {
+        "nodes": [
+          "CLM-0001",
+          "INV-0004",
+          "CLM-0147"
+        ],
+        "edges": [
+          [
+            "CLM-0001",
+            "INVESTIGATES_CLAIM",
+            "INV-0004"
+          ],
+          [
+            "INV-0004",
+            "INVESTIGATES_CLAIM",
+            "CLM-0147"
+          ]
+        ]
+      },
+      {
+        "nodes": [
+          "CLM-0001",
+          "INV-0004",
+          "CLM-0157"
+        ],
+        "edges": [
+          [
+            "CLM-0001",
+            "INVESTIGATES_CLAIM",
+            "INV-0004"
+          ],
+          [
+            "INV-0004",
+            "INVESTIGATES_CLAIM",
+            "CLM-0157"
+          ]
+        ]
+      },
+      {
+        "nodes": [
+          "CLM-0001",
+          "INV-0004",
+          "CLM-0160"
+        ],
+        "edges": [
+          [
+            "CLM-0001",
+            "INVESTIGATES_CLAIM",
+            "INV-0004"
+          ],
+          [
+            "INV-0004",
+            "INVESTIGATES_CLAIM",
+            "CLM-0160"
+          ]
+        ]
+      },
+      {
+        "nodes": [
+          "CLM-0001",
+          "INV-0004",
+          "CLM-0171"
+        ],
+        "edges": [
+          [
+            "CLM-0001",
+            "INVESTIGATES_CLAIM",
+            "INV-0004"
+          ],
+          [
+            "INV-0004",
+            "INVESTIGATES_CLAIM",
+            "CLM-0171"
+          ]
+        ]
+      },
+      {
+        "nodes": [
+          "CLM-0002",
+          "POL-0033"
+        ],
+        "edges": [
+          [
+            "CLM-0002",
+            "HAS_CLAIM",
+            "POL-0033"
+          ]
+        ]
+      },
+      {
+        "nodes": [
+          "CLM-0002",
+          "POL-0033",
+          "COV-0129"
+        ],
+        "edges": [
+          [
+            "CLM-0002",
+            "HAS_CLAIM",
+            "POL-0033"
+          ],
+          [
+            "POL-0033",
+            "COVERS",
+            "COV-0129"
+          ]
+        ]
+      },
+      {
+        "nodes": [
+          "CLM-0002",
+          "POL-0033",
+          "COV-0130"
+        ],
+        "edges": [
+          [
+            "CLM-0002",
+            "HAS_CLAIM",
+            "POL-0033"
+          ],
+          [
+            "POL-0033",
+            "COVERS",
+            "COV-0130"
+          ]
+        ]
+      },
+      {
+        "nodes": [
+          "CLM-0002",
+          "POL-0033",
+          "CLM-0064"
+        ],
+        "edges": [
+          [
+            "CLM-0002",
+            "HAS_CLAIM",
+            "POL-0033"
+          ],
+          [
+            "POL-0033",
+            "HAS_CLAIM",
+            "CLM-0064"
+          ]
+        ]
+      },
+      {
+        "nodes": [
+          "CLM-0002",
+          "POL-0033",
+          "CLM-0182"
+        ],
+        "edges": [
+          [
+            "CLM-0002",
+            "HAS_CLAIM",
+            "POL-0033"
+          ],
+          [
+            "POL-0033",
+            "HAS_CLAIM",
+            "CLM-0182"
+          ]
+        ]
+      },
+      {
+        "nodes": [
+          "CLM-0002",
+          "POL-0033",
+          "PH-0033"
+        ],
+        "edges": [
+          [
+            "CLM-0002",
+            "HAS_CLAIM",
+            "POL-0033"
+          ],
+          [
+            "POL-0033",
+            "HAS_POLICY",
+            "PH-0033"
+          ]
+        ]
+      }
+    ]
+  },
+  "cypher": "-- 1. seed lookup --\n// seed 1 (keyword match)\nMATCH (s0:Claim {id: \"CLM-0001\"})\nRETURN s0\n\n// seed 2 (keyword match)\nMATCH (s1:Claim {id: \"CLM-0002\"})\nRETURN s1\n\n// seed 3 (keyword match)\nMATCH (s2:Claim {id: \"CLM-0003\"})\nRETURN s2\n\n// seed 4 (keyword match)\nMATCH (s3:Claim {id: \"CLM-0005\"})\nRETURN s3\n\n// seed 5 (keyword match)\nMATCH (s4:Claim {id: \"CLM-0006\"})\nRETURN s4\n\n-- 2. BFS expansion (both directions, max 2 hops) --\nMATCH p = (s0 {id: \"CLM-0001\"})-[*1..2]-(n)\nRETURN DISTINCT nodes(p) AS visited, relationships(p) AS edges\n\n-- 3. concrete answer path (first extracted chain) --\nMATCH p = (n0 {id: \"CLM-0001\"})-[:HAS_CLAIM]->(n1 {id: \"POL-0007\"})\nRETURN p",
+  "ranking": [
+    {
+      "id": "CLM-0001",
+      "label": "Claim",
+      "score": 0.0
+    },
+    {
+      "id": "CLM-0002",
+      "label": "Claim",
+      "score": 0.0
+    },
+    {
+      "id": "CLM-0003",
+      "label": "Claim",
+      "score": 0.0
+    },
+    {
+      "id": "CLM-0005",
+      "label": "Claim",
+      "score": 0.0
+    },
+    {
+      "id": "CLM-0006",
+      "label": "Claim",
+      "score": 0.0
+    },
+    {
+      "id": "CLM-0009",
+      "label": "Claim",
+      "score": 0.0
+    },
+    {
+      "id": "CLM-0012",
+      "label": "Claim",
+      "score": 0.0
+    },
+    {
+      "id": "CLM-0014",
+      "label": "Claim",
+      "score": 0.0
+    },
+    {
+      "id": "CLM-0021",
+      "label": "Claim",
+      "score": 0.0
+    },
+    {
+      "id": "CLM-0024",
+      "label": "Claim",
+      "score": 0.0
+    },
+    {
+      "id": "CLM-0026",
+      "label": "Claim",
+      "score": 0.0
+    },
+    {
+      "id": "CLM-0028",
+      "label": "Claim",
+      "score": 0.0
+    },
+    {
+      "id": "CLM-0030",
+      "label": "Claim",
+      "score": 0.0
+    },
+    {
+      "id": "CLM-0033",
+      "label": "Claim",
+      "score": 0.0
+    },
+    {
+      "id": "CLM-0034",
+      "label": "Claim",
+      "score": 0.0
+    },
+    {
+      "id": "CLM-0050",
+      "label": "Claim",
+      "score": 0.0
+    },
+    {
+      "id": "CLM-0055",
+      "label": "Claim",
+      "score": 0.0
+    },
+    {
+      "id": "CLM-0064",
+      "label": "Claim",
+      "score": 0.0
+    },
+    {
+      "id": "CLM-0065",
+      "label": "Claim",
+      "score": 0.0
+    },
+    {
+      "id": "CLM-0068",
+      "label": "Claim",
+      "score": 0.0
+    }
+  ],
+  "pruned": {
+    "kept": [
+      "CLM-0001",
+      "CLM-0002",
+      "CLM-0003",
+      "CLM-0005",
+      "CLM-0006",
+      "FRD-CLM-0003",
+      "INV-0001",
+      "INV-0002",
+      "INV-0004",
+      "POL-0007",
+      "POL-0033",
+      "POL-0040",
+      "POL-0084",
+      "POL-0090",
+      "CLM-0009",
+      "CLM-0012"
+    ],
+    "dropped": [
+      "CLM-0024",
+      "CLM-0026",
+      "CLM-0028",
+      "CLM-0030",
+      "CLM-0033",
+      "CLM-0034",
+      "CLM-0050",
+      "CLM-0055",
+      "CLM-0064",
+      "CLM-0065",
+      "CLM-0068",
+      "CLM-0071",
+      "CLM-0077",
+      "CLM-0079",
+      "CLM-0087",
+      "CLM-0095",
+      "CLM-0097",
+      "CLM-0101",
+      "CLM-0105",
+      "CLM-0107",
+      "CLM-0112",
+      "CLM-0113",
+      "CLM-0120",
+      "CLM-0129",
+      "CLM-0135",
+      "CLM-0137",
+      "CLM-0140",
+      "CLM-0142",
+      "CLM-0147",
+      "CLM-0149",
+      "CLM-0154",
+      "CLM-0157",
+      "CLM-0160",
+      "CLM-0161",
+      "CLM-0162",
+      "CLM-0171",
+      "CLM-0174",
+      "CLM-0182",
+      "CLM-0192",
+      "CLM-0200",
+      "COV-0129",
+      "COV-0130",
+      "COV-0158",
+      "COV-0333",
+      "COV-0334",
+      "COV-0357",
+      "END-0013",
+      "PH-0007",
+      "PH-0033",
+      "PH-0040",
+      "PH-0084",
+      "PH-0090",
+      "COV-0157",
+      "COV-0025",
+      "CLM-0021",
+      "CLM-0014"
+    ],
+    "kept_count": 16,
+    "dropped_count": 56,
+    "budget": 1280
+  },
+  "tokens": {
+    "before": 6554,
+    "after": 1276,
+    "savings_percent": 80.53
+  },
+  "timings_ms": {
+    "retrieval_ms": 90.52,
+    "rerank_ms": 2.55,
+    "prune_ms": 7.15,
+    "total_ms": 100.22
+  }
+}

@@ -1,0 +1,32 @@
+# GraphRAG Insurance Claims System — dependencies
+# Phase 1: synthetic data generation + graph seeding
+# Phase 2: CDC engine + FastAPI upload pipeline
+# Later phases will add: sentence-transformers, streamlit, pyvis, ruff, etc.
+
+# --- data generation (Phase 1) ---
+faker>=24.0        # realistic names/addresses for synthetic policyholders
+reportlab>=4.0     # PDF generation for the synthetic insurance documents
+
+# --- graph (Phase 1/2) ---
+neo4j>=5.0         # Python driver — seeding + CDC engine
+
+# --- ingestion & API (Phase 2) ---
+PyPDF2>=3.0        # PDF text extraction (fallback)
+pdfplumber>=0.11   # PDF text extraction (preferred, better table layout)
+fastapi>=0.110     # REST API
+uvicorn>=0.29      # ASGI server
+pydantic-settings>=2.0  # typed settings from .env
+python-multipart>=0.0.9 # FastAPI file uploads
+
+# --- token optimization (Phase 3) ---
+sentence-transformers>=2.6  # cross-encoder re-ranker (pulls torch)
+tiktoken>=0.6               # token counting for the cost dashboard
+streamlit>=1.30             # Shot 2: token cost dashboard
+
+# --- lineage & audit trail (Phase 4) ---
+pyvis>=0.3                  # interactive traversal graph (Shot 3; optional)
+reportlab>=4.0              # PDF audit report export (already used by Phase 1)
+
+# --- tests (Phase 2/3) ---
+pytest>=8.0
+httpx>=0.27        # FastAPI TestClient
