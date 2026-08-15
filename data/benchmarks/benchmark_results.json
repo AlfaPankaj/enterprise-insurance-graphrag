@@ -2,13 +2,20 @@
   "benchmark_metadata": {
     "dataset": "GraphRAG Insurance Claims System \u2014 Kaggle Insurance Claims & Policy Knowledge Graph",
     "total_test_queries": 10200,
-    "timestamp": "2026-08-15T00:03:37Z",
+    "timestamp": "2026-08-15T00:25:31Z",
     "generator": "scripts/export_benchmark_proof.py"
   },
   "aggregate_metrics": {
     "retrieval_accuracy": 100.0,
     "pruning_accuracy": 100.0,
     "accuracy_score": 1.0,
+    "wilson_95ci_accuracy": {
+      "lower": 99.96,
+      "upper": 100.0,
+      "n": 10200,
+      "ok": 10200,
+      "z": 1.96
+    },
     "raw_tokens_consumed": 2044311,
     "optimized_tokens_consumed": 1857621,
     "average_token_savings_pct": 7.83,
@@ -19,6 +26,50 @@
       "price_per_1k_tokens": 0.0025,
       "queries_per_day": 10000,
       "model_price_basis": "GPT-4o input tier"
+    }
+  },
+  "query_mix": {
+    "categories": {
+      "id-lookup": 9038,
+      "amount-threshold": 49,
+      "keyword": 15,
+      "fraud-list": 1098
+    },
+    "total": 10200,
+    "exact_share_pct": 88.6
+  },
+  "generalization_probes": {
+    "datasets": [
+      "fraud_oracle",
+      "insurance_claims",
+      "insurance_dataset",
+      "synthetic"
+    ],
+    "probes_total": 83,
+    "retrieval_prune_passed": 83,
+    "retrieval_prune_accuracy": 100.0,
+    "wilson_ci": {
+      "lower": 95.58,
+      "upper": 100.0,
+      "n": 83,
+      "ok": 83,
+      "z": 1.96
+    },
+    "answer_level_passed": 83,
+    "answer_level_accuracy": 100.0,
+    "by_kind": {
+      "paraphrase": {
+        "passed": 61,
+        "total": 61
+      },
+      "negative": {
+        "passed": 14,
+        "total": 14
+      },
+      "cross-schema": {
+        "passed": 8,
+        "total": 8
+      }
     }
   },
   "fraud_detection": {
@@ -43,8 +94,8 @@
     },
     "cross_encoder": {
       "rerank_used": "cross-encoder",
-      "avg_rerank_latency_ms": 47.4,
-      "cold_start_time_s": 52.1,
+      "avg_rerank_latency_ms": 45.3,
+      "cold_start_time_s": 21.7,
       "model_name": "cross-encoder/ms-marco-MiniLM-L-6-v2",
       "dependencies": "sentence-transformers"
     }

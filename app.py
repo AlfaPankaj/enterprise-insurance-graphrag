@@ -387,7 +387,7 @@ if page == "Home":
     st.markdown("### The 3 Technical Kill Shots")
     shots = [
         ("⚡", "Shot 1: Real-time CDC", "#3fb950", "Upload an endorsement PDF and the graph updates surgically in under 500ms — no full rebuild.", "Change Detection → Entity Diff → Partial Neo4j write."),
-        ("🎯", "Shot 2: Token Optimization", "#58a6ff", "Cross-encoder re-ranking + adaptive pruning cuts token usage by 30-70% without losing answer quality.", "Retrieve → Re-rank → Prune to token budget → Answer."),
+        ("🎯", "Shot 2: Token Optimization", "#58a6ff", "Cross-encoder re-ranking + adaptive pruning cuts token usage per query — measured 6–16% on precise real queries, up to 80% on dense subgraphs.", "Retrieve → Re-rank → Prune to token budget → Answer."),
         ("🔍", "Shot 3: Lineage & Explainability", "#bc8cff", "Every answer ships with its full traversal path, Cypher query, and exportable audit report.", "Traversal logging → Interactive lineage graph → JSON/HTML/PDF exports."),
     ]
     cols = st.columns(3)

@@ -10,15 +10,21 @@ each file is ingested into the graph separately.)
 
 | Dataset | Rows ingested | Ground-truth queries | Retrieval accuracy | Pruning accuracy |
 |---|---|---|---|---|
-| `fraud_oracle.csv` (Kaggle auto claims, **923 fraud**) | 15,420 claims | 4 | **4/4 = 100%** | **4/4 = 100%** |
-| `insurance_claims.csv` (1,000 claims, **247 fraud**) | 1,000 claims | 5 | **5/5 = 100%** | **5/5 = 100%** |
-| `insurance_dataset.csv` (13,000 customers) | 13,000 claims | 2 | **2/2 = 100%** | **2/2 = 100%** |
-| `data_synthetic.csv` (all 53,503 rows) | 40,259 customers + policies + coverages | 2 | **2/2 = 100%** | **2/2 = 100%** |
-| **TOTAL** | **~209k entities** | **13** | **13/13 = 100%** | **13/13 = 100%** |
+| `fraud_oracle.csv` (Kaggle auto claims, **923 fraud**) | 15,420 claims | **5,500** | **5,500/5,500 = 100%** | **5,500/5,500 = 100%** |
+| `insurance_claims.csv` (1,000 claims, **247 fraud**) | 1,000 claims | **600** | **600/600 = 100%** | **600/600 = 100%** |
+| `insurance_dataset.csv` (13,000 customers) | 13,000 claims | **3,900** | **3,900/3,900 = 100%** | **3,900/3,900 = 100%** |
+| `data_synthetic.csv` (all 53,503 rows) | 40,259 customers + policies + coverages | 100 | **100/100 = 100%** | **100/100 = 100%** |
+| **TOTAL (Excel sessions)** | **~209k entities** | **10,100** | **10,100/10,100 = 100%** | **10,100/10,100 = 100%** |
+| PDF demo graph (`scripts/seed_graph.py`) | synthetic policies/claims/endorsements | 100 | **100/100 = 100%** | **100/100 = 100%** |
+| **GRAND TOTAL** | | **10,200** | **10,200/10,200 = 100%** | **10,200/10,200 = 100%** |
 
-Every expected node was retrieved *and* survived token pruning on all 13 ground-truth
-queries, built from the CSVs themselves (fraud labels, id lookups, amount/premium
-thresholds, occupation/area keywords).
+**10,000 of those queries run against the 3 real Excel sessions** (5,500 + 3,900 + 600
+— the auditor-scale run; `--queries N` scales any dataset up or down). Every expected
+node was retrieved *and* survived token pruning on **all 10,200 ground-truth queries**, built
+from the CSVs themselves (fraud labels, id lookups, amount/premium thresholds,
+occupation/area keywords) — distributed across each file's head, middle and tail
+so boundary values are exercised too. Parallel 8-worker execution, audit trail
+disabled during the run (10k benchmark queries must not pollute it).
 
 ## Fraud-detection accuracy benchmark (precision / recall)
 
@@ -28,11 +34,13 @@ against the CSV ground truth. Extractive answers, 8 workers, ~178ms/claim,
 audit trail disabled so thousands of benchmark queries stay out of it.
 
 ```
-fraud_oracle:     923 fraud + 1,500 clean claims in 53.9s (177.7ms avg/claim)
+fraud_oracle:     923 fraud + 1,500 clean claims (2,423 total)
                  Confusion: TP=923 FP=0 TN=1500 FN=0  -> P/R/F1 = 100% / 100% / 100%
 insurance_claims: all 247 fraud + 753 clean claims (every label, no sampling)
                  Confusion: TP=247 FP=0 TN=753 FN=0  -> P/R/F1 = 100% / 100% / 100%
-COMBINED: 1,170 fraud labels evaluated -> TP=1,170 FP=0 FN=0
+pdf demo graph:   42 fraud labels (no clean set)
+                 Confusion: TP=42 FP=0 FN=0  -> P/R/F1 = 100%
+COMBINED: 1,212 fraud labels evaluated -> TP=1,212 FP=0 FN=0, TN=2,253
 FraudFlag survived pruning: 100% of fraud claims
 ```
 
@@ -41,10 +49,10 @@ Results: `data/benchmarks/fraud_detection_fraud_oracle.json` +
 
 **Honest framing (use this in the pitch):** the graph is built FROM the labels,
 so a perfect score is the expected outcome. What the benchmark actually proves
-is *end-to-end fidelity at scale* — every one of the 1,170 fraud claims' flags
-was retrieved, survived re-ranking + pruning, and drove a correct answer; not a
-single clean claim was falsely flagged (0 false positives, 0 false negatives
-across both labeled datasets). It is a full-pipeline regression test, not a
+is *end-to-end fidelity at scale* — every one of the 1,212 fraud claims' flags
+(923 + 247 + 42 demo) was retrieved, survived re-ranking + pruning, and drove a
+correct answer; not a single clean claim was falsely flagged (0 false positives,
+0 false negatives across all three labeled graphs). It is a full-pipeline regression test, not a
 learned-detector evaluation. Run it with `--limit`/`--negatives` to shrink, or
 `--answer-mode auto` on a small sample for LLM verdicts.
 
@@ -65,35 +73,36 @@ LLM answers verified against the CSV ground truth, end to end with the local mod
 The third row is the demo moment: the model had no fraud edge for CLM-00117 and said
 so instead of inventing a verdict.
 
-## Per-dataset details
+## Per-dataset details (at scale — 10,200 ground-truth queries)
 
-**fraud_oracle (15,420 claims, 923 fraud)** — 4/4
-```
-id-lookup    What is the status of claim CLM-00001?              173 → 159 tok ( 8.1%)  349ms  OK
-fraud-list   All fraud claims under policy POL-0029              238 → 224 tok ( 5.9%)   94ms  OK
-fraud-check  Claims flagged as fraud under policy POL-0053       234 → 219 tok ( 6.4%)   95ms  OK
-keyword      Show me urban claims                                862 → 855 tok ( 0.8%)  493ms  OK (5/13,822, 100% precision)
-```
+Every dataset is benchmarked at **100% retrieval and pruning accuracy** over its full
+query set; the representative samples below show the per-query shapes.
 
-**insurance_claims (1,000 claims, 247 fraud)** — 5/5
+**fraud_oracle (15,420 claims, 923 fraud)** — **5,500/5,500**
 ```
-id-lookup      What is the status of claim CLM-00001?           281 → 267 tok ( 5.0%)  284ms  OK
-amount-thresh  All claims over $40,000                         1232 → 1220 tok ( 1.0%)  101ms  OK (5/766)
-keyword        Vehicle theft claims                             1154 → 1146 tok ( 0.7%)  147ms  OK (5/94)
-fraud-list     Fraud claims under policy POL-5215                281 → 267 tok ( 5.0%)   26ms  OK
-fraud-list     Fraud claims under policy POL-3428                279 → 265 tok ( 5.0%)   21ms  OK
+  ...5500/5500 queries (413s, 8 workers)
+  retrieval 5500/5500 = 100.0% | pruning 5500/5500 = 100.0% | avg savings 7.49% | avg 236ms
+  query mix: 4,575 id-lookups · 923 fraud-checks · 2 keyword (spread head/middle/tail)
 ```
 
-**insurance_dataset (13,000)** — 2/2
+**insurance_claims (1,000 claims, 247 fraud)** — **600/600**
 ```
-amount-thresh  All claims over $20,000                          769 → 757 tok ( 1.6%)  404ms  OK (5/885)
-keyword        All claims from doctors                          778 → 769 tok ( 1.2%)  426ms  OK (5/624)
+  ...600/600 queries (22s, 8 workers)
+  retrieval 600/600 = 100.0% | pruning 600/600 = 100.0% | avg savings 6.35% | avg 221ms
+  query mix: 430 id-lookups · 150 fraud-checks · 16 amount-thresholds · 4 keyword
 ```
 
-**data_synthetic — full scale: all 53,503 rows (40,259 unique customers)** — 2/2
+**insurance_dataset (13,000)** — **3,900/3,900**
 ```
-premium-thresh    Policies with premium over $5,000            885 → 872 tok ( 1.5%)  798ms  OK (5/40)
-deductible-thresh Policies with deductible under $1,000        875 → 862 tok ( 1.5%)  272ms  OK (5/21,077)
+  ...3900/3900 queries (641s, 8 workers)
+  retrieval 3900/3900 = 100.0% | pruning 3900/3900 = 100.0% | avg savings 8.39% | avg 133ms
+  query mix: 3,879 id-lookups · 16 amount-thresholds · 5 keyword
+```
+
+**data_synthetic — full scale: all 53,503 rows (40,259 unique customers)** — 100/100
+```
+  retrieval 100/100 = 100.0% | pruning 100/100 = 100.0% | avg savings 6.27% | avg 241ms
+  query mix: id-lookups (policyholder/coverage pairs) + premium/deductible thresholds
 ```
 
 ## Scale test: 10,000 → 53,503 rows
@@ -112,13 +121,13 @@ autocommit batches instead of one giant transaction.
 
 ## Honest caveats (say these in the pitch — they make you credible)
 
-1. **Token savings on these real-data queries are 1–8%, not 70%.** The benchmark
+1. **Token savings on these real-data queries are 6–16%, not 70%.** The benchmark
    queries are *precise* (an id, a policy, a threshold) — the retriever returns a
    small subgraph (~15 nodes) that is already near the budget, so there is little to
-   prune. The 30–80% savings story holds on **dense** subgraphs (many seeds, many
-   sibling nodes) — exactly what the synthetic Phase-3 benchmark shows (avg 18.5%,
-   up to 80% on coverage/fraud-list queries). Savings = f(retrieval density), not a
-   constant.
+   prune (real sessions avg 6.4–8.4%, the denser PDF demo 15.5%). The 30–80% savings
+   story holds on **dense** subgraphs (many seeds, many sibling nodes) — exactly what
+   the synthetic Phase-3 benchmark shows (avg 18.5%, up to 80% on coverage/fraud-list
+   queries). Savings = f(retrieval density), not a constant.
 2. **Keyword/threshold seeding is capped at 5 seeds by design** — "urban claims" has
    13,822 matches; we return 5 *correct* ones (100% precision, 0 off-target). Recall
    on the full set is intentionally bounded for latency. This is the right trade-off
@@ -142,11 +151,45 @@ Testing against real data exposed 4 real retrieval gaps — all fixed, all teste
    parser, so expected sets can never disagree with the graph.
 4. **`occupation` added to keyword-seed props** (already done for the doctors query).
 
+## Is the 100% overfitted? — the anti-circularity probes
+
+Fair question, and the answer is split:
+
+* **It is NOT ML overfitting** — nothing in the pipeline is trained on these
+  queries. The retriever is deterministic rules, the reranker is BM25 (a
+  formula, no fitted weights), the pruner is a token budget.
+* **BUT 88.6% of the 10,200 queries ARE exact id-lookups**, whose expected ids
+  come from the same CSVs + helpers that built the graph — an auditor would
+  rightly call that near-circular.
+
+So the 100% needed a second, harder test. `scripts/benchmark_generalization.py`
+runs **anti-circularity probes** that break the id-lookup loop:
+
+| Probe | What it asks | Result (83 probes) |
+|---|---|---|
+| **Paraphrase** | Same expected nodes, phrased WITHOUT the claim id — "claims under policy POL-x" (multi-hop) and "claims related to {value}" (keyword seed) | **all pass** |
+| **Negative / hallucination** | Non-existent ids (CLM-99999), unknown keywords — must return "no context", never a fabricated claim | **all pass** |
+| **Cross-schema** | Queries phrased for another dataset's vocabulary — resolve when the concept exists, honestly refuse when it doesn't | **all pass** |
+| **Answer-level** | Final answer text must reference an expected node or the retrieval's own seed (grounded, not fabricated) | **83/83 grounded** |
+
+Per-session: insurance_claims 24/24 · fraud_oracle 21/21 · insurance_dataset
+20/20 · pdf demo 18/18. The honest caveat: extractive answers name the
+**top-ranked anchor node** (often a Policyholder/FraudFlag) rather than the
+claim id itself, so "names the expected id literally" is much lower — that is
+an answer-formatting limitation of the deterministic fallback, not a retrieval
+miss (retrieval found every expected node).
+
+**The probes also found and fixed a real bug**: a query naming an id that
+doesn't exist (CLM-99999) used to fall through to numeric seeding and return
+*other real claims* (silent fabrication). The retriever now returns empty for
+non-existent ids — regression-tested in `tests/test_retriever.py`.
+
 ## What this proves (mapped to the project's goals)
 
 - **Multi-hop retrieval works on real insurance data**: policy → claim → fraud flag
   paths resolved correctly on 100% of queries.
-- **Ground-truth accuracy**: 13/13 queries retrieved AND kept every expected node.
+- **Ground-truth accuracy**: 10,200/10,200 queries retrieved AND kept every expected
+  node (10,000 on the 3 real Excel sessions alone).
 - **Fraud detection is answerable end-to-end** with real labels, and the LLM
   **doesn't hallucinate** when evidence is absent (verified refusal on a non-fraud claim).
 - **Latency**: 20–500 ms retrieval+prune per query at 15k+ entity scale; the only
@@ -189,7 +232,8 @@ always direct-ingested at full scale (it has no dedicated API session).
 Fingerprints (size + mtime + sha256) live in
 `data/benchmarks/.auto_pipeline_state.json`; a dataset is only marked done
 when its whole chain succeeded, so failures are retried. A full run across
-all 4 CSVs (3 datasets, including all 1,170 fraud labels) takes ~100s.
+all 4 CSVs (3 datasets, including all 1,212 fraud labels across the real files
++ demo graph) takes ~100s.
 
 
 *Auto-pipeline run 2026-08-13 00:29:47 (95.3s): data_synthetic, fraud_oracle, insurance_claims, insurance_dataset — results refreshed in `data/benchmarks/`.*

@@ -13,7 +13,7 @@
 > "I built a real-time GraphRAG for insurance claims that updates surgically instead
 > of re-indexing, prunes context to cut token spend, and produces an audit trail
 > executives can actually inspect — validated end-to-end on **3 real insurance
-> datasets (4 CSV files), ~209,000 entities**."
+> datasets (4 CSV files), ~209,000 entities, 10,200 ground-truth queries**."
 
 ---
 
@@ -29,8 +29,8 @@
 > costs real money; verbose retrieval wastes tokens; and when an executive asks
 > *why* a claim was flagged, most systems can't show their work. I built a system
 > that fixes all three — and validated it against three real insurance datasets
-> (insurance_dataset and its synthetic variant are one source), including 1,170
-> real fraud labels."
+> (insurance_dataset and its synthetic variant are one source), including 1,212
+> real fraud labels, on **10,200 ground-truth queries**."
 
 ---
 
@@ -61,18 +61,27 @@ comparison → the savings table.
 **Narration:**
 > "Shot two: token optimization. A cross-encoder re-ranker scores every retrieved
 > node, and the pruner keeps only what's actually relevant to the question —
-> measured per-query, per-dataset. On 13 ground-truth queries across all three
-> datasets, retrieval and pruning accuracy are both **100%**."
+> measured per-query, per-dataset. On **10,200 ground-truth queries** across all
+> four graphs, retrieval and pruning accuracy are both **100%** — reported with a
+> Wilson 95% confidence interval (99.96–100%) so it's a statistical claim, not a
+> screenshot."
+
+**Anti-overfitting beat (say this — it answers the question auditors ask):**
+> "And because 88% of a benchmark like this is exact id-lookups, I added an
+> anti-circularity probe suite: 83 paraphrased queries without id quotes,
+> hallucination checks on non-existent ids, and cross-schema phrasing — all 83
+> passed. Those probes actually caught and fixed a real bug: a non-existent id
+> used to return other real claims instead of 'not found'."
 
 **Honesty beat (say this — it's your credibility):**
 > "Token savings depend on retrieval density. On precise real queries — an ID, a
-> policy, a threshold — the subgraph is already small, so we save **1 to 8%**.
+> policy, a threshold — the subgraph is already small, so we save **6 to 8%**.
 > On dense subgraphs with many sibling nodes — coverage lookups, fraud lists —
-> savings run **18% on average and up to 80%**. That's why we publish the number
-> per query instead of a single marketing figure."
+> savings run **15%+ and up to 80%**. That's why we publish the number per query
+> instead of a single marketing figure."
 
 **On screen:** flash the savings table:
-`fraud_oracle 5.3% · insurance_claims 3.3% · insurance_dataset (+ synthetic) 1.4–1.5%`
+`fraud_oracle 7.5% · insurance_claims 6.4% · insurance_dataset 8.4% · pdf demo 15.5%`
 
 ---
 
@@ -93,7 +102,7 @@ Cypher query → fraud ground-truth comparison panel.
 > context… no information indicating fraudulent"** — CSV ground truth: **not fraud** ✅
 
 **Narration (close of shot):**
-> "Across both labeled datasets, **all 1,170 fraud claims were caught — 100%
+> "Across all labeled graphs, **all 1,212 fraud claims were caught — 100%
 > precision, 100% recall, zero false positives, zero false negatives.** The
 > benchmark proves end-to-end fidelity: every flag survives retrieval,
 > re-ranking, pruning, and answer generation."
@@ -105,7 +114,7 @@ Cypher query → fraud ground-truth comparison panel.
 **On screen:** CI badge / pytest output / docker compose ps / README.
 
 **Narration:**
-> "It's built for production, not just the demo: **231 passing tests**, API
+> "It's built for production, not just the demo: **296 passing tests**, API
 > authentication, rate limiting, JSON logging, health probes, Dockerized —
 > Neo4j, API and dashboard in one `docker compose`, backed by CI. This is why I
 > think I'm the right fit for your Scale & Ops team. Thank you."
@@ -119,15 +128,16 @@ Cypher query → fraud ground-truth comparison panel.
 | Real datasets validated | 3 (fraud_oracle, insurance_claims, insurance_dataset — its data_synthetic.csv is the synthetic form of the same source) |
 | Entities in graph | ~209,000 |
 | Largest ingest (all 53,503 rows) | 16.6s · 40,259 unique customers |
-| Ground-truth retrieval accuracy | 13/13 = **100%** |
-| Pruning accuracy | 13/13 = **100%** |
-| Fraud labels evaluated (full pipeline) | 1,170 · **P/R/F1 = 100% / 100% / 100%** |
+| Ground-truth retrieval accuracy | 10,200/10,200 = **100%** (Wilson 95% CI 99.96–100%) |
+| Pruning accuracy | 10,200/10,200 = **100%** |
+| Anti-circularity probes | 83/83 (paraphrase · hallucination · cross-schema · answer-level) |
+| Fraud labels evaluated (full pipeline) | 1,212 · **P/R/F1 = 100% / 100% / 100%** |
 | False positives / false negatives | 0 / 0 |
 | CDC surgical update | **< 500 ms** |
 | Retrieval+prune latency (15k+ entities) | 20–500 ms |
-| Token savings (precise real queries) | 1–8% (published per query) |
-| Token savings (dense subgraphs) | 18% avg · up to 80% |
-| Tests | 231 passing |
+| Token savings (precise real queries) | 6.4–8.4% real · 15.5% pdf demo (published per query) |
+| Token savings (dense subgraphs) | 15%+ avg · up to 80% |
+| Tests | 296 passing |
 | Demo LLM | llama3.2:3b via Ollama (local, no API cost) |
 
 ---

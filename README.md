@@ -7,6 +7,9 @@ bottlenecks EXL faces:
 
 ![Description of PNG](image/Home_page_2.png)
 
+## Check the result
+[`data/real_dataset_results.md`](data/real_dataset_results.md).
+
 ## The 3 Techinal kill shots
 | Shot | Problem it solves | Implementation |
 |---|---|---|
@@ -49,7 +52,7 @@ python -m venv .venv && .venv/Scripts/pip install -r requirements.txt   # Window
 # 4) Tests
 .venv/Scripts/python.exe -m pytest
 ```
-![Description of PNG](image/Terminal.png)
+![Description of PNG](image/Home_page_01.png)
 
 ## Sessions (switch from the web UI)
 
@@ -100,7 +103,8 @@ Validated end-to-end against the **3 distinct real datasets** (4 CSV files) in
 `data/Real_datasets/` — `insurance_dataset.csv` and `data_synthetic.csv` are two
 forms of the same Kaggle source (one archive ships both CSVs):
 
-* **10,000 ground-truth queries** across the 3 real Excel sessions — `fraud_oracle` 5,500, `insurance_dataset` 3,900, `insurance_claims` 600 — **100% retrieval & pruning accuracy on every single query** (10,200 total including the synthetic variant + PDF demo graph, each 100/100)
+* **10,000 ground-truth queries** across the 3 real Excel sessions — `fraud_oracle` 5,500, `insurance_dataset` 3,900, `insurance_claims` 600 — **100% retrieval & pruning accuracy on every single query** (10,200 total including the synthetic variant + PDF demo graph, each 100/100). Reported with a **Wilson 95% CI (99.96–100%)** and the honest **query mix (88.6% exact id-lookups)** so the number can't be mistaken for a claim about harder queries.
+* **Anti-circularity probes: 83/83** (`scripts/benchmark_generalization.py`) — paraphrases without id quotes, non-existent ids that must come back empty (no hallucination), cross-schema phrasing, and answer-level grounding checks. **These found and fixed a real bug**: non-existent ids used to fall through to numeric seeding and return unrelated claims.
 * **Fraud detection: P/R/F1 = 100%** over all **1,212 real fraud labels** (923 + 247 + the demo graph's 42) plus 2,253 clean claims — zero false positives, zero false negatives
 * **Edge cases: 20/20** — head/middle/tail boundary queries over every real file
 * **Scale: 53,503 rows → 40,259 customers** ingested in ~16s, benchmark accuracy holds at 40k+ entities
@@ -124,11 +128,32 @@ Full details + honest caveats: [`data/real_dataset_results.md`](data/real_datase
 **Consolidated proof file** — `scripts/export_benchmark_proof.py` merges all raw
 benchmark JSONs into one
 [`data/benchmarks/benchmark_results.json`](data/benchmarks/benchmark_results.json):
-weighted accuracy, total raw vs optimized tokens, fraud P/R/F1, live lexical vs
+weighted accuracy with a **Wilson 95% confidence interval**, the **per-category
+query mix** (so the id-lookup share is visible), the **generalization-probe
+results**, total raw vs optimized tokens, fraud P/R/F1, live lexical vs
 cross-encoder rerank latency, and a projected annual cost saving
 (`--price-per-1k-tokens` / `--queries-per-day` overridable). Regenerate it after
 any benchmark run:
 `python scripts/export_benchmark_proof.py`.
+
+### How the numbers are produced (reproducible, end-to-end)
+
+Every headline number above comes from a script that computes its own ground
+truth from the source data — nothing is hand-typed:
+
+| Number | How it's computed | Command |
+|---|---|---|
+| **10,200 queries · 100% accuracy** | `benchmark_real_dataset.py` builds ground-truth queries **from the CSV itself** (ids, fraud labels, amount thresholds, keywords spread head/middle/tail), runs each through the full pipeline, and records hit/miss + tokens + latency per query | `python scripts/benchmark_real_dataset.py <dataset> --queries N --workers 8` (one run per loaded session) |
+| **Wilson CI** | `export_benchmark_proof.py` computes the 95% Wilson interval over all runs — 100% on 10,200 samples ⇒ lower bound 99.96% | `python scripts/export_benchmark_proof.py` |
+| **83/83 anti-circularity probes** | `benchmark_generalization.py` rephrases queries *without* id quotes, asserts non-existent ids return empty, crosses schemas, and checks answer grounding | `python scripts/benchmark_generalization.py <dataset>` |
+| **Fraud P/R/F1 = 100%** | `benchmark_fraud_detection.py` runs every fraud label through the full pipeline and scores verdicts against the CSV ground truth | `python scripts/benchmark_fraud_detection.py --dataset <dataset>` |
+| **Token savings per query** | `token_counter.py` (tiktoken) counts baseline vs pruned context inside each benchmark run | recorded in every `real_<dataset>.json` result |
+| **Latency** | per-query `execution_time_ms` from the pipeline, averaged per dataset | same files |
+
+Raw per-query results live in `data/benchmarks/real_*.json`,
+`fraud_detection_*.json`, `generalization_*.json`; the dashboard's **Pipeline
+Validation** table reads them directly, so the numbers on screen are always the
+measured ones.
 
 ## Auto-pipeline
 
@@ -146,6 +171,7 @@ dashboard's validation table. See the report for usage.
 * [`how_to_run.md`](how_to_run.md) — run commands
 * [`GraphRAG Insurance Claims System - Production-Ready Plan.md`](GraphRAG%20Insurance%20Claims%20System%20-%20Production-Ready%20Plan.md) — the original plan
 
+![Description of PNG](image/Terminal.png)
 
 ## Repository layout
 

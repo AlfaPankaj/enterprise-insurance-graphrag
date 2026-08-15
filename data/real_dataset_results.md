@@ -151,6 +151,39 @@ Testing against real data exposed 4 real retrieval gaps — all fixed, all teste
    parser, so expected sets can never disagree with the graph.
 4. **`occupation` added to keyword-seed props** (already done for the doctors query).
 
+## Is the 100% overfitted? — the anti-circularity probes
+
+Fair question, and the answer is split:
+
+* **It is NOT ML overfitting** — nothing in the pipeline is trained on these
+  queries. The retriever is deterministic rules, the reranker is BM25 (a
+  formula, no fitted weights), the pruner is a token budget.
+* **BUT 88.6% of the 10,200 queries ARE exact id-lookups**, whose expected ids
+  come from the same CSVs + helpers that built the graph — an auditor would
+  rightly call that near-circular.
+
+So the 100% needed a second, harder test. `scripts/benchmark_generalization.py`
+runs **anti-circularity probes** that break the id-lookup loop:
+
+| Probe | What it asks | Result (83 probes) |
+|---|---|---|
+| **Paraphrase** | Same expected nodes, phrased WITHOUT the claim id — "claims under policy POL-x" (multi-hop) and "claims related to {value}" (keyword seed) | **all pass** |
+| **Negative / hallucination** | Non-existent ids (CLM-99999), unknown keywords — must return "no context", never a fabricated claim | **all pass** |
+| **Cross-schema** | Queries phrased for another dataset's vocabulary — resolve when the concept exists, honestly refuse when it doesn't | **all pass** |
+| **Answer-level** | Final answer text must reference an expected node or the retrieval's own seed (grounded, not fabricated) | **83/83 grounded** |
+
+Per-session: insurance_claims 24/24 · fraud_oracle 21/21 · insurance_dataset
+20/20 · pdf demo 18/18. The honest caveat: extractive answers name the
+**top-ranked anchor node** (often a Policyholder/FraudFlag) rather than the
+claim id itself, so "names the expected id literally" is much lower — that is
+an answer-formatting limitation of the deterministic fallback, not a retrieval
+miss (retrieval found every expected node).
+
+**The probes also found and fixed a real bug**: a query naming an id that
+doesn't exist (CLM-99999) used to fall through to numeric seeding and return
+*other real claims* (silent fabrication). The retriever now returns empty for
+non-existent ids — regression-tested in `tests/test_retriever.py`.
+
 ## What this proves (mapped to the project's goals)
 
 - **Multi-hop retrieval works on real insurance data**: policy → claim → fraud flag
