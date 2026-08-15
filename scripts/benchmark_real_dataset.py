@@ -23,6 +23,7 @@ import re
 import sys
 import time
 from collections import defaultdict
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
 from neo4j import GraphDatabase
@@ -513,6 +514,10 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     p.add_argument("--custom-session", dest="custom_session", default=None,
                    help="benchmark a user-uploaded CSV session by name "
                         "(reads its source from data/custom_sessions.json)")
+    p.add_argument("--workers", type=int, default=8,
+                   help="parallel workers for the query run (default: 8; the "
+                        "Neo4j driver is thread-safe and each worker creates "
+                        "its own lexical reranker, so runs scale ~linearly)")
     p.add_argument("--uri", default=settings.NEO4J_URI)
     p.add_argument("--user", default=settings.NEO4J_USER)
     p.add_argument("--password", default=settings.NEO4J_PASSWORD)
@@ -546,61 +551,91 @@ def main(argv: list[str] | None = None) -> int:
             queries = _expand_to_target(dataset, rows, args.queries)
     print(f"== {dataset}: {len(queries)} ground-truth queries ==")
 
+    if args.workers < 1:
+        print("ERROR: --workers must be >= 1")
+        return 2
+
     driver = GraphDatabase.driver(args.uri, auth=(args.user, args.password))
-    results = []
+
+    def run_one(q: dict) -> dict:
+        """One ground-truth query through the full pipeline."""
+        res = run_query(driver, q["query"], token_budget=args.token_budget,
+                        reranker_mode="lexical", answer_mode="extractive")
+        expected = set(q["expected"])
+        mode = q.get("mode", "exact")
+        sub = retrieve_subgraph(driver, q["query"], settings.MAX_HOPS)
+        sub_ids = {n["id"] for n in sub["nodes"]}
+        kept = set(res["pruned"]["kept"])
+        if mode == "exact":
+            retrieval_hit = expected <= sub_ids
+            prune_hit = expected <= kept
+            bad_seeds: set[str] = set()
+        else:  # top-k: seeding is capped, so check recall>=1 + precision
+            seed_ids = set(res["retrieval"]["seeds"])
+            bad_seeds = {s for s in seed_ids if s.startswith(("CLM", "POL"))} - expected
+            retrieval_hit = bool(expected & sub_ids) and not bad_seeds
+            prune_hit = bool(expected & kept) and not bad_seeds
+        expected_found = len(expected & sub_ids)
+        return {
+            "category": q["category"], "query": q["query"], "mode": mode,
+            "expected": sorted(expected),
+            "expected_found": expected_found, "expected_total": len(expected),
+            "missing_from_graph": sorted(expected - sub_ids)[:5],
+            "missing_after_prune": sorted(expected - kept)[:5],
+            "bad_seeds": sorted(bad_seeds),
+            "retrieval_hit": retrieval_hit,
+            "prune_hit": prune_hit,
+            "tokens_before": res["tokens"]["before"],
+            "tokens_after": res["tokens"]["after"],
+            "savings_percent": res["tokens"]["savings_percent"],
+            "execution_time_ms": res["execution_time_ms"],
+        }
+
+    results: list[dict] = []
+    t0 = time.perf_counter()
+    # 10k benchmark queries must not flood the audit trail (they're thousands;
+    # the same choice the fraud benchmark makes). Restored in ``finally`` so an
+    # in-process caller keeps audit logging enabled afterwards.
+    audit_was_enabled = settings.AUDIT_ENABLED
+    settings.AUDIT_ENABLED = False
     try:
-        for q in queries:
-            res = run_query(driver, q["query"], token_budget=args.token_budget,
-                            reranker_mode="lexical", answer_mode="extractive")
-            expected = set(q["expected"])
-            mode = q.get("mode", "exact")
-            sub = retrieve_subgraph(driver, q["query"], settings.MAX_HOPS)
-            sub_ids = {n["id"] for n in sub["nodes"]}
-            kept = set(res["pruned"]["kept"])
-            if mode == "exact":
-                retrieval_hit = expected <= sub_ids
-                prune_hit = expected <= kept
-                bad_seeds: set[str] = set()
-            else:  # top-k: seeding is capped, so check recall>=1 + precision
-                seed_ids = set(res["retrieval"]["seeds"])
-                bad_seeds = {s for s in seed_ids if s.startswith(("CLM", "POL"))} - expected
-                retrieval_hit = bool(expected & sub_ids) and not bad_seeds
-                prune_hit = bool(expected & kept) and not bad_seeds
-            expected_found = len(expected & sub_ids)
-            results.append({
-                "category": q["category"], "query": q["query"], "mode": mode,
-                "expected": sorted(expected),
-                "expected_found": expected_found, "expected_total": len(expected),
-                "missing_from_graph": sorted(expected - sub_ids)[:5],
-                "missing_after_prune": sorted(expected - kept)[:5],
-                "bad_seeds": sorted(bad_seeds),
-                "retrieval_hit": retrieval_hit,
-                "prune_hit": prune_hit,
-                "tokens_before": res["tokens"]["before"],
-                "tokens_after": res["tokens"]["after"],
-                "savings_percent": res["tokens"]["savings_percent"],
-                "execution_time_ms": res["execution_time_ms"],
-            })
-            mark = "OK " if retrieval_hit and prune_hit else "FAIL"
-            where = f" ({expected_found}/{len(expected)} found)" if mode == "top-k" else ""
-            print(f"  [{mark}] {q['category']:<18} {q['query'][:46]:<46} "
-                  f"{res['tokens']['before']:>5} -> {res['tokens']['after']:>4} tok "
-                  f"({res['tokens']['savings_percent']:>5.1f}%) "
-                  f"{res['execution_time_ms']:>6.1f}ms{where}")
-            if not (retrieval_hit and prune_hit):
-                if bad_seeds:
-                    print(f"         off-target seeds: {sorted(bad_seeds)[:5]}")
-                if not retrieval_hit:
-                    print(f"         not found: {sorted(expected - sub_ids)[:5]}")
-                if not prune_hit:
-                    print(f"         dropped in prune: {sorted(expected - kept)[:5]}")
+        if args.workers <= 1:
+            for q in queries:
+                r = run_one(q)
+                results.append(r)
+                mark = "OK " if r["retrieval_hit"] and r["prune_hit"] else "FAIL"
+                print(f"  [{mark}] {r['category']:<18} {q['query'][:46]:<46} "
+                      f"{r['tokens_before']:>5} -> {r['tokens_after']:>4} tok "
+                      f"({r['savings_percent']:>5.1f}%) {r['execution_time_ms']:>6.1f}ms")
+        else:
+            with ThreadPoolExecutor(max_workers=args.workers) as pool:
+                futures = {pool.submit(run_one, q): q for q in queries}
+                done = 0
+                for fut in as_completed(futures):
+                    results.append(fut.result())
+                    done += 1
+                    if done % 500 == 0 or done == len(queries):
+                        print(f"  ...{done}/{len(queries)} queries "
+                              f"({time.perf_counter() - t0:.0f}s)")
     finally:
         driver.close()
+        settings.AUDIT_ENABLED = audit_was_enabled
+
+    for r in results:
+        if not (r["retrieval_hit"] and r["prune_hit"]):
+            print(f"  FAIL {r['query']}")
+            if r["bad_seeds"]:
+                print(f"         off-target seeds: {sorted(r['bad_seeds'])[:5]}")
+            if not r["retrieval_hit"]:
+                print(f"         not found: {sorted(r['missing_from_graph'])[:5]}")
+            if not r["prune_hit"]:
+                print(f"         dropped in prune: {sorted(r['missing_after_prune'])[:5]}")
 
     n = len(results)
     ret_acc = sum(r["retrieval_hit"] for r in results)
     prn_acc = sum(r["prune_hit"] for r in results)
     savings = [r["savings_percent"] for r in results]
+    elapsed = time.perf_counter() - t0
     summary = {
         "dataset": dataset,
         "queries": n,
@@ -608,13 +643,16 @@ def main(argv: list[str] | None = None) -> int:
         "pruning_accuracy": round(prn_acc / n * 100, 2),
         "avg_savings_pct": round(sum(savings) / n, 2),
         "avg_latency_ms": round(sum(r["execution_time_ms"] for r in results) / n, 2),
+        "elapsed_s": round(elapsed, 1),
+        "workers": args.workers,
         "results": results,
     }
     print("=" * 72)
     print(f"  {dataset}: retrieval {ret_acc}/{n} = {summary['retrieval_accuracy']}% | "
           f"pruning {prn_acc}/{n} = {summary['pruning_accuracy']}% | "
           f"avg savings {summary['avg_savings_pct']}% | "
-          f"avg {summary['avg_latency_ms']}ms")
+          f"avg {summary['avg_latency_ms']}ms | {elapsed:.0f}s with "
+          f"{args.workers} workers")
     # persist per-dataset by default so the dashboard can show all 4 files
     out = args.output or PROJECT_ROOT / "data" / "benchmarks" / f"real_{dataset}.json"
     out.parent.mkdir(parents=True, exist_ok=True)

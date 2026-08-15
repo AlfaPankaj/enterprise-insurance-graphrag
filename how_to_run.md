@@ -18,6 +18,13 @@
 .venv/Scripts/python.exe -m pytest
 .venv/Scripts/python.exe scripts/run_benchmark.py --reranker-mode lexical
 
+# Real-dataset ground-truth benchmark (auditor-scale: --queries N per dataset,
+# parallel --workers; 10k = 5,500 fraud_oracle + 3,900 insurance_dataset +
+# 600 insurance_claims, each run against its own loaded session)
+.venv/Scripts/python.exe scripts/benchmark_real_dataset.py fraud_oracle --queries 5500 --workers 8
+.venv/Scripts/python.exe scripts/benchmark_real_dataset.py insurance_dataset --queries 3900 --workers 8
+.venv/Scripts/python.exe scripts/benchmark_real_dataset.py insurance_claims --queries 600 --workers 8
+
 # Benchmark proof (single consolidated JSON — the run: accuracy, tokens, savings,
 # fraud P/R/F1, reranker latency, projected annual cost)
 .venv/Scripts/python.exe scripts/export_benchmark_proof.py   # -> data/benchmarks/benchmark_results.json

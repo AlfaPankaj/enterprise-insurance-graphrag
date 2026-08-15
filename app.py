@@ -426,7 +426,7 @@ elif page == "Dashboard":
 
     st.markdown("---")
     st.markdown("#### Pipeline Validation (all sessions)")
-    st.caption("Benchmarks per session — 3 real Excel datasets, the **PDF demo graph** (edge-case benchmark), and any **custom uploads**. The ● marks the currently loaded session; it updates automatically when you switch or upload. CSV uploads are benchmarked automatically in the background — this table refreshes until they land. Regenerate with `scripts/benchmark_real_dataset.py <dataset>` + `scripts/benchmark_fraud_detection.py --dataset <dataset>` (JSONs saved to `data/benchmarks/`).")
+    st.caption("Benchmarks per session — **10,200 ground-truth queries total** (10,000 on the 3 real Excel sessions: fraud_oracle 5,500 · insurance_dataset 3,900 · insurance_claims 600, plus the synthetic variant + PDF demo graph at 100 each), **100% retrieval & pruning accuracy**, token savings, latency and fraud P/R/F1 per row. The ● marks the currently loaded session; it updates automatically when you switch or upload. CSV uploads are benchmarked automatically in the background — this table refreshes until they land. Regenerate with `scripts/benchmark_real_dataset.py <dataset> --queries N --workers 8` + `scripts/benchmark_fraud_detection.py --dataset <dataset>` (JSONs saved to `data/benchmarks/`).")
     # while any auto-benchmark is in flight, refresh this table every 5s so the
     # new row fills in without a manual reload (fragment keeps the live query
     # runner below undisturbed)

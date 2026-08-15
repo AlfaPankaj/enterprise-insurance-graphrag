@@ -1,20 +1,20 @@
 {
   "benchmark_metadata": {
     "dataset": "GraphRAG Insurance Claims System \u2014 Kaggle Insurance Claims & Policy Knowledge Graph",
-    "total_test_queries": 520,
-    "timestamp": "2026-08-13T16:17:23Z",
+    "total_test_queries": 10200,
+    "timestamp": "2026-08-15T00:03:37Z",
     "generator": "scripts/export_benchmark_proof.py"
   },
   "aggregate_metrics": {
     "retrieval_accuracy": 100.0,
     "pruning_accuracy": 100.0,
     "accuracy_score": 1.0,
-    "raw_tokens_consumed": 269143,
-    "optimized_tokens_consumed": 217983,
-    "average_token_savings_pct": 9.03,
-    "saved_tokens_per_query": 98.4,
-    "avg_latency_ms": 307.3,
-    "projected_annual_cost_savings_usd": 897.76,
+    "raw_tokens_consumed": 2044311,
+    "optimized_tokens_consumed": 1857621,
+    "average_token_savings_pct": 7.83,
+    "saved_tokens_per_query": 18.3,
+    "avg_latency_ms": 194.1,
+    "projected_annual_cost_savings_usd": 167.01,
     "cost_assumptions": {
       "price_per_1k_tokens": 0.0025,
       "queries_per_day": 10000,
@@ -43,8 +43,8 @@
     },
     "cross_encoder": {
       "rerank_used": "cross-encoder",
-      "avg_rerank_latency_ms": 51.7,
-      "cold_start_time_s": 20.0,
+      "avg_rerank_latency_ms": 47.4,
+      "cold_start_time_s": 52.1,
       "model_name": "cross-encoder/ms-marco-MiniLM-L-6-v2",
       "dependencies": "sentence-transformers"
     }
@@ -62,33 +62,33 @@
     },
     {
       "dataset": "fraud_oracle",
-      "queries": 100,
+      "queries": 5500,
       "retrieval_accuracy": 100.0,
       "pruning_accuracy": 100.0,
-      "avg_savings_pct": 7.17,
-      "avg_latency_ms": 120.94,
-      "raw_tokens": 20927,
-      "optimized_tokens": 19533
+      "avg_savings_pct": 7.49,
+      "avg_latency_ms": 236.33,
+      "raw_tokens": 1044899,
+      "optimized_tokens": 967905
     },
     {
       "dataset": "insurance_claims",
-      "queries": 100,
+      "queries": 600,
       "retrieval_accuracy": 100.0,
       "pruning_accuracy": 100.0,
-      "avg_savings_pct": 9.48,
-      "avg_latency_ms": 44.3,
-      "raw_tokens": 59852,
-      "optimized_tokens": 47817
+      "avg_savings_pct": 6.35,
+      "avg_latency_ms": 221.25,
+      "raw_tokens": 183729,
+      "optimized_tokens": 164694
     },
     {
       "dataset": "insurance_dataset",
-      "queries": 100,
+      "queries": 3900,
       "retrieval_accuracy": 100.0,
       "pruning_accuracy": 100.0,
-      "avg_savings_pct": 7.04,
-      "avg_latency_ms": 108.57,
-      "raw_tokens": 29374,
-      "optimized_tokens": 27967
+      "avg_savings_pct": 8.39,
+      "avg_latency_ms": 133.26,
+      "raw_tokens": 660453,
+      "optimized_tokens": 605846
     },
     {
       "dataset": "synthetic",
@@ -99,16 +99,6 @@
       "avg_latency_ms": 29.68,
       "raw_tokens": 122425,
       "optimized_tokens": 87789
-    },
-    {
-      "dataset": "pdf_demo_graph",
-      "queries": 20,
-      "retrieval_accuracy": 100.0,
-      "pruning_accuracy": 100.0,
-      "avg_savings_pct": 7.28,
-      "avg_latency_ms": 5264.39,
-      "raw_tokens": 3760,
-      "optimized_tokens": 3490
     }
   ]
 }

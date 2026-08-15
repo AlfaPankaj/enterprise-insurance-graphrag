@@ -49,6 +49,7 @@ python -m venv .venv && .venv/Scripts/pip install -r requirements.txt   # Window
 # 4) Tests
 .venv/Scripts/python.exe -m pytest
 ```
+![Description of PNG](image/Terminal.png)
 
 ## Sessions (switch from the web UI)
 
@@ -99,14 +100,15 @@ Validated end-to-end against the **3 distinct real datasets** (4 CSV files) in
 `data/Real_datasets/` — `insurance_dataset.csv` and `data_synthetic.csv` are two
 forms of the same Kaggle source (one archive ships both CSVs):
 
-* **500 ground-truth queries** (100 per dataset) — 100% retrieval & pruning accuracy across every dataset, including the PDF demo graph (100/100) and the full 53,503-row data_synthetic (100/100)
-* **Fraud detection: P/R/F1 = 100%** over all **1,170 real fraud labels** (923 + 247) plus the demo graph's 42 — zero false positives
+* **10,000 ground-truth queries** across the 3 real Excel sessions — `fraud_oracle` 5,500, `insurance_dataset` 3,900, `insurance_claims` 600 — **100% retrieval & pruning accuracy on every single query** (10,200 total including the synthetic variant + PDF demo graph, each 100/100)
+* **Fraud detection: P/R/F1 = 100%** over all **1,212 real fraud labels** (923 + 247 + the demo graph's 42) plus 2,253 clean claims — zero false positives, zero false negatives
 * **Edge cases: 20/20** — head/middle/tail boundary queries over every real file
 * **Scale: 53,503 rows → 40,259 customers** ingested in ~16s, benchmark accuracy holds at 40k+ entities
 
 The Dashboard's **Pipeline Validation** table shows all of this per session — the
-3 real datasets, the **PDF demo graph** (from `scripts/benchmark_edge_cases.py`,
-20/20 edge-case queries) and any **custom uploads** — with the ● marking the
+3 real datasets, the **PDF demo graph** (100 ground-truth queries from
+`scripts/benchmark_real_dataset.py synthetic`, plus the legacy 20/20 edge-case
+file as fallback) and any **custom uploads** — with the ● marking the
 currently loaded session. A newly uploaded dataset appears as a row immediately,
 and **CSV uploads are benchmarked automatically**: as soon as the session seeds,
 `scripts/benchmark_real_dataset.py --custom-session <name>` and (when the CSV
@@ -144,7 +146,6 @@ dashboard's validation table. See the report for usage.
 * [`how_to_run.md`](how_to_run.md) — run commands
 * [`GraphRAG Insurance Claims System - Production-Ready Plan.md`](GraphRAG%20Insurance%20Claims%20System%20-%20Production-Ready%20Plan.md) — the original plan
 
-![Description of PNG](image/Terminal.png)
 
 ## Repository layout
 
