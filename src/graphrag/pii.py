@@ -11,10 +11,21 @@ Modes (``settings.PII_MODE``):
   context is serialized for ranking/answering, and again in the final answer
   text. IDs and non-PII business fields (amounts, statuses, causes) pass
   through untouched, so retrieval/benchmark semantics do not change.
+
+**Encryption at rest** (``settings.PII_ENCRYPTION_KEY``): PII-classified
+properties are Fernet-encrypted (``enc:v1:<token>``) before they are written
+to Neo4j and decrypted on read. Write paths (``graph_updater``, ``load_nodes``)
+call ``encrypt_node``; the retrieval read path (``_fetch_nodes``) calls
+``decrypt_node``. Values already carrying the prefix are never re-encrypted
+(idempotent), and non-PII fields stay plaintext so graph queries/filters keep
+working. Envelope encryption (KMS-wrapped data key) is the production upgrade
+path; this is the single-key baseline.
 """
 
 from __future__ import annotations
 
+import base64
+import hashlib
 import re
 from dataclasses import dataclass
 
@@ -144,3 +155,84 @@ def scrub_answer(text: str, policy: MaskingPolicy) -> str:
     if not policy.active:
         return text
     return mask_text(text)
+
+
+# ---------------------------------------------------------------------------
+# encryption at rest (Fernet; lazy import so cryptography stays optional)
+# ---------------------------------------------------------------------------
+
+_ENCRYPT_PREFIX = "enc:v1:"
+
+
+def encryption_enabled() -> bool:
+    """True when PII field encryption is configured."""
+    return bool(settings.PII_ENCRYPTION_KEY)
+
+
+def _fernet():
+    from cryptography.fernet import Fernet
+
+    return Fernet(_fernet_key())
+
+
+def _fernet_key() -> bytes:
+    """32-byte urlsafe-base64 key from the setting.
+
+    Accepts a real urlsafe-base64 32-byte key directly; anything else
+    (passphrase, hex) is SHA-256-derived so users can't lock themselves out
+    with a malformed key.
+    """
+    raw = settings.PII_ENCRYPTION_KEY.encode("utf-8")
+    try:
+        decoded = base64.urlsafe_b64decode(raw + b"=" * (-len(raw) % 4))
+        if len(decoded) == 32:
+            return base64.urlsafe_b64encode(decoded)
+    except Exception:
+        pass
+    return base64.urlsafe_b64encode(hashlib.sha256(raw).digest())
+
+
+def encrypt_value(value) -> str:
+    """Encrypt one PII value (idempotent; non-string values stringified)."""
+    if isinstance(value, (int, float, bool)):
+        value = str(value)
+    text = str(value)
+    if text.startswith(_ENCRYPT_PREFIX):
+        return text
+    token = _fernet().encrypt(text.encode("utf-8")).decode("ascii")
+    return _ENCRYPT_PREFIX + token
+
+
+def decrypt_value(value) -> str:
+    """Decrypt an ``enc:v1:`` value; pass anything else through unchanged."""
+    text = str(value)
+    if not text.startswith(_ENCRYPT_PREFIX):
+        return text
+    return _fernet().decrypt(text[len(_ENCRYPT_PREFIX):].encode("ascii")).decode("utf-8")
+
+
+def encrypt_node(node: dict) -> dict:
+    """Write path: encrypt PII-classed props (no-op when encryption is off)."""
+    if not encryption_enabled():
+        return node
+    props = dict(node.get("props", {}))
+    changed = False
+    for prop, value in list(props.items()):
+        cls = classify(node.get("label", ""), prop)
+        if cls and not str(value).startswith(_ENCRYPT_PREFIX):
+            props[prop] = encrypt_value(value)
+            changed = True
+    return {**node, "props": props} if changed else node
+
+
+def decrypt_node(node: dict) -> dict:
+    """Read path: decrypt PII-classed props (no-op when encryption is off)."""
+    if not encryption_enabled():
+        return node
+    props = dict(node.get("props", {}))
+    changed = False
+    for prop, value in list(props.items()):
+        if classify(node.get("label", ""), prop) and str(value).startswith(_ENCRYPT_PREFIX):
+            props[prop] = decrypt_value(value)
+            changed = True
+    return {**node, "props": props} if changed else node

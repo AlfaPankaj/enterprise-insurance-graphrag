@@ -356,7 +356,16 @@ def _expand_both(session, frontier: list[str],
 
 def _fetch_nodes(session, ids: list[str],
                  tenant_id: str | None = None) -> dict[str, dict]:
-    """id -> {id, label, props} for every requested node id."""
+    """id -> {id, label, props} for every requested node id.
+
+    PII-classified props stored encrypted (``PII_ENCRYPTION_KEY``) are
+    decrypted here — the read path of the at-rest encryption scheme.
+    """
+    try:
+        from graphrag.pii import decrypt_node, encryption_enabled
+    except ImportError:  # pragma: no cover - graphrag package always present
+        encryption_enabled = lambda: False  # noqa: E731
+        decrypt_node = lambda n: n  # noqa: E731
     nodes: dict[str, dict] = {}
     tp = tenant_predicate("n")
     for row in session.run(
@@ -368,7 +377,10 @@ def _fetch_nodes(session, ids: list[str],
         nid = node["id"]
         props = {k: v for k, v in dict(node).items()
                  if k != "id" and not isinstance(v, (dict, list))}
-        nodes[nid] = {"id": nid, "label": row["labels"][0], "props": props}
+        fetched = {"id": nid, "label": row["labels"][0], "props": props}
+        if encryption_enabled():
+            fetched = decrypt_node(fetched)
+        nodes[nid] = fetched
     return nodes
 
 

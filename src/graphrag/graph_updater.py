@@ -22,6 +22,7 @@ from datetime import datetime, timezone
 from graphrag.cache import bump_revision
 from graphrag.config import settings
 from graphrag.graph_store import SNAPSHOT_LABEL, save_existing_entities
+from graphrag.pii import classify, encryption_enabled, encrypt_value
 
 # Join fields are used to derive edges and are not stored as node properties.
 JOIN_FIELDS = {"policy_id", "claim_id", "investigator_id", "policyholder_id", "doc_id"}
@@ -163,19 +164,26 @@ def update_graph_surgically(driver, doc_id: str, changes: dict,
                 # NOTE: don't use .get(key, entity["props"]) — the default is
                 # evaluated eagerly and raises for modified entities.
                 full_props = entity["new_props"] if "new_props" in entity else entity["props"]
+                stored = {k: v for k, v in full_props.items() if k not in JOIN_FIELDS}
+                # v2 PII at rest: classified fields are Fernet-encrypted before
+                # they touch the database (non-PII fields stay plaintext so
+                # graph queries/filters keep working)
+                if encryption_enabled():
+                    stored = {k: (encrypt_value(v) if classify(entity["label"], k) else v)
+                              for k, v in stored.items()}
                 if stamp_tenant:
                     tx.run(
                         f"MERGE (n:{entity['label']} {{id: $id}}) SET n += $props "
                         "SET n.tenant_id = coalesce(n.tenant_id, $tenant)",
                         id=entity["id"],
-                        props={k: v for k, v in full_props.items() if k not in JOIN_FIELDS},
+                        props=stored,
                         tenant=tenant_id,
                     )
                 else:
                     tx.run(
                         f"MERGE (n:{entity['label']} {{id: $id}}) SET n += $props",
                         id=entity["id"],
-                        props={k: v for k, v in full_props.items() if k not in JOIN_FIELDS},
+                        props=stored,
                     )
                 if "new_props" in entity:
                     _prune_derived_edges(tx, entity["label"], entity["id"])

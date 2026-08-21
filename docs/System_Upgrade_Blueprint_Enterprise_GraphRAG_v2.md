@@ -269,7 +269,30 @@ criteria. Order reflects dependency, not necessarily priority — see §6.
 * **Tests** — 90 new tests across the v2 slices: **363 passed, 12 skipped**
   (skips = DB-dependent, unchanged baseline).
 
-**Next slices (in order):** WS-B remainder (PII at-rest encryption, OIDC
-integration test) → WS-A remainder (durable job runner, OTel tracing) →
-WS-C (hybrid retrieval + answer-quality evals) → WS-E (banking domain, Aura
-topology).
+**Done — WS-B remainder (v2 slice 4):**
+
+* **PII encryption at rest** — `pii.encrypt_value/decrypt_value/encrypt_node/
+  decrypt_node` (Fernet/AES-GCM via `cryptography`, lazy import). PII-classed
+  props are encrypted (`enc:v1:`) before they touch Neo4j on **every write
+  path** (`update_graph_surgically`, `load_nodes` → all ingest/seed scripts);
+  the retrieval read path (`_fetch_nodes`) decrypts. Idempotent, tamper-
+  detected (InvalidToken), key from `PII_ENCRYPTION_KEY` (base64 key or
+  SHA-256-derived passphrase); non-PII fields stay plaintext so graph
+  queries/filters keep working. (G2 — at-rest half)
+* **OIDC RS256 + JWKS integration test** — `tests/test_oidc_rs256.py` runs the
+  real enterprise flow against a local IdP stub: threaded JWKS server, RS256
+  keypair, `require_user` end to end — valid token → identity, forged
+  signature → 401, unknown kid → 401, role gates enforced post-login.
+  `identity_from_token` / `identity_from_api_key` helpers added for
+  UI/scripts callers.
+* **Streamlit login gate** — `app.py` signs in via API key (static mode) or
+  bearer token (jwt mode) whenever auth is configured; identity flows into
+  `run_query`/`stream_query` (tenant scoping + PII masking per user), subject
+  + roles shown in the sidebar, sign-out supported. Dev mode (auth off)
+  unchanged.
+* **Tests** — 115 new tests across the v2 slices: **385 passed, 12 skipped**
+  (skips = DB-dependent, unchanged baseline).
+
+**Next slices (in order):** WS-A remainder (durable job runner, OTel tracing)
+→ WS-C (hybrid retrieval + answer-quality evals) → WS-E (banking domain,
+Aura topology).

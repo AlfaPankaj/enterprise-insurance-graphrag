@@ -109,6 +109,12 @@ JWT_SECRET=<at least 32 random chars>
 JWT_ISSUER=my-test-issuer          # optional but recommended
 ```
 
+> For a **real IdP** (Keycloak / Azure AD / Okta): leave `JWT_SECRET` empty and
+> set `JWKS_URL` to the provider's JWKS endpoint (e.g.
+> `https://<keycloak>/realms/<realm>/protocol/openid-connect/certs`). Tokens
+> are verified as RS256 with automatic key discovery — the same flow
+> `tests/test_oidc_rs256.py` exercises end to end against a local IdP stub.
+
 Mint a token locally (PyJWT is already installed) and use it with curl:
 
 ```python
@@ -238,6 +244,43 @@ CACHE_MAX_ENTRIES=1000
   provider; extractive answers arrive as a single delta.
 * When `PII_MODE=mask` applies to the caller, streaming is disabled and the
   answer arrives as one buffered delta (nothing sensitive streams).
+
+## 6c. PII encryption at rest (v2)
+
+```dotenv
+# generate a key:
+#   python -c "import base64,os;print(base64.urlsafe_b64encode(os.urandom(32)).decode())"
+PII_ENCRYPTION_KEY=<your 44-char key>
+```
+
+1. Re-seed a session (`Re-seed this session` in the sidebar, or
+   `python scripts/seed_graph.py --reset --apply-schema`): policyholder
+   names/emails/DOBs are now stored in Neo4j as `enc:v1:...` ciphertext —
+   check in the Neo4j Browser (`MATCH (n:Policyholder) RETURN n LIMIT 1`).
+2. Queries still return plaintext to authorized callers (the retriever
+   decrypts on read) — combine with `PII_MODE=mask` to also hide fields from
+   analysts.
+3. Business fields (amounts, statuses, risk scores) remain plaintext, so
+   threshold/graph queries are unaffected.
+4. Tamper test: edit a `enc:v1:` value directly in Neo4j → the next query
+   touching that node fails closed with an InvalidToken error (Fernet
+   authentication) rather than serving garbage.
+
+> Production upgrade path: envelope encryption (KMS-wrapped data key) —
+> the single-key baseline is the demo/trial mode.
+
+## 6d. UI login gate (v2)
+
+When auth is configured (`AUTH_MODE=static`/`jwt` or `API_KEY` set), the
+Streamlit app shows a **Sign in** box in the sidebar:
+
+* `static` mode → paste the API key
+* `jwt` mode → paste a bearer token (mint one with the PyJWT snippet above,
+  or use your real IdP when `JWKS_URL` points at it)
+
+After sign-in the sidebar shows the user + roles, every query runs as that
+identity (tenant scoping + PII masking apply), and Sign out resets it. With
+auth off (dev), the app behaves exactly as before.
 
 ## 7. Trial-account caveats (set expectations before the demo)
 

@@ -72,6 +72,11 @@ class Settings(BaseSettings):
     # off = raw fields everywhere (v1 behavior); mask = redact PII-classified
     # fields in retrieval context + answers unless the caller's role can read them
     PII_MODE: str = "off"
+    # app-layer field encryption for PII-classified properties (Fernet/AES).
+    # Empty = disabled (v1 behavior). Set to a 32-byte urlsafe-base64 key:
+    #   python -c "import base64,os;print(base64.urlsafe_b64encode(os.urandom(32)).decode())"
+    # (a plain passphrase is also accepted — it is SHA-256-derived into a key)
+    PII_ENCRYPTION_KEY: str = ""
     # false = v1 behavior; true = input/output guardrail checks on every query
     GUARDRAILS_ENABLED: bool = False
     # off = v1 un-scoped graph; column = every Cypher query is prefixed with a

@@ -143,3 +143,37 @@ def test_static_mode_identity_and_roles(monkeypatch):
     resp = client.get("/admin", headers={"X-API-Key": "k-123"})
     assert resp.status_code == 200
     assert resp.json()["subject"] == "api-key"
+
+
+# ---------------------------------------------------------------------------
+# UI/scripts helpers (v2 login gate)
+# ---------------------------------------------------------------------------
+
+def test_identity_from_api_key_helper(monkeypatch):
+    from graphrag.identity import identity_from_api_key
+
+    monkeypatch.setattr(settings, "API_KEY", "ui-key")
+    monkeypatch.setattr(settings, "API_KEY_ROLES", "analyst,auditor")
+    user = identity_from_api_key("ui-key")
+    assert user is not None
+    assert user.subject == "api-key"
+    assert user.has_role("analyst") and user.has_role("auditor")
+    assert user.tenant_id == settings.DEFAULT_TENANT
+    assert identity_from_api_key("wrong") is None
+
+
+def test_identity_from_token_helper(monkeypatch):
+    from graphrag.identity import identity_from_token
+
+    monkeypatch.setattr(settings, "AUTH_MODE", "jwt")
+    monkeypatch.setattr(settings, "JWT_SECRET", "test-secret")
+    monkeypatch.setattr(settings, "JWT_ISSUER", "")
+    monkeypatch.setattr(settings, "JWT_AUDIENCE", "")
+    user = identity_from_token(_make_token({"sub": "u-9", "roles": ["admin"],
+                                            "tenant_id": "bank-b"}))
+    assert user.subject == "u-9" and user.has_role("admin")
+    assert user.tenant_id == "bank-b"
+
+    import jwt as _jwt
+    with pytest.raises(_jwt.PyJWTError):
+        identity_from_token("garbage-token")

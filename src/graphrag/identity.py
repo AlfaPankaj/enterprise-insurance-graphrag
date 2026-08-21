@@ -184,6 +184,21 @@ def identity_from_request(request: Request) -> UserIdentity:
     return _anonymous()
 
 
+def identity_from_api_key(key: str) -> UserIdentity | None:
+    """Resolve a caller from an API key (UI/scripts path); None when invalid."""
+    if api_key_valid(key):
+        return _static_identity()
+    return None
+
+
+def identity_from_token(token: str) -> UserIdentity:
+    """Verify a JWT and build the caller identity (UI/scripts path).
+
+    Raises ``jwt.PyJWTError`` when the token is invalid/expired.
+    """
+    return _claims_identity(_verify_token(token))
+
+
 def require_user(*allowed_roles: str):
     """FastAPI dependency: authenticate, authorize, and expose the identity.
 

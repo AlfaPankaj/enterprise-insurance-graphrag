@@ -34,6 +34,12 @@ from neo4j.exceptions import ConstraintError, Neo4jError
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 
+# graphrag.* imports (pii, config) must work when the script is run
+# standalone (`python scripts/seed_graph.py`) — not only via the app
+SRC = PROJECT_ROOT / "src"
+if str(SRC) not in sys.path:
+    sys.path.insert(0, str(SRC))
+
 BATCH_SIZE = 500
 
 
@@ -130,6 +136,18 @@ def apply_schema(session, schema_path: Path) -> None:
     print("  schema (constraints + indexes) applied")
 
 
+def _pii_encrypt_props(label: str, props: dict) -> dict:
+    """v2 PII at rest: encrypt classified fields (no-op when not configured)."""
+    try:
+        from graphrag.pii import classify, encryption_enabled, encrypt_value
+    except ImportError:  # pragma: no cover - graphrag package unavailable
+        return props
+    if not encryption_enabled():
+        return props
+    return {k: (encrypt_value(v) if classify(label, k) else v)
+            for k, v in props.items()}
+
+
 def load_nodes(runner, nodes_by_label: dict[str, list[dict]],
                tenant_id: str | None = None) -> None:
     """runner is a Session or an explicit Transaction (both expose .run).
@@ -137,21 +155,27 @@ def load_nodes(runner, nodes_by_label: dict[str, list[dict]],
     ``tenant_id`` (v2) stamps every node with
     ``tenant_id = coalesce(tenant_id, $tenant)`` — first owner wins, so a
     re-seed without ``--reset`` can never hijack another tenant's nodes.
+
+    PII-classified props are Fernet-encrypted before write when
+    ``PII_ENCRYPTION_KEY`` is set (at-rest encryption; decrypted on read by
+    the retriever).
     """
     for label, rows in nodes_by_label.items():
         if not rows:
             continue
         for batch in batches(rows):
+            safe = [{"id": r["id"], "props": _pii_encrypt_props(label, r["props"])}
+                    for r in batch]
             if tenant_id:
                 runner.run(
                     f"UNWIND $rows AS r MERGE (n:{label} {{id: r.id}}) SET n += r.props "
                     "SET n.tenant_id = coalesce(n.tenant_id, $tenant)",
-                    rows=batch, tenant=tenant_id,
+                    rows=safe, tenant=tenant_id,
                 )
             else:
                 runner.run(
                     f"UNWIND $rows AS r MERGE (n:{label} {{id: r.id}}) SET n += r.props",
-                    rows=batch,
+                    rows=safe,
                 )
 
 

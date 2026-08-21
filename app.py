@@ -19,6 +19,8 @@ sys.path.insert(0, str(ROOT / "src"))
 
 from neo4j import GraphDatabase
 from src.graphrag.config import settings
+from src.graphrag.identity import (effective_auth_mode, identity_from_api_key,
+                                   identity_from_token)
 from src.graphrag.fraud_ground_truth import build_comparison, detect_dataset, load_ground_truth
 from src.graphrag.query_pipeline import run_query, stream_query
 from src.graphrag.reranker import make_reranker
@@ -293,6 +295,45 @@ with st.sidebar:
         fraud = sum(1 for v in gt.values() if v)
         st.markdown(f"**Fraud labels:** {fraud:,} / {len(gt):,}")
 
+    # ---- v2 login gate (WS-B): API key / JWT when auth is configured ----
+    identity = None
+    if effective_auth_mode() != "none":
+        st.markdown("---")
+        st.markdown("#### Sign in")
+        if st.session_state.get("identity") is None:
+            if effective_auth_mode() == "static":
+                cred = st.text_input("API key", type="password", key="login_api_key",
+                                     label_visibility="collapsed")
+                if st.button("Sign in", key="login_btn", use_container_width=True):
+                    ident = identity_from_api_key(cred)
+                    if ident:
+                        st.session_state["identity"] = ident
+                        st.rerun()
+                    else:
+                        st.error("Invalid API key")
+            else:  # jwt
+                cred = st.text_input("Bearer token", type="password", key="login_token",
+                                     label_visibility="collapsed")
+                if st.button("Sign in", key="login_btn", use_container_width=True):
+                    try:
+                        ident = identity_from_token(cred.strip())
+                    except Exception:
+                        ident = None
+                    if ident:
+                        st.session_state["identity"] = ident
+                        st.rerun()
+                    else:
+                        st.error("Invalid or expired token")
+            st.stop()  # pages are gated until signed in
+        else:
+            ident = st.session_state["identity"]
+            st.markdown(f"**User:** `{ident.subject}` · "
+                        f"{', '.join(sorted(ident.roles))}")
+            if st.button("Sign out", key="logout_btn", use_container_width=True):
+                st.session_state["identity"] = None
+                st.rerun()
+        identity = st.session_state.get("identity")
+
     # ---- session switcher (Phase 6): re-seeds the graph from the web UI ----
     st.markdown("---")
     st.markdown("#### Active Session")
@@ -491,7 +532,8 @@ elif page == "Dashboard":
                                             max_hops=max_hops,
                                             token_budget=token_budget,
                                             reranker_mode=reranker_mode,
-                                            answer_mode=answer_mode):
+                                            answer_mode=answer_mode,
+                                            identity=identity):
                         if ev["type"] == "delta":
                             buffer.append(ev["text"])
                             live.markdown("".join(buffer))
@@ -502,7 +544,7 @@ elif page == "Dashboard":
                         st.stop()
                 else:
                     with st.spinner("Retrieving, re-ranking, pruning and answering..."):
-                        res = run_query(get_driver(), query.strip(), max_hops=max_hops, token_budget=token_budget, reranker_mode=reranker_mode, answer_mode=answer_mode)
+                        res = run_query(get_driver(), query.strip(), max_hops=max_hops, token_budget=token_budget, reranker_mode=reranker_mode, answer_mode=answer_mode, identity=identity)
             except Exception as exc:
                 st.error(f"Query failed: {exc}"); st.stop()
 

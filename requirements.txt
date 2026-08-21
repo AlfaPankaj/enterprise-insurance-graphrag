@@ -29,6 +29,7 @@ reportlab>=4.0              # PDF audit report export (already used by Phase 1)
 
 # --- v2: multi-provider LLM + identity (trust & compliance) ---
 PyJWT>=2.8                  # JWT/OIDC verification (AUTH_MODE=jwt)
+cryptography>=42            # PII field encryption (Fernet) + RS256 support
 
 # --- tests (Phase 2/3) ---
 pytest>=8.0

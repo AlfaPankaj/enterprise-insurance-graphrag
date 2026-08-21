@@ -136,6 +136,13 @@ def main(argv: list[str] | None = None) -> int:
     print("\n[Trust controls]")
     _ok("PII_MODE", settings.PII_MODE + (
         f" (readers: {settings.PII_READER_ROLES})" if settings.PII_MODE == "mask" else ""))
+    enc = "set (len=%d)" % len(settings.PII_ENCRYPTION_KEY) if settings.PII_ENCRYPTION_KEY else "not set"
+    _ok("PII encryption at rest", enc,
+        None if settings.PII_ENCRYPTION_KEY else
+        ("PII stored plaintext in Neo4j — generate a key:\n"
+         '         python -c "import base64,os;print(base64.urlsafe_b64encode(os.urandom(32)).decode())"')
+        if settings.PII_MODE == "mask" else
+        "encryption off (v1 behavior); set PII_ENCRYPTION_KEY to encrypt PII fields")
     _ok("GUARDRAILS_ENABLED", str(settings.GUARDRAILS_ENABLED))
     _ok("TENANT_MODE", settings.TENANT_MODE + (
         f" (default: {settings.DEFAULT_TENANT})" if settings.TENANT_MODE == "column" else ""))
