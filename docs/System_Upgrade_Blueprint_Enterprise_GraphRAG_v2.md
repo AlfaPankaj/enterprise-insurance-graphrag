@@ -217,7 +217,10 @@ criteria. Order reflects dependency, not necessarily priority — see §6.
 * **Tenant isolation plumbing** — `graph_retriever.tenant_predicate()` +
   `TENANT_MODE=column`: every Cypher statement carries a `$tenant` predicate
   (NULL = unscoped v1 behavior); identity tenant flows through
-  `run_query(..., identity=...)`. (G4 groundwork)
+  `run_query(..., identity=...)`. **Write paths stamp tenants** (first-owner-
+  wins `coalesce`): `load_nodes(..., tenant_id=)`, `update_graph_surgically(
+  ..., tenant_id=)` (API uploads stamp the caller's tenant), ingest scripts +
+  session switcher propagate `--tenant`/`DEFAULT_TENANT`. (G4 groundwork)
 * **PII policy engine** — `src/graphrag/pii.py`: (label, prop) classification
   table + name-pattern fallback, `MaskingPolicy.for_roles()`, masked retrieval
   context + answer scrub; `PII_MODE=mask` opts in (retrieval semantics
@@ -235,9 +238,13 @@ criteria. Order reflects dependency, not necessarily priority — see §6.
   blocking); request-id on every response; RBAC-gated endpoints. (G3)
 * **Repo hygiene** — `.gitignore`, `.env.example` (no secrets), `PyJWT` added
   to both requirements files. (G13 partial)
-* **Tests** — 58 new tests (providers, identity, PII, guardrails, audit
-  integrity, tenant scoping, end-to-end pipeline w/ scripted fake driver):
-  **331 passed, 12 skipped** (skips = DB-dependent, as before).
+* **Tests** — 64 new tests (providers, identity, PII, guardrails, audit
+  integrity, tenant scoping + stamping, end-to-end pipeline w/ scripted fake
+  driver): **337 passed, 12 skipped** (skips = DB-dependent, as before).
+* **Manual trial testing kit** — `scripts/check_config.py` (one-command
+  config/probe report with exit code) + `docs/TESTING_WITH_FREE_TRIALS.md`
+  (Aura free / Ollama / OpenAI / Azure setup, auth + trust-control demos,
+  curl cheatsheet, trial caveats).
 
 **Next slices (in order):** WS-B remainder (tenant stamping on ingest + CDC
 writes, PII at-rest encryption, OIDC integration test) → WS-A (streaming,

@@ -127,9 +127,11 @@ async def upload_pdf(
         with app.state.driver.session() as session:
             old = get_existing_entities(session, doc_id)
             changes = detect_changes(old, entities)
-            # graph update + snapshot save run in one transaction (atomic CDC)
+            # graph update + snapshot save run in one transaction (atomic CDC);
+            # v2: nodes are stamped with the caller's tenant (TENANT_MODE=column)
             stats = update_graph_surgically(
-                app.state.driver, doc_id, changes, new_entities=entities
+                app.state.driver, doc_id, changes, new_entities=entities,
+                tenant_id=user.tenant_id,
             )
         return {
             "doc_id": doc_id,

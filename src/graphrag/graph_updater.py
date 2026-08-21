@@ -19,6 +19,7 @@ import json
 import time
 from datetime import datetime, timezone
 
+from graphrag.config import settings
 from graphrag.graph_store import SNAPSHOT_LABEL, save_existing_entities
 
 # Join fields are used to derive edges and are not stored as node properties.
@@ -116,13 +117,20 @@ def _referenced_elsewhere(tx, eid: str, doc_id: str) -> bool:
 
 
 def update_graph_surgically(driver, doc_id: str, changes: dict,
-                            new_entities: dict | None = None) -> dict:
+                            new_entities: dict | None = None,
+                            tenant_id: str | None = None) -> dict:
     """Apply CDC changes to Neo4j. Returns timing + count stats.
 
     If ``new_entities`` is given, the document snapshot is saved in the SAME
     transaction as the graph update — the graph and the CDC baseline can never
     diverge (a crash mid-flight rolls both back).
+
+    ``tenant_id`` (with ``settings.TENANT_MODE="column"``) stamps new/updated
+    nodes with ``tenant_id = coalesce(tenant_id, $tenant)`` — **first owner
+    wins**, so a CDC write can never hijack a node that already belongs to
+    another tenant.
     """
+    stamp_tenant = bool(tenant_id) and settings.TENANT_MODE == "column"
     start = time.perf_counter()
     stats = {
         "timestamp": datetime.now(timezone.utc).isoformat(),
@@ -154,11 +162,20 @@ def update_graph_surgically(driver, doc_id: str, changes: dict,
                 # NOTE: don't use .get(key, entity["props"]) — the default is
                 # evaluated eagerly and raises for modified entities.
                 full_props = entity["new_props"] if "new_props" in entity else entity["props"]
-                tx.run(
-                    f"MERGE (n:{entity['label']} {{id: $id}}) SET n += $props",
-                    id=entity["id"],
-                    props={k: v for k, v in full_props.items() if k not in JOIN_FIELDS},
-                )
+                if stamp_tenant:
+                    tx.run(
+                        f"MERGE (n:{entity['label']} {{id: $id}}) SET n += $props "
+                        "SET n.tenant_id = coalesce(n.tenant_id, $tenant)",
+                        id=entity["id"],
+                        props={k: v for k, v in full_props.items() if k not in JOIN_FIELDS},
+                        tenant=tenant_id,
+                    )
+                else:
+                    tx.run(
+                        f"MERGE (n:{entity['label']} {{id: $id}}) SET n += $props",
+                        id=entity["id"],
+                        props={k: v for k, v in full_props.items() if k not in JOIN_FIELDS},
+                    )
                 if "new_props" in entity:
                     _prune_derived_edges(tx, entity["label"], entity["id"])
                 _derive_edges(tx, entity["label"], entity["id"], full_props)

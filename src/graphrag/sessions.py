@@ -35,6 +35,7 @@ import sys
 import threading
 from pathlib import Path
 
+from graphrag.config import settings
 from src.graphrag.fraud_ground_truth import detect_dataset
 
 # Serialize the actual (re)seed: two concurrent switches (e.g. API + web UI)
@@ -177,6 +178,8 @@ def _seed_command(session: dict) -> list[str]:
         str(ROOT / "scripts" / "seed_graph.py"),
         "--reset",
         "--apply-schema",
+        *(["--tenant", settings.DEFAULT_TENANT]
+          if settings.TENANT_MODE == "column" else []),
     ]
 
 

@@ -56,6 +56,9 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
                         help="Assert that duplicate entity ids are rejected by the constraints")
     parser.add_argument("--snapshots", action="store_true",
                         help="Create per-document CDC snapshots by extracting data/pdfs/*.pdf")
+    parser.add_argument("--tenant", default=None,
+                        help="v2: stamp this tenant_id on every seeded node "
+                             "(use with TENANT_MODE=column)")
     return parser.parse_args(argv)
 
 
@@ -127,16 +130,29 @@ def apply_schema(session, schema_path: Path) -> None:
     print("  schema (constraints + indexes) applied")
 
 
-def load_nodes(runner, nodes_by_label: dict[str, list[dict]]) -> None:
-    """runner is a Session or an explicit Transaction (both expose .run)."""
+def load_nodes(runner, nodes_by_label: dict[str, list[dict]],
+               tenant_id: str | None = None) -> None:
+    """runner is a Session or an explicit Transaction (both expose .run).
+
+    ``tenant_id`` (v2) stamps every node with
+    ``tenant_id = coalesce(tenant_id, $tenant)`` — first owner wins, so a
+    re-seed without ``--reset`` can never hijack another tenant's nodes.
+    """
     for label, rows in nodes_by_label.items():
         if not rows:
             continue
         for batch in batches(rows):
-            runner.run(
-                f"UNWIND $rows AS r MERGE (n:{label} {{id: r.id}}) SET n += r.props",
-                rows=batch,
-            )
+            if tenant_id:
+                runner.run(
+                    f"UNWIND $rows AS r MERGE (n:{label} {{id: r.id}}) SET n += r.props "
+                    "SET n.tenant_id = coalesce(n.tenant_id, $tenant)",
+                    rows=batch, tenant=tenant_id,
+                )
+            else:
+                runner.run(
+                    f"UNWIND $rows AS r MERGE (n:{label} {{id: r.id}}) SET n += r.props",
+                    rows=batch,
+                )
 
 
 def load_relationships(runner, rels: list[tuple[str, str, str, str, str]]) -> None:
@@ -155,7 +171,7 @@ def load_relationships(runner, rels: list[tuple[str, str, str, str, str]]) -> No
             )
 
 
-def seed(session, samples_dir: Path) -> None:
+def seed(session, samples_dir: Path, tenant_id: str | None = None) -> None:
     policies = load_json(samples_dir, "policies.json")
     claims = load_json(samples_dir, "claims.json")
     endorsements = load_json(samples_dir, "endorsements.json")
@@ -209,7 +225,7 @@ def seed(session, samples_dir: Path) -> None:
     # Whole load in one transaction: a failure rolls back everything (idempotent
     # MERGEs make re-running the recovery path either way).
     with session.begin_transaction() as tx:
-        load_nodes(tx, nodes)
+        load_nodes(tx, nodes, tenant_id=tenant_id)
         load_relationships(tx, rels)
 
     # Queued counts are pre-dedupe (endorsements appear in policies.json AND
@@ -304,7 +320,7 @@ def main(argv: list[str] | None = None) -> int:
             if args.reset:
                 clear_graph_batched(session)
                 print("  graph cleared (--reset)")
-            seed(session, args.samples_dir)
+            seed(session, args.samples_dir, tenant_id=args.tenant)
             # stamp the demo dataset so the dashboard picks the right fraud
             # ground-truth table (samples/claims.json labels) — but never
             # overwrite a real-dataset marker (e.g. when adding snapshots to a
