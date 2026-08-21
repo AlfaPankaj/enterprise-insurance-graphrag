@@ -19,6 +19,7 @@ import json
 import time
 from datetime import datetime, timezone
 
+from graphrag.cache import bump_revision
 from graphrag.config import settings
 from graphrag.graph_store import SNAPSHOT_LABEL, save_existing_entities
 
@@ -179,6 +180,11 @@ def update_graph_surgically(driver, doc_id: str, changes: dict,
                 if "new_props" in entity:
                     _prune_derived_edges(tx, entity["label"], entity["id"])
                 _derive_edges(tx, entity["label"], entity["id"], full_props)
+            # v2 cache invalidation: any effective write bumps the graph
+            # revision so cached answers can never survive a mutation
+            effective_deletes = len(changes["deleted"]) - stats["deleted_skipped"]
+            if upserts or effective_deletes > 0:
+                bump_revision(tx)
             rels_after = _count_rels(tx, kept_ids) if kept_ids else 0
             if new_entities is not None:
                 save_existing_entities(tx, doc_id, new_entities)

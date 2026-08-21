@@ -328,7 +328,13 @@ def main(argv: list[str] | None = None) -> int:
             if args.reset or not session.run(
                 "MATCH (d:Dataset) RETURN d LIMIT 1"
             ).single():
-                session.run("MERGE (d:Dataset {name: 'synthetic'})")
+                # v2: bump the dataset revision on (re)stamp so the answer
+                # cache invalidates across processes
+                session.run(
+                    "MERGE (d:Dataset {name: 'synthetic'}) "
+                    "ON CREATE SET d.rev = 0 "
+                    "ON MATCH SET d.rev = coalesce(d.rev, 0) + 1"
+                )
             report_counts(session)
             if args.snapshots:
                 create_snapshots(driver, PROJECT_ROOT / "data" / "pdfs", args.samples_dir)

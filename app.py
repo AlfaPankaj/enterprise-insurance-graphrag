@@ -20,7 +20,7 @@ sys.path.insert(0, str(ROOT / "src"))
 from neo4j import GraphDatabase
 from src.graphrag.config import settings
 from src.graphrag.fraud_ground_truth import build_comparison, detect_dataset, load_ground_truth
-from src.graphrag.query_pipeline import run_query
+from src.graphrag.query_pipeline import run_query, stream_query
 from src.graphrag.reranker import make_reranker
 from src.graphrag.audit_reporter import render_html, render_json, render_pdf
 from src.graphrag.lineage_visualizer import render_lineage_html
@@ -423,6 +423,10 @@ elif page == "Dashboard":
         reranker_mode = c3.selectbox("Reranker", ["auto", "cross-encoder", "lexical"])
         answer_mode = c4.selectbox("Answer mode", ["extractive", "auto", "llm"],
                                    index=["extractive", "auto", "llm"].index(settings.ANSWER_MODE) if settings.ANSWER_MODE in ("extractive", "auto", "llm") else 0)
+        stream_answers = st.checkbox(
+            "Stream answer tokens live (LLM answers; buffered when PII masking is on)",
+            value=False,
+        )
 
     st.markdown("---")
     st.markdown("#### Pipeline Validation (all sessions)")
@@ -479,13 +483,31 @@ elif page == "Dashboard":
             st.error("Neo4j is not reachable.")
         else:
             try:
-                with st.spinner("Retrieving, re-ranking, pruning and answering..."):
-                    res = run_query(get_driver(), query.strip(), max_hops=max_hops, token_budget=token_budget, reranker_mode=reranker_mode, answer_mode=answer_mode)
+                if stream_answers:
+                    live = st.empty()
+                    buffer: list[str] = []
+                    res = None
+                    for ev in stream_query(get_driver(), query.strip(),
+                                            max_hops=max_hops,
+                                            token_budget=token_budget,
+                                            reranker_mode=reranker_mode,
+                                            answer_mode=answer_mode):
+                        if ev["type"] == "delta":
+                            buffer.append(ev["text"])
+                            live.markdown("".join(buffer))
+                        elif ev["type"] in ("done", "blocked"):
+                            res = ev["result"]
+                    if res is None:
+                        st.error("Streaming failed — no result event received.")
+                        st.stop()
+                else:
+                    with st.spinner("Retrieving, re-ranking, pruning and answering..."):
+                        res = run_query(get_driver(), query.strip(), max_hops=max_hops, token_budget=token_budget, reranker_mode=reranker_mode, answer_mode=answer_mode)
             except Exception as exc:
                 st.error(f"Query failed: {exc}"); st.stop()
 
             st.markdown(f"<div class='grag-answer'><div class='label'>Answer</div><div class='text'>{res['answer']}</div></div>", unsafe_allow_html=True)
-            st.caption(f"answer mode: {res['answer_mode']}" + (f" ({res['answer_model']})" if res.get("answer_model") else "") + f" · reranker: {res['reranker']}")
+            st.caption(f"answer mode: {res['answer_mode']}" + (f" ({res['answer_model']})" if res.get("answer_model") else "") + f" · reranker: {res['reranker']}" + (" · ⚡ served from cache" if res.get("cached") else "") + (f" · provider: {res['answer_provider']}" if res.get("answer_provider") else ""))
             if res.get("answer_fallback"):
                 st.warning(f"LLM unavailable — extractive fallback. Reason: {res['answer_fallback']}")
 

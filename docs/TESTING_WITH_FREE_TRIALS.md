@@ -195,6 +195,11 @@ curl -X POST http://localhost:8000/api/v1/query \
   -H "Content-Type: application/json" \
   -d '{"query": "Does claim CLM-0003 have a fraud flag?"}'
 
+# streaming query (SSE: meta -> delta* -> done/blocked; -N disables buffering)
+curl -N -X POST http://localhost:8000/api/v1/query/stream \
+  -H "Content-Type: application/json" \
+  -d '{"query": "Does claim CLM-0003 have a fraud flag?", "answer_mode": "auto"}'
+
 # upload (CDC: PDF -> diff -> surgical update)
 curl -X POST http://localhost:8000/api/v1/upload \
   -F "file=@data/pdfs/policy_POL-0001.pdf"
@@ -204,9 +209,35 @@ curl http://localhost:8000/api/v1/session
 curl http://localhost:8000/api/v1/metrics
 curl http://localhost:8000/api/v1/audit?limit=10
 curl http://localhost:8000/api/v1/audit/verify
+
+# Prometheus scrape target (admin/auditor roles) — Grafana/Prometheus point here
+curl http://localhost:8000/metrics
 ```
 
 (Add `-H "X-API-Key: ..."` or `-H "Authorization: Bearer ..."` when auth is on.)
+
+## 6b. Answer cache (cost/latency demo)
+
+```dotenv
+CACHE_ENABLED=true
+CACHE_TTL_S=300
+CACHE_MAX_ENTRIES=1000
+```
+
+1. Query something twice — the second response carries `"cached": true` and
+   near-zero `execution_time_ms` (original timing preserved in
+   `cached_original_execution_ms`); the audit trail gets a fresh record marked
+   `"cached": true`.
+2. Cache keys include the tenant, the PII scope, and the dataset revision —
+   upload a PDF (CDC write) or re-seed a session and the same question
+   recomputes (no stale answers after writes).
+3. `/metrics` exposes `graphrag_cache_hits_total` / `graphrag_cache_misses_total`.
+
+### Streaming notes
+* Live token streaming requires `answer_mode=auto`/`llm` AND a reachable
+  provider; extractive answers arrive as a single delta.
+* When `PII_MODE=mask` applies to the caller, streaming is disabled and the
+  answer arrives as one buffered delta (nothing sensitive streams).
 
 ## 7. Trial-account caveats (set expectations before the demo)
 

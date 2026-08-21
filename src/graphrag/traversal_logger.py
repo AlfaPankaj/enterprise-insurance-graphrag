@@ -38,6 +38,7 @@ from pathlib import Path
 
 from graphrag.config import settings
 from graphrag.path_extractor import build_cypher, traversal_summary
+from graphrag.prometheus import audit_records_total
 
 # repo root = <root>/src/graphrag/traversal_logger.py
 ROOT = Path(__file__).resolve().parents[2]
@@ -149,6 +150,7 @@ class AuditStore:
             self._head_hash = record["record_hash"]
             if self._count > self.max_records:
                 self._rotate()
+        audit_records_total.inc()
 
     def _rotate(self) -> None:
         """Keep the newest ``max_records`` lines in the active file and append

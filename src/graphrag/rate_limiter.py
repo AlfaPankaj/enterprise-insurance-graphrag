@@ -19,6 +19,7 @@ from collections import defaultdict, deque
 from fastapi import HTTPException, Request, status
 
 from graphrag.config import settings
+from graphrag.prometheus import rate_limited_total
 
 _WINDOWS: dict[str, deque[float]] = defaultdict(deque)
 _LOCK = threading.Lock()
@@ -79,6 +80,7 @@ def rate_limit(limit: int | None = None, window_s: int | None = None):
     """
     def dependency(request: Request) -> None:
         if not check(client_identity(request), limit=limit, window_s=window_s):
+            rate_limited_total.inc()
             raise HTTPException(
                 status_code=status.HTTP_429_TOO_MANY_REQUESTS,
                 detail="Rate limit exceeded — slow down",

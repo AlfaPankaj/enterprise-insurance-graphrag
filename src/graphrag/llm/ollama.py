@@ -4,10 +4,15 @@ Kept contract-compatible with the v1 call site (answer_generator's mocked
 tests POST to ``{LLAMA_API_URL}/api/generate`` with ``{model, prompt, stream:
 False, options: {temperature, num_predict}}``), so this provider re-implements
 exactly that wire format while returning the richer ``LLMResult``.
+
+v2: ``stream()`` speaks the same endpoint with ``stream: true`` (NDJSON lines)
+and yields ``{"type": "delta", "text"}`` events plus a final ``{"type": "done",
+...}`` with usage.
 """
 
 from __future__ import annotations
 
+import json
 import logging
 import time
 
@@ -89,3 +94,55 @@ class OllamaProvider:
             latency_ms=round((time.perf_counter() - start) * 1000, 1),
             raw=data,
         )
+
+    def stream(self, prompt: str, *, model: str | None = None,
+               max_tokens: int = 512, temperature: float = 0.2,
+               json_mode: bool = False):
+        """Yield ``{"type": "delta", "text"}`` events, then ``{"type": "done", ...}``.
+
+        The final event carries the assembled text, model, and token usage.
+        Raises ``ProviderError``/``ModelNotFoundError`` on transport/status
+        failures (the caller decides fallback policy).
+        """
+        model = model or settings.ANSWER_MODEL or settings.LLAMA_MODEL
+        payload: dict = {
+            "model": model,
+            "prompt": prompt,
+            "stream": True,
+            "options": {"temperature": temperature, "num_predict": max_tokens},
+        }
+        if json_mode:
+            payload["format"] = "json"
+        timeout = httpx.Timeout(settings.LLM_TIMEOUT_S, read=settings.LLM_TIMEOUT_S)
+        try:
+            with httpx.stream("POST", f"{self.base_url}/api/generate",
+                              json=payload, timeout=timeout) as response:
+                _raise_actionable_error(response, model)
+                full: list[str] = []
+                for line in response.iter_lines():
+                    if not line:
+                        continue
+                    try:
+                        data = json.loads(line)
+                    except ValueError:
+                        continue
+                    token = data.get("response") or ""
+                    if token:
+                        full.append(token)
+                        yield {"type": "delta", "text": token}
+                    if data.get("done"):
+                        yield {
+                            "type": "done",
+                            "text": "".join(full),
+                            "provider": self.name,
+                            "model": model,
+                            "usage": {
+                                "input_tokens": data.get("prompt_eval_count"),
+                                "output_tokens": data.get("eval_count"),
+                            },
+                            "cost_usd": None,
+                        }
+                        return
+        except httpx.HTTPError as exc:
+            raise ProviderError(f"Ollama unreachable at {self.base_url}: {exc}") from exc
+        raise ProviderError("Ollama stream ended without a done event")

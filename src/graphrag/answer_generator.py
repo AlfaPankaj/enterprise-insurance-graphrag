@@ -31,6 +31,7 @@ from graphrag.config import settings
 from graphrag.llm import ModelNotFoundError as ProviderModelNotFoundError
 from graphrag.llm.base import ProviderError
 from graphrag.llm.factory import get_provider
+from graphrag.llm.ollama import OllamaProvider
 from graphrag.llm.openai_compat import OpenAICompatProvider
 
 logger = logging.getLogger("graphrag.answer_generator")
@@ -251,6 +252,92 @@ def _openai_answer_path() -> bool:
         provider = get_provider("auto")
         return provider is not None and provider.name == "openai"
     return False
+
+
+# ---------------------------------------------------------------------------
+# streaming entry point (v2 — WS-A)
+# ---------------------------------------------------------------------------
+
+def stream_answer(query: str, pruned: dict, mode: str | None = None):
+    """Generate the answer as a token stream.
+
+    Yields ``{"type": "delta", "text": ...}`` events followed by exactly one
+    ``{"type": "done", "answer", "mode", "model", "provider", "usage",
+    "cost_usd", "fallback_reason"}`` event.
+
+    Fallback policy mirrors ``generate_answer``:
+
+    * ``auto`` — provider stream when one is up; if the stream fails before
+      the first token, degrade cleanly to the deterministic extractor (with
+      ``fallback_reason``); a mid-stream failure after tokens yields a done
+      event carrying the partial text + reason.
+    * ``llm`` — require a provider; failures raise.
+    * ``extractive`` — deterministic single-shot (one delta + done).
+    """
+    mode = mode or settings.ANSWER_MODE
+    if mode not in VALID_MODES:
+        raise ValueError(f"unknown answer mode: {mode!r} (expected one of {VALID_MODES})")
+
+    provider = None
+    if mode in ("llm", "auto") and _openai_answer_path():
+        provider = OpenAICompatProvider()
+    elif mode in ("llm", "auto") and ollama_available():
+        provider = OllamaProvider()
+    if mode == "llm" and provider is None:
+        raise RuntimeError(
+            f"answer mode 'llm' requires a provider (Ollama at "
+            f"{settings.LLAMA_API_URL} or OPENAI_BASE_URL)"
+        )
+
+    if provider is not None:
+        prompt = _render_prompt(query, pruned["text"])
+        emitted = False
+        full: list[str] = []
+        done_ev: dict | None = None
+        try:
+            for ev in provider.stream(
+                prompt,
+                model=settings.ANSWER_MODEL or None,
+                max_tokens=settings.ANSWER_MAX_TOKENS,
+                temperature=0.2,
+            ):
+                if ev["type"] == "delta":
+                    emitted = True
+                    full.append(ev["text"])
+                    yield ev
+                else:
+                    done_ev = ev
+        except Exception as exc:  # noqa: BLE001 - fallback policy below
+            if not emitted and mode == "auto":
+                logger.warning("stream unavailable, extractive fallback: %s", exc)
+                out = extractive_answer(query, pruned)
+                out["fallback_reason"] = str(exc)[:200]
+                yield {"type": "delta", "text": out["answer"]}
+                yield {"type": "done", "answer": out["answer"], "mode": "extractive",
+                       "model": None, "provider": None, "usage": None,
+                       "cost_usd": None, "fallback_reason": out.get("fallback_reason")}
+                return
+            if mode == "llm":
+                raise
+            logger.warning("stream interrupted mid-answer: %s", exc)
+            yield {"type": "done", "answer": "".join(full), "mode": "llm",
+                   "model": None, "provider": None, "usage": None, "cost_usd": None,
+                   "fallback_reason": f"stream interrupted: {exc}"[:200]}
+            return
+        if done_ev is None:
+            raise ProviderError("stream ended without a done event")
+        yield {"type": "done", "answer": done_ev["text"], "mode": "llm",
+               "model": done_ev.get("model"), "provider": done_ev.get("provider"),
+               "usage": done_ev.get("usage"), "cost_usd": done_ev.get("cost_usd"),
+               "fallback_reason": None}
+        return
+
+    # no provider up (or extractive mode): deterministic single-shot
+    out = extractive_answer(query, pruned)
+    yield {"type": "delta", "text": out["answer"]}
+    yield {"type": "done", "answer": out["answer"], "mode": "extractive",
+           "model": None, "provider": None, "usage": None, "cost_usd": None,
+           "fallback_reason": None}
 
 
 # ---------------------------------------------------------------------------

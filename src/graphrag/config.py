@@ -104,5 +104,12 @@ class Settings(BaseSettings):
     AUDIT_DIR: str = "data/audit_trail"  # JSONL store + exported reports
     AUDIT_MAX_RECORDS: int = 2000      # trim the JSONL store to this many records
 
+    # v2 — answer cache (WS-A). Off by default = v1 behavior. Cache keys bind
+    # query + pipeline params + tenant + PII scope + dataset revision; any
+    # graph write bumps the revision, so cached answers never survive a write.
+    CACHE_ENABLED: bool = False
+    CACHE_TTL_S: int = 300
+    CACHE_MAX_ENTRIES: int = 1000
+
 
 settings = Settings()

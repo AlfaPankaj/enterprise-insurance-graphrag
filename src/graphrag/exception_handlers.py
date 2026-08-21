@@ -14,6 +14,8 @@ from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
+from graphrag.prometheus import errors_total
+
 logger = logging.getLogger("graphrag.api")
 
 
@@ -29,6 +31,7 @@ def _register_general(app: FastAPI) -> None:
     @app.exception_handler(Exception)
     async def general_exception_handler(request: Request, exc: Exception):  # noqa: ANN001
         rid = _request_id(request)
+        errors_total.inc(kind="unhandled")
         logger.exception("unhandled error request_id=%s: %s", rid, exc)
         return JSONResponse(
             status_code=500,

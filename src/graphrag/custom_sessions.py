@@ -234,7 +234,13 @@ def remove_custom_session(name: str) -> bool:
 # ---------------------------------------------------------------------------
 
 def _stamp_marker(session, name: str) -> None:
-    session.run("MERGE (d:Dataset {name: $name})", name=name)
+    # v2: the rev bump invalidates the answer cache on every (re)seed
+    session.run(
+        "MERGE (d:Dataset {name: $name}) "
+        "ON CREATE SET d.rev = 0 "
+        "ON MATCH SET d.rev = coalesce(d.rev, 0) + 1",
+        name=name,
+    )
 
 
 def build_from_csv(driver, csv_path: Path, session_name: str,

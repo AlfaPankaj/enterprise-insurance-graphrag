@@ -357,8 +357,14 @@ def main(argv: list[str] | None = None) -> int:
             load_s = time.perf_counter() - t1
             print(f"  loaded in {load_s:.1f}s (total {load_s + parse_s:.1f}s)")
             # stamp which dataset is loaded so the dashboard can pick the right
-            # fraud ground-truth table (labels live in the CSVs, not the graph)
-            session.run("MERGE (d:Dataset {name: $name})", name=args.dataset)
+            # fraud ground-truth table (labels live in the CSVs, not the graph);
+            # v2: the rev bump invalidates the answer cache on every (re)seed
+            session.run(
+                "MERGE (d:Dataset {name: $name}) "
+                "ON CREATE SET d.rev = 0 "
+                "ON MATCH SET d.rev = coalesce(d.rev, 0) + 1",
+                name=args.dataset,
+            )
             counts = session.run(
                 "MATCH (n) RETURN labels(n)[0] AS label, count(*) AS c ORDER BY label"
             ).data()

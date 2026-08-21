@@ -246,7 +246,30 @@ criteria. Order reflects dependency, not necessarily priority — see §6.
   (Aura free / Ollama / OpenAI / Azure setup, auth + trust-control demos,
   curl cheatsheet, trial caveats).
 
-**Next slices (in order):** WS-B remainder (tenant stamping on ingest + CDC
-writes, PII at-rest encryption, OIDC integration test) → WS-A (streaming,
-answer cache, job runner, Prometheus/OTel) → WS-C (hybrid retrieval + evals)
-→ WS-E (banking domain, Aura topology).
+**Done — platform core (v2 slice 3, WS-A):**
+
+* **Answer cache** — `src/graphrag/cache.py`: TTL + LRU in-process cache
+  (`CACHE_ENABLED`/`CACHE_TTL_S`/`CACHE_MAX_ENTRIES`, off by default = v1
+  behavior). Keys bind query + pipeline params + **tenant** + **PII scope** +
+  **dataset revision**; every write path bumps `(:Dataset).rev` (ingest, seed,
+  CDC upload) so stale answers can never survive a graph write. Cache hits
+  re-audit (fresh audit id, `cached: true`) and skip retrieval entirely.
+  (G9)
+* **Streaming answers** — providers gained `stream()` (Ollama NDJSON +
+  OpenAI-compatible SSE, incl. Azure); `stream_answer()` with the same
+  fallback policy (auto degrades to extractive before the first token);
+  `POST /api/v1/query/stream` (SSE `meta → delta* → done/blocked/error`);
+  Streamlit Dashboard "stream tokens live" checkbox. Streaming is
+  automatically buffered when PII masking applies to the caller. (G10)
+* **Prometheus observability** — `src/graphrag/prometheus.py`: zero-dependency
+  counter/histogram registry + `GET /metrics` (admin/auditor roles):
+  requests by kind, error/rate-limit counters, query+upload latency
+  histograms, token-savings histogram, LLM cost USD, fallbacks, cache
+  hits/misses, audit records. (G12-lite — OTel tracing still open)
+* **Tests** — 90 new tests across the v2 slices: **363 passed, 12 skipped**
+  (skips = DB-dependent, unchanged baseline).
+
+**Next slices (in order):** WS-B remainder (PII at-rest encryption, OIDC
+integration test) → WS-A remainder (durable job runner, OTel tracing) →
+WS-C (hybrid retrieval + answer-quality evals) → WS-E (banking domain, Aura
+topology).

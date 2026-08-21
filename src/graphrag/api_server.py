@@ -4,9 +4,11 @@ Endpoints
 ---------
 * ``POST /api/v1/upload`` — CDC: PDF -> entities -> diff -> surgical Neo4j update
 * ``POST /api/v1/query``  — retrieve -> re-rank -> prune -> token-optimized answer
+* ``POST /api/v1/query/stream`` — same pipeline as SSE (live token streaming)
 * ``GET  /api/v1/session`` / ``POST /api/v1/session`` — switch datasets (Phase 6)
 * ``GET  /api/v1/metrics`` — rolling latency / token-savings stats
-* ``GET  /api/v1/audit``  — recent explainability records (Shot 3)
+* ``GET  /api/v1/audit`` / ``GET /api/v1/audit/verify`` — explainability records
+* ``GET  /metrics`` — Prometheus exposition (v2)
 * ``GET  /health/live`` / ``GET /health/ready`` — orchestrator probes
 
 Phase 5 hardening: API-key auth (when ``API_KEY`` is set), in-memory rate
@@ -19,11 +21,13 @@ Run:  uvicorn graphrag.api_server:app --app-dir src
 from __future__ import annotations
 
 import asyncio
+import json
 import logging
 import time
 from contextlib import asynccontextmanager
 
 from fastapi import Depends, FastAPI, File, HTTPException, UploadFile
+from fastapi.responses import PlainTextResponse, StreamingResponse
 from neo4j import GraphDatabase
 from pydantic import BaseModel, Field
 
@@ -40,7 +44,8 @@ from graphrag.identity import (AUDIT_ROLES, METRICS_ROLES, QUERY_ROLES,
 from graphrag.logger_config import setup_logging
 from graphrag.monitoring import monitor
 from graphrag.pdf_processor import extract_text_from_pdf
-from graphrag.query_pipeline import run_query
+from graphrag import prometheus as prom
+from graphrag.query_pipeline import run_query, stream_query
 from graphrag.rate_limiter import rate_limit
 from graphrag.security import setup_security
 from graphrag.sessions import (all_sessions, current_session_id,
@@ -152,6 +157,8 @@ async def upload_pdf(
         )
 
         stats["execution_time_ms"] = round((time.perf_counter() - start) * 1000, 2)
+        prom.requests_total.inc(kind="upload")
+        prom.upload_latency.observe(stats["execution_time_ms"] / 1000.0)
         monitor.record(kind="upload", file=file.filename, doc_id=doc_id,
                        user=user.subject, tenant_id=user.tenant_id,
                        latency_ms=stats["execution_time_ms"])
@@ -172,6 +179,7 @@ async def upload_pdf(
     except HTTPException:
         raise
     except Exception:  # noqa: BLE001 - report and wrap; never leak internals
+        prom.errors_total.inc(kind="upload")
         logger.exception("upload failed for %s", file.filename)
         raise HTTPException(status_code=500, detail="Internal Server Error") from None
 
@@ -196,6 +204,7 @@ async def query_graph(
             answer_mode=request.answer_mode,
             identity=user,
         )
+        _record_query_metrics(result, kind="query")
         monitor.record(kind="query", query=request.query, user=user.subject,
                        tenant_id=user.tenant_id,
                        latency_ms=result["execution_time_ms"],
@@ -204,8 +213,70 @@ async def query_graph(
     except HTTPException:
         raise
     except Exception:  # noqa: BLE001 - report and wrap; never leak internals
+        prom.errors_total.inc(kind="query")
         logger.exception("query failed: %s", request.query)
         raise HTTPException(status_code=500, detail="Internal Server Error") from None
+
+
+def _record_query_metrics(result: dict, kind: str) -> None:
+    """Prometheus observations shared by the one-shot and streamed paths."""
+    prom.requests_total.inc(kind=kind)
+    if result.get("execution_time_ms") is not None:
+        prom.query_latency.observe(result["execution_time_ms"] / 1000.0)
+    tokens = result.get("tokens") or {}
+    if tokens.get("savings_percent") is not None:
+        prom.token_savings.observe(tokens["savings_percent"] / 100.0)
+    if result.get("cost_usd") is not None:
+        prom.llm_cost_total.inc(result["cost_usd"])
+    if result.get("answer_fallback"):
+        prom.llm_fallbacks_total.inc()
+
+
+@app.post("/api/v1/query/stream")
+async def query_stream(
+    request: QueryRequest,
+    user: UserIdentity = Depends(require_user(*QUERY_ROLES)),
+    _rl=Depends(rate_limit()),
+):
+    """Streaming variant of /api/v1/query — server-sent events.
+
+    Event sequence: ``meta`` → ``delta``* → ``done`` (or ``blocked`` on
+    guardrail refusal / ``error`` on failure). The ``done``/``blocked`` events
+    carry the full result (same shape as /api/v1/query) after the audit
+    record is written. When PII masking is active for the caller, live token
+    streaming is disabled and the answer arrives as a single buffered delta.
+    """
+
+    def sse_events():
+        try:
+            for ev in stream_query(
+                app.state.driver,
+                request.query,
+                max_hops=request.max_hops,
+                token_budget=request.token_budget,
+                reranker_mode=request.reranker_mode,
+                answer_mode=request.answer_mode,
+                identity=user,
+            ):
+                if ev["type"] in ("done", "blocked"):
+                    _record_query_metrics(ev.get("result") or {}, kind="stream")
+                    monitor.record(kind="stream", query=request.query,
+                                   user=user.subject, tenant_id=user.tenant_id,
+                                   latency_ms=(ev.get("result") or {}).get("execution_time_ms"),
+                                   savings_pct=((ev.get("result") or {}).get("tokens") or {}).get("savings_percent"))
+                yield f"event: {ev['type']}\ndata: {json.dumps(ev, default=str)}\n\n"
+        except Exception as exc:  # noqa: BLE001 - streamed to the client
+            prom.errors_total.inc(kind="stream")
+            logger.exception("streamed query failed: %s", request.query)
+            yield ("event: error\ndata: "
+                   + json.dumps({"detail": "Internal Server Error", "error": type(exc).__name__})
+                   + "\n\n")
+
+    return StreamingResponse(
+        sse_events(),
+        media_type="text/event-stream",
+        headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
+    )
 
 
 @app.get("/api/v1/session")
@@ -280,6 +351,15 @@ async def get_audit(limit: int = 50,
 async def verify_audit(user: UserIdentity = Depends(require_user(*AUDIT_ROLES))):
     """Verify the hash-chain integrity of the audit store (v2)."""
     return {"status": "success", **audit_store.verify()}
+
+
+@app.get("/metrics")
+async def metrics(user: UserIdentity = Depends(require_user(*METRICS_ROLES))):
+    """Prometheus exposition (v2) — scrape target for Grafana/Datadog agents."""
+    return PlainTextResponse(
+        prom.render(),
+        media_type="text/plain; version=0.0.4; charset=utf-8",
+    )
 
 
 if __name__ == "__main__":
