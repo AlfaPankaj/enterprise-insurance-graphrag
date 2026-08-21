@@ -34,6 +34,50 @@ class Settings(BaseSettings):
     API_KEY: str = ""
     CORS_ORIGINS: str = "http://localhost:3000,http://localhost:8501,http://localhost:8502"
 
+    # ------------------------------------------------------------------
+    # v2 — multi-provider LLM layer
+    # ------------------------------------------------------------------
+    # auto = OpenAI-compatible when configured, else Ollama, else extractive;
+    # ollama / openai = require that provider (raise/fall back per caller)
+    LLM_PROVIDER: str = "auto"
+    OPENAI_BASE_URL: str = ""            # Azure: https://<res>.openai.azure.com/openai/deployments/<deployment>
+    OPENAI_API_KEY: str = ""             # vLLM/Together/Ollama-compat may not need a key
+    OPENAI_MODEL: str = "gpt-4o-mini"
+    OPENAI_API_VERSION: str = ""         # Azure only: e.g. 2024-06-01
+    LLM_TIMEOUT_S: float = 90.0
+    LLM_MAX_RETRIES: int = 2             # retries on transient 5xx/timeout
+    # per-1k-token USD used to price provider usage blocks (set contracted rates)
+    LLM_PRICE_PER_1K_INPUT: float = 0.0
+    LLM_PRICE_PER_1K_OUTPUT: float = 0.0
+
+    # ------------------------------------------------------------------
+    # v2 — identity & RBAC (trust & compliance workstream)
+    # ------------------------------------------------------------------
+    # none = dev (auth off, anonymous identity); static = X-API-Key;
+    # jwt = OIDC bearer token (HS256 shared secret or RS256 via JWKS_URL)
+    AUTH_MODE: str = "none"
+    API_KEY_ROLES: str = "admin,analyst,auditor"   # roles granted to the static key
+    JWT_SECRET: str = ""                 # HS256 shared secret (dev/simple OIDC)
+    JWT_ISSUER: str = ""                 # required when AUTH_MODE=jwt
+    JWT_AUDIENCE: str = ""               # optional
+    JWKS_URL: str = ""                   # RS256 key discovery (Keycloak/Azure AD)
+    # default tenant for unauthenticated requests (dev); JWT carries tenant_id claim
+    DEFAULT_TENANT: str = "demo"
+    # roles allowed to read PII-classified fields (PII_MODE=mask)
+    PII_READER_ROLES: str = "admin,auditor"
+
+    # ------------------------------------------------------------------
+    # v2 — trust controls (PII, guardrails, tenant isolation)
+    # ------------------------------------------------------------------
+    # off = raw fields everywhere (v1 behavior); mask = redact PII-classified
+    # fields in retrieval context + answers unless the caller's role can read them
+    PII_MODE: str = "off"
+    # false = v1 behavior; true = input/output guardrail checks on every query
+    GUARDRAILS_ENABLED: bool = False
+    # off = v1 un-scoped graph; column = every Cypher query is prefixed with a
+    # tenant predicate ({tenant_id: $tenant}) so tenants can never see each other
+    TENANT_MODE: str = "off"
+
     # Rate limiting (in-memory sliding window; single-process)
     RATE_LIMIT_PER_MINUTE: int = 60
     RATE_LIMIT_WINDOW_S: int = 60

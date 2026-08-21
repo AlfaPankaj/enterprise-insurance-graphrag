@@ -34,12 +34,15 @@ from graphrag.exception_handlers import register_exception_handlers
 from graphrag.graph_store import get_existing_entities
 from graphrag.graph_updater import update_graph_surgically
 from graphrag.health_check import register_health_endpoints
+from graphrag.identity import (AUDIT_ROLES, METRICS_ROLES, QUERY_ROLES,
+                               SESSION_ROLES, UPLOAD_ROLES, UserIdentity,
+                               require_user)
 from graphrag.logger_config import setup_logging
 from graphrag.monitoring import monitor
 from graphrag.pdf_processor import extract_text_from_pdf
 from graphrag.query_pipeline import run_query
 from graphrag.rate_limiter import rate_limit
-from graphrag.security import require_api_key, setup_security
+from graphrag.security import setup_security
 from graphrag.sessions import (all_sessions, current_session_id,
                                session_exists, switch_session)
 from graphrag.traversal_logger import audit_store
@@ -95,7 +98,7 @@ register_health_endpoints(app)
 @app.post("/api/v1/upload")
 async def upload_pdf(
     file: UploadFile = File(...),
-    _auth=Depends(require_api_key),
+    user: UserIdentity = Depends(require_user(*UPLOAD_ROLES)),
     _rl=Depends(rate_limit()),
 ):
     """Ingest an insurance PDF. Returns the CDC diff + surgical update stats."""
@@ -106,7 +109,10 @@ async def upload_pdf(
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
     start = time.perf_counter()
-    try:
+
+    def _process_upload() -> dict:
+        """Sync ingestion work — run in a worker thread (G3: the event loop
+        must never block on extraction/LLM/Neo4j)."""
         text = extract_text_from_pdf(contents)
         extracted = extract_entities(text, doc_id_hint=file.filename)
         entities = extracted["entities"]
@@ -125,23 +131,40 @@ async def upload_pdf(
             stats = update_graph_surgically(
                 app.state.driver, doc_id, changes, new_entities=entities
             )
-
-        stats["execution_time_ms"] = round((time.perf_counter() - start) * 1000, 2)
-        monitor.record(kind="upload", file=file.filename, doc_id=doc_id,
-                       latency_ms=stats["execution_time_ms"])
-        logger.info("upload ok file=%s doc=%s", file.filename, doc_id,
-                    extra={"doc_id": doc_id, "latency_ms": stats["execution_time_ms"]})
-
         return {
-            "status": "success",
-            "file": file.filename,
             "doc_id": doc_id,
-            "extraction_mode": extracted["mode"],
+            "mode": extracted["mode"],
+            "stats": stats,
             "changes": {
                 "added": len(changes["added"]),
                 "modified": len(changes["modified"]),
                 "deleted": len(changes["deleted"]),
             },
+        }
+
+    try:
+        processed = await asyncio.to_thread(_process_upload)
+        doc_id, extracted_mode, stats, changes = (
+            processed["doc_id"], processed["mode"], processed["stats"],
+            processed["changes"],
+        )
+
+        stats["execution_time_ms"] = round((time.perf_counter() - start) * 1000, 2)
+        monitor.record(kind="upload", file=file.filename, doc_id=doc_id,
+                       user=user.subject, tenant_id=user.tenant_id,
+                       latency_ms=stats["execution_time_ms"])
+        logger.info("upload ok file=%s doc=%s user=%s tenant=%s", file.filename,
+                    doc_id, user.subject, user.tenant_id,
+                    extra={"doc_id": doc_id, "user": user.subject,
+                           "tenant_id": user.tenant_id,
+                           "latency_ms": stats["execution_time_ms"]})
+
+        return {
+            "status": "success",
+            "file": file.filename,
+            "doc_id": doc_id,
+            "extraction_mode": extracted_mode,
+            "changes": changes,
             "update_stats": stats,
         }
     except HTTPException:
@@ -154,20 +177,25 @@ async def upload_pdf(
 @app.post("/api/v1/query")
 async def query_graph(
     request: QueryRequest,
-    _auth=Depends(require_api_key),
+    user: UserIdentity = Depends(require_user(*QUERY_ROLES)),
     _rl=Depends(rate_limit()),
 ):
     """Token-optimized retrieval: returns context, savings, and an answer."""
     try:
-        result = run_query(
+        # G3: the sync pipeline (Neo4j + rerank + LLM, up to seconds) runs in
+        # a worker thread so the event loop keeps serving concurrent requests
+        result = await asyncio.to_thread(
+            run_query,
             app.state.driver,
             request.query,
             max_hops=request.max_hops,
             token_budget=request.token_budget,
             reranker_mode=request.reranker_mode,
             answer_mode=request.answer_mode,
+            identity=user,
         )
-        monitor.record(kind="query", query=request.query,
+        monitor.record(kind="query", query=request.query, user=user.subject,
+                       tenant_id=user.tenant_id,
                        latency_ms=result["execution_time_ms"],
                        savings_pct=result["tokens"]["savings_percent"])
         return {"status": "success", **result}
@@ -179,7 +207,7 @@ async def query_graph(
 
 
 @app.get("/api/v1/session")
-async def get_session(_auth=Depends(require_api_key)):
+async def get_session(user: UserIdentity = Depends(require_user(*QUERY_ROLES))):
     """Current session + the sessions available for switching."""
     return {
         "status": "success",
@@ -195,7 +223,7 @@ async def get_session(_auth=Depends(require_api_key)):
 @app.post("/api/v1/session")
 async def set_session(
     request: SessionRequest,
-    _auth=Depends(require_api_key),
+    user: UserIdentity = Depends(require_user(*SESSION_ROLES)),
     _rl=Depends(rate_limit()),
 ):
     """Switch the loaded graph to another session (re-seeds if needed).
@@ -234,15 +262,22 @@ async def set_session(
 
 
 @app.get("/api/v1/metrics")
-async def get_metrics(_auth=Depends(require_api_key)):
+async def get_metrics(user: UserIdentity = Depends(require_user(*METRICS_ROLES))):
     """Rolling request stats: counts, avg latency, avg token savings."""
     return {"summary": monitor.summary(), "metrics": monitor.recent(100)}
 
 
 @app.get("/api/v1/audit")
-async def get_audit(limit: int = 50, _auth=Depends(require_api_key)):
+async def get_audit(limit: int = 50,
+                    user: UserIdentity = Depends(require_user(*AUDIT_ROLES))):
     """Recent query audit records (Shot 3 explainability trail)."""
     return {"status": "success", "records": audit_store.recent(min(limit, 500))}
+
+
+@app.get("/api/v1/audit/verify")
+async def verify_audit(user: UserIdentity = Depends(require_user(*AUDIT_ROLES))):
+    """Verify the hash-chain integrity of the audit store (v2)."""
+    return {"status": "success", **audit_store.verify()}
 
 
 if __name__ == "__main__":

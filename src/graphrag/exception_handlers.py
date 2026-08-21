@@ -18,7 +18,11 @@ logger = logging.getLogger("graphrag.api")
 
 
 def _request_id(request: Request) -> str:
-    return request.headers.get("X-Request-ID") or uuid.uuid4().hex[:12]
+    # the security middleware stamps request.state.request_id on every path;
+    # fall back to the header (or a fresh id) for bare TestClient usage
+    return (getattr(request.state, "request_id", None)
+            or request.headers.get("X-Request-ID")
+            or uuid.uuid4().hex[:12])
 
 
 def _register_general(app: FastAPI) -> None:

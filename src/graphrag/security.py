@@ -14,6 +14,7 @@ cannot recover it from response latency.
 from __future__ import annotations
 
 import secrets
+import uuid
 from typing import Annotated
 
 from fastapi import Depends, HTTPException, status
@@ -63,7 +64,11 @@ def setup_security(app) -> None:
 
     @app.middleware("http")
     async def add_security_headers(request, call_next):
+        # request-id correlation on EVERY path (v2): honor the client's id,
+        # generate one otherwise, echo it on the response for log correlation
+        request.state.request_id = request.headers.get("X-Request-ID") or uuid.uuid4().hex[:12]
         response = await call_next(request)
+        response.headers["X-Request-ID"] = request.state.request_id
         for header, value in _SECURITY_HEADERS.items():
             response.headers[header] = value
         return response

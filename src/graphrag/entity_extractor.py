@@ -271,7 +271,7 @@ def extract_entities_heuristic(text: str, doc_id_hint: str | None = None) -> dic
 
 
 # ---------------------------------------------------------------------------
-# LLM path (Ollama)
+# LLM path — v2 multi-provider layer (OpenAI-compatible → Ollama → heuristic)
 # ---------------------------------------------------------------------------
 
 def _ollama_available() -> bool:
@@ -285,11 +285,22 @@ def _load_prompts() -> tuple[str, str]:
     return PROMPT_FILE.read_text(encoding="utf-8").split("\n---\n", 1)
 
 
-def _extract_with_llm(text: str, doc_id_hint: str | None) -> dict:
+def _render_extraction_prompt(text: str) -> str:
+    """Fill the extraction template — brace-safe (document text may hold {}).
+
+    A document containing literal braces (JSON snippets in clauses, etc.)
+    must not crash ``.format()``; the swap goes through a sentinel.
+    """
     prompt, _qa = _load_prompts()
+    return prompt.replace("{text}", "\x00DOC_TEXT\x00").replace("\x00DOC_TEXT\x00", text)
+
+
+def _extract_with_llm(text: str, doc_id_hint: str | None) -> dict:
+    """Ollama /api/generate extraction (v1 contract: format=json)."""
+    prompt = _render_extraction_prompt(text)
     response = httpx.post(
         f"{settings.LLAMA_API_URL}/api/generate",
-        json={"model": settings.LLAMA_MODEL, "prompt": prompt.format(text=text),
+        json={"model": settings.LLAMA_MODEL, "prompt": prompt,
               "stream": False, "format": "json"},
         timeout=120,
     )
@@ -303,13 +314,70 @@ def _extract_with_llm(text: str, doc_id_hint: str | None) -> dict:
     return {"doc_id": doc_id, "entities": entities, "mode": "llm"}
 
 
+def _extract_with_openai(text: str, doc_id_hint: str | None) -> dict:
+    """OpenAI-compatible Chat Completions extraction (structured JSON)."""
+    from graphrag.llm.openai_compat import OpenAICompatProvider
+
+    prompt = _render_extraction_prompt(text)
+    result = OpenAICompatProvider().generate(
+        prompt,
+        model=settings.LLAMA_MODEL if settings.LLM_PROVIDER == "ollama"
+        else (settings.OPENAI_MODEL),
+        max_tokens=2048,
+        temperature=0.0,
+        json_mode=True,
+    )
+    # tolerate markdown fences some gateways wrap JSON in
+    raw = result.text.strip()
+    if raw.startswith("```"):
+        raw = raw.strip("`")
+        raw = raw.removeprefix("json")
+    entities = json.loads(raw)
+    doc_id = _hint_id(doc_id_hint) or ""
+    for label, ents in entities.items():
+        for eid, props in ents.items():
+            if not doc_id and re.fullmatch(r"(POL|CLM|END)-\d+", eid):
+                doc_id = eid
+    return {"doc_id": doc_id, "entities": entities, "mode": "llm",
+            "provider": result.provider, "model": result.model}
+
+
+def _openai_extraction_path() -> bool:
+    """Prefer the OpenAI-compatible provider for extraction (like answers)."""
+    if settings.LLM_PROVIDER == "openai":
+        return True
+    if settings.LLM_PROVIDER == "auto" and settings.OPENAI_BASE_URL:
+        from graphrag.llm.factory import get_provider
+        provider = get_provider("auto")
+        return provider is not None and provider.name == "openai"
+    return False
+
+
 def extract_entities(text: str, doc_id_hint: str | None = None, mode: str | None = None) -> dict:
-    """Extract entities — LLM when requested/available, heuristic otherwise."""
+    """Extract entities — LLM when requested/available, heuristic otherwise.
+
+    Provider chain (v2): OpenAI-compatible when configured → Ollama →
+    deterministic heuristic. ``mode="llm"`` requires a provider; ``auto``
+    degrades gracefully on any failure.
+    """
     mode = mode or settings.EXTRACTION_MODE
-    if mode in ("llm", "auto") and _ollama_available():
-        try:
-            return _extract_with_llm(text, doc_id_hint)
-        except Exception:
-            if mode == "llm":
-                raise
+    if mode in ("llm", "auto"):
+        if _openai_extraction_path():
+            try:
+                return _extract_with_openai(text, doc_id_hint)
+            except Exception:
+                if mode == "llm":
+                    raise
+                # auto: fall through to the Ollama attempt below
+        if mode in ("llm", "auto") and _ollama_available():
+            try:
+                return _extract_with_llm(text, doc_id_hint)
+            except Exception:
+                if mode == "llm":
+                    raise
+        if mode == "llm" and not _openai_extraction_path() and not _ollama_available():
+            raise RuntimeError(
+                f"extraction mode 'llm' requires a provider (Ollama at "
+                f"{settings.LLAMA_API_URL} or OPENAI_BASE_URL)"
+            )
     return extract_entities_heuristic(text, doc_id_hint)

@@ -14,29 +14,47 @@ from graphrag.answer_generator import generate_answer
 from graphrag.config import settings
 from graphrag.context_pruner import prune_context
 from graphrag.graph_retriever import retrieve_subgraph, serialize_subgraph
+from graphrag.guardrails import run_guardrails
+from graphrag.identity import UserIdentity
+from graphrag.pii import MaskingPolicy, redact_node, scrub_answer
 from graphrag.reranker import _label_prior_hits, make_reranker
 from graphrag.token_counter import count_tokens
 from graphrag.traversal_logger import audit_store, build_audit_record
 
+_BLOCKED_ANSWER = ("Query blocked by guardrail policy "
+                   "(instruction injection detected).")
+
 
 def run_query(driver, query: str, max_hops: int | None = None,
               token_budget: int | None = None, reranker_mode: str | None = None,
-              answer_mode: str | None = None) -> dict:
+              answer_mode: str | None = None,
+              identity: UserIdentity | None = None) -> dict:
     """Full token-optimized retrieval pipeline for a natural-language query.
 
     Returns the answer + token savings, and — for explainability (Shot 3) —
     the full traversal lineage (nodes/edges visited, Cypher used, per-stage
     timings). Every call is appended to the audit trail store.
 
+    v2 additions: ``identity`` (a ``UserIdentity``) drives tenant scoping,
+    PII masking, and audit attribution; guardrail findings are recorded in
+    ``result["guardrails"]`` and enforced (refusal) when enabled.
+
     ``answer_mode`` in {"extractive", "auto", "llm"} — default
-    ``settings.ANSWER_MODE`` (extractive = deterministic, no Ollama needed;
-    auto = try Ollama, fall back to extractive; llm = require Ollama).
+    ``settings.ANSWER_MODE`` (extractive = deterministic; auto = provider
+    chain with extractive fallback; llm = require a provider).
     """
     max_hops = max_hops or settings.MAX_HOPS
     token_budget = token_budget or settings.MAX_TOKENS
     t0 = time.perf_counter()
 
-    subgraph = retrieve_subgraph(driver, query, max_hops)
+    tenant_id = identity.tenant_id if identity else None
+    scoped_tenant = tenant_id if settings.TENANT_MODE == "column" else None
+    pii_policy = MaskingPolicy.for_roles(set(identity.roles) if identity else None)
+
+    subgraph = retrieve_subgraph(driver, query, max_hops, tenant_id=scoped_tenant)
+    # PII masking: rank/prune/answer only ever see the policy-applied view
+    if pii_policy.active:
+        subgraph["nodes"] = [redact_node(n, pii_policy) for n in subgraph["nodes"]]
     baseline_text = serialize_subgraph(subgraph)
     baseline_tokens = count_tokens(baseline_text)
     t1 = time.perf_counter()
@@ -105,6 +123,14 @@ def run_query(driver, query: str, max_hops: int | None = None,
     answer = generate_answer(query, pruned, mode=answer_mode)
     t4 = time.perf_counter()
 
+    # v2 trust layer: PII safety net on the final answer + guardrail checks
+    if pii_policy.active:
+        answer["answer"] = scrub_answer(answer["answer"], pii_policy)
+    guardrails = run_guardrails(query, answer["answer"], pruned["text"])
+    if guardrails.blocked:
+        answer = {"answer": _BLOCKED_ANSWER, "mode": "blocked", "model": None,
+                  "fallback_reason": "guardrail: " + ", ".join(guardrails.injection_hits)}
+
     tokens = {
         "before": baseline_tokens,
         "after": pruned["tokens"],
@@ -124,6 +150,11 @@ def run_query(driver, query: str, max_hops: int | None = None,
         tokens=tokens, answer=answer["answer"], answer_mode=answer["mode"],
         answer_model=answer.get("model"), reranker=reranker.name, max_hops=max_hops,
         t0=t0, t1=t1, t2=t2, t3=t3, t4=t4,
+        user=identity.as_dict() if identity else None,
+        tenant_id=scoped_tenant,
+        answer_provider=answer.get("provider"),
+        usage=answer.get("usage"),
+        cost_usd=answer.get("cost_usd"),
     )
     if settings.AUDIT_ENABLED:
         audit_store.append(audit_record)
@@ -143,6 +174,12 @@ def run_query(driver, query: str, max_hops: int | None = None,
         "answer_mode": answer["mode"],
         "answer_model": answer.get("model"),
         "answer_fallback": answer.get("fallback_reason"),
+        "answer_provider": answer.get("provider"),
+        "usage": answer.get("usage"),
+        "cost_usd": answer.get("cost_usd"),
+        "guardrails": guardrails.as_dict(),
+        "user": identity.as_dict() if identity else None,
+        "tenant_id": scoped_tenant,
         "reranker": reranker.name,
         "tokens": tokens,
         "retrieval": {
