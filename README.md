@@ -1,13 +1,8 @@
 # GraphRAG Insurance Claims System
 
-> **v2 (this branch):** the system upgrade blueprint is implemented —
-> multi-provider LLMs, identity/RBAC + OIDC, PII masking & at-rest encryption,
-> tenant isolation, tamper-evident audit, guardrails, streaming, answer cache,
-> Prometheus/OTel, durable jobs, hybrid (vector+BM25+graph) retrieval,
-> answer-quality evals with a CI gate, an extraction review queue, and a
-> **second business domain (banking)** with Aura topology. See
-> [`docs/System_Upgrade_Blueprint_Enterprise_GraphRAG_v2.md`](docs/System_Upgrade_Blueprint_Enterprise_GraphRAG_v2.md)
-> and [`docs/TESTING_WITH_FREE_TRIALS.md`](docs/TESTING_WITH_FREE_TRIALS.md).
+> **v2 (this branch):** the enterprise system upgrade is implemented — see
+> **[What's new in v2](#whats-new-in-v2)** below for every new capability and
+> what it changes for the system.
 
 A **production-grade, incrementally-updating GraphRAG system** for commercial
 insurance processing. Unstructured insurance PDFs → Neo4j knowledge graph →
@@ -28,6 +23,64 @@ detection at **P/R/F1 = 100%** over 1,212 real fraud labels.
 | **3 — Lineage & explainability** | Executives can't audit answers | every query logs its **traversal path + Cypher + nodes/edges** → interactive lineage UI + JSON/HTML/PDF audit reports |
 
 ![Description of GIF](image/Audit_Trail_&_Lineage.gif)
+
+## What's new in v2
+
+v1 proved the three kill shots on real data. **v2 turns the system from a
+validated demo into an enterprise-grade platform** — answering the questions a
+CISO, an ops lead, and an auditor actually ask: *who ran this query, can this
+user see that PII, could client A's data ever leak into client B's answer,
+what did each answer cost, how do we know quality didn't regress, and can we
+trust the audit trail?*
+
+Everything below is **opt-in via `.env`** (defaults preserve v1 behavior
+exactly), adds **no new hard dependencies**, and is covered by the test suite
+(**476 passing**) and the free-trial walkthrough
+([`docs/TESTING_WITH_FREE_TRIALS.md`](docs/TESTING_WITH_FREE_TRIALS.md)).
+
+### Trust & compliance
+
+| Feature | What it does | Impact on the system |
+|---|---|---|
+| **Identity & RBAC** — `AUTH_MODE=none\|static\|jwt` | API-key or OIDC bearer auth (HS256 shared secret, or RS256 via your IdP's `JWKS_URL` — Keycloak/Azure AD/Okta…); roles `admin / analyst / auditor` gate every endpoint; the Streamlit app gets a sign-in box | Every request and audit record now carries **who asked** (subject + roles + tenant). Role separation is enforced per endpoint — an analyst cannot re-seed sessions or read the full audit trail |
+| **Tenant isolation** — `TENANT_MODE=column` | Every written node is stamped with `tenant_id` (first owner wins) and every Cypher statement is scoped by the caller's tenant | **Client A's data can never appear in client B's answer** — the isolation guarantee that makes the system multi-client safe |
+| **PII masking** — `PII_MODE=mask` | PII-classified fields (name, DOB, address, phone, email) are redacted from retrieval context, ranking, and answers for roles without read rights (`PII_READER_ROLES`) | Analysts get business facts without identity data; auditors/admin see full detail. GDPR/IRDAI-class data stays protected through the whole pipeline |
+| **PII encryption at rest** — `PII_ENCRYPTION_KEY` | PII fields are Fernet-encrypted before they are written to Neo4j (decrypted on read, tamper-detected) | **A database dump leaks no identity data.** Business fields stay plaintext, so threshold/graph queries are unaffected |
+| **Tamper-evident audit** — always on | Every audit record is linked into a SHA-256 hash chain; `GET /api/v1/audit/verify` validates it | Editing or deleting a record **breaks the chain and is detected** — the compliance trail is no longer a plain file anyone could rewrite |
+| **Guardrails** — `GUARDRAILS_ENABLED=true` | Query/document injection screening; answers are checked for fabricated ids/values and PII echo; violations are blocked or flagged in the result | OWASP LLM Top-10 mitigations become measurable — a malicious PDF or prompt can't silently steer the model |
+
+### Performance & cost
+
+| Feature | What it does | Impact on the system |
+|---|---|---|
+| **Multi-provider LLM layer** — `LLM_PROVIDER=auto` | One interface over OpenAI-compatible gateways (OpenAI, **Azure OpenAI**, vLLM, Together…) with Ollama as the local fallback; automatic retries and a deterministic extractive last resort | **No vendor lock-in**, per-answer `usage` + `cost_usd` recorded in every result and audit record, and the system **never hard-fails** when a model is down |
+| **Answer cache** — `CACHE_ENABLED=true` | TTL+LRU cache keyed by query + parameters + **tenant + PII scope + dataset revision** | Repeated operations questions ("status of CLM-…?") answer in milliseconds at **zero LLM cost**; any graph write bumps the revision, so a stale answer can never survive a change |
+| **Streaming answers** — `POST /api/v1/query/stream` | SSE token streaming through the provider layer + a live-stream checkbox in the Dashboard | First token in well under a second instead of waiting for the full answer; automatically buffered whenever PII masking applies, so nothing sensitive streams |
+| **Durable job runner** — `POST /api/v1/jobs` | Seeding/benchmark runs are tracked jobs in SQLite (progress lines, cancel, crash recovery) instead of in-process threads | Long operations **survive API restarts** and are visible/cancelable — no more dead daemon threads |
+
+### Retrieval & answer quality
+
+| Feature | What it does | Impact on the system |
+|---|---|---|
+| **Hybrid retrieval** — `reranker_mode=hybrid` | Reciprocal-Rank-Fusion of BM25 + **embeddings** (OpenAI / Ollama / a free deterministic hash embedder) + graph proximity; semantic seed fallback for queries with no id/keyword signal | **Paraphrase and no-id questions now get answers** ("which account posted a payment to Aurora Rare Goods?"). The pure-Cypher path is untouched — the 10,200-query benchmark behavior is unchanged |
+| **Answer-quality evals** — `scripts/benchmark_answer_quality.py` | Every answer scored on faithfulness / relevance / groundedness / refusal against a golden set built from the source data (optional LLM rubric judge) | **Answer quality is now measured and CI-gated**, not just retrieval fidelity — a silent quality regression can't merge |
+| **Extraction review queue** — `EXTRACTION_REVIEW_ENABLED=true` | Every extracted entity gets a confidence score; low-confidence entities are **held for human review** (new Review Queue page + `/api/v1/review`) and applied via CDC only after approval | **CDC only ever applies confirmed changes** — the auditor's guarantee for document ingestion; real-world document key spellings are parsed too |
+
+### Operations, observability & deployment
+
+| Feature | What it does | Impact on the system |
+|---|---|---|
+| **Prometheus** — `GET /metrics` | Zero-dependency registry: requests/errors/rate-limits, latency + token-savings histograms, LLM cost USD, cache hits, jobs, review queue | Ops teams get real dashboards (Grafana/Datadog) instead of grep-ing JSON logs |
+| **OpenTelemetry tracing** — `TRACING_ENABLED=true` | Per-request spans (method, caller, tenant, status) + pipeline stage spans (`retrieve → rerank → prune → answer`) + `X-Trace-ID` response header; OTLP export to Jaeger/Tempo/Datadog | A user's question can be traced from HTTP to answer; support correlates a complaint to a trace id in seconds. No-op without the optional packages |
+| **Banking domain** — `banking_demo` session | A pluggable ontology layer + a second domain (Customer/Account/Transaction/Dispute/AMLAlert) with its own deterministic dataset, benchmark, and PII rules | **The same platform runs banking digital operations** — adding a domain is now one `DomainSpec`, not a code change |
+| **Aura topology** — `docker-compose.aura.yml` | App tier wired to **Neo4j AuraDB** (managed, native TLS) + a runbook for tenancy, backup/restore RPO/RTO and restore drills | Production-grade deployment with zero graph-DB operations burden — see [`docs/AURA_TOPOLOGY.md`](docs/AURA_TOPOLOGY.md) |
+| **Config checker** — `scripts/check_config.py` | One-command validation of a trial/production setup (Neo4j, providers, auth, trust controls) with exit codes | Misconfiguration is caught before a demo or deploy, not during it |
+
+**Start exploring:** copy `.env.example` → `.env`, run `python scripts/check_config.py`,
+then follow the free-trial walkthrough in
+[`docs/TESTING_WITH_FREE_TRIALS.md`](docs/TESTING_WITH_FREE_TRIALS.md). The full
+rationale (gap analysis, acceptance criteria, slice-by-slice status) lives in
+[`docs/System_Upgrade_Blueprint_Enterprise_GraphRAG_v2.md`](docs/System_Upgrade_Blueprint_Enterprise_GraphRAG_v2.md).
 
 ## Two pipelines, one graph
 
@@ -176,9 +229,11 @@ dashboard's validation table. See the report for usage.
 
 ## Docs
 
-* [`DEPLOYMENT.md`](DEPLOYMENT.md) — Docker, environment config, backups, CI/CD
-* [`API_DOCS.md`](API_DOCS.md) — REST endpoint reference
-* [`docs/graph_schema.md`](docs/graph_schema.md) — ontology
+* [`docs/System_Upgrade_Blueprint_Enterprise_GraphRAG_v2.md`](docs/System_Upgrade_Blueprint_Enterprise_GraphRAG_v2.md) — **the v2 blueprint**: gap analysis, workstreams, acceptance criteria, slice-by-slice status
+* [`docs/TESTING_WITH_FREE_TRIALS.md`](docs/TESTING_WITH_FREE_TRIALS.md) — free-trial walkthrough (Aura / Ollama / OpenAI / Azure) + a demo script for every v2 feature
+* [`docs/AURA_TOPOLOGY.md`](docs/AURA_TOPOLOGY.md) — managed Neo4j Aura topology: tenancy, backup/restore, hardening
+* [`API_DOCS.md`](API_DOCS.md) — REST endpoint reference (v1 + all v2 endpoints)
+* [`docs/graph_schema.md`](docs/graph_schema.md) — insurance ontology (banking ontology: [`src/graphrag/domains/banking.py`](src/graphrag/domains/banking.py))
 * [`how_to_run.md`](how_to_run.md) — run commands
 * [`GraphRAG Insurance Claims System - Production-Ready Plan.md`](GraphRAG%20Insurance%20Claims%20System%20-%20Production-Ready%20Plan.md) — the original plan
 
@@ -186,59 +241,73 @@ dashboard's validation table. See the report for usage.
 ## Repository layout
 
 ```
-├── app.py            # main Streamlit app (Home / Dashboard / Audit Trail / Datasets)
+├── app.py            # main Streamlit app (Home / Dashboard / Audit Trail / Datasets / Review Queue)
 ├── dashboard.py                # Shot 2: standalone cost-optimization dashboard
-├── Dockerfile · Dockerfile.dashboard · docker-compose.yml · docker-compose.e2e.yml
-├── pyproject.toml · requirements.txt · requirements-api.txt
+├── Dockerfile · Dockerfile.dashboard · docker-compose.yml · docker-compose.e2e.yml · docker-compose.aura.yml
+├── pyproject.toml · requirements.txt · requirements-api.txt · requirements-otel.txt
+├── .env.example                # every v2 knob documented (copy to .env — never committed)
 ├── README.md
 ├── How_to_run.md
 |
 │
-├── src/graphrag/               # core library (28 modules)
+├── src/graphrag/               # core library (40 modules + llm/ + domains/ subpackages)
 │   │
 │   ├── PDF + CDC pipeline (Shot 1)
 │   │   ├── pdf_processor.py        # text/table extraction from insurance PDFs
-│   │   ├── entity_extractor.py     # LLM (Ollama) + heuristic entity extraction, prompts
+│   │   ├── entity_extractor.py     # LLM + heuristic extraction, confidence scoring, key aliases
 │   │   ├── change_detector.py      # CDC: added / modified / deleted entities
-│   │   ├── graph_updater.py        # surgical Neo4j updates — no full re-index
+│   │   ├── graph_updater.py        # surgical Neo4j updates — no full re-index (+ tenant/PII/rev)
 │   │   └── graph_store.py          # node/edge persistence helpers
 │   │
 │   ├── Retrieval + token optimization (Shot 2)
-│   │   ├── graph_retriever.py      # multi-hop Neo4j sub-graph retrieval + numeric seeds
-│   │   ├── reranker.py             # cross-encoder (neural) ↔ lexical BM25, auto-fallback
+│   │   ├── graph_retriever.py      # multi-hop Neo4j sub-graph retrieval + numeric/semantic seeds
+│   │   ├── reranker.py             # cross-encoder ↔ BM25 ↔ hybrid (RRF) re-ranking
 │   │   ├── context_pruner.py       # token-budget context pruning
 │   │   ├── token_counter.py        # tiktoken-based token accounting
-│   │   └── answer_generator.py     # Ollama LLM answer + extractive fallback
+│   │   ├── answer_generator.py     # multi-provider LLM answer + streaming + extractive fallback
+│   │   ├── embeddings.py           # OpenAI / Ollama / deterministic-hash embedders
+│   │   └── vector_store.py         # revision-cached semantic index + seed fallback
 │   │
 │   ├── Lineage + explainability (Shot 3)
-│   │   ├── traversal_logger.py     # query → nodes/edges → answer audit trail
+│   │   ├── traversal_logger.py     # hash-chained, tamper-evident audit trail
 │   │   ├── path_extractor.py       # Cypher path reconstruction
 │   │   ├── lineage_visualizer.py   # pyvis graph rendering
 │   │   ├── audit_reporter.py       # JSON / HTML / PDF audit report export
 │   │   └── audit_ui.py             # audit trail page
 │   │
-│   ├── Orchestration + data
-│   │   ├── query_pipeline.py       # end-to-end: retrieve → rank → prune → answer
-│   │   ├── sessions.py             # session switching, re-seed, auto-benchmark triggers
-│   │   ├── custom_sessions.py      # upload-your-own PDF/CSV registry + adapters
-│   │   └── fraud_ground_truth.py   # verdict parsing + fraud label loading
+│   ├── v2 — Trust & compliance
+│   │   ├── identity.py             # OIDC/JWT/API-key auth + RBAC (admin/analyst/auditor)
+│   │   ├── pii.py                  # PII classification, masking, Fernet at-rest encryption
+│   │   ├── guardrails.py           # injection / groundedness / refusal checks
+│   │   └── extraction_review.py    # human-in-the-loop review queue for low-confidence entities
 │   │
-│   └── Production hardening (Phase 5)
-│       ├── api_server.py           # FastAPI: /upload, /query, /session, /health, /metrics
-│       ├── security.py · rate_limiter.py · validators.py · exception_handlers.py
-│       ├── health_check.py · monitoring.py · logger_config.py · config.py
+│   ├── v2 — Platform
+│   │   ├── cache.py                # tenant/PII/revision-keyed answer cache
+│   │   ├── jobs.py                 # durable background job runner (SQLite)
+│   │   ├── prometheus.py           # zero-dependency metrics + /metrics exposition
+│   │   ├── tracing.py              # OpenTelemetry spans + X-Trace-ID (optional deps)
+│   │   └── evals.py                # answer-quality scoring (rules + LLM judge)
+│   │
+│   ├── llm/                        # provider layer: ollama · openai_compat · pricing · factory
+│   └── domains/                    # pluggable ontology: insurance.py · banking.py · registry
 │
-├── scripts/                      # 22 operational scripts
-│   ├── seed_graph.py · ingest_real_dataset.py · ingest_custom_dataset.py
+├── scripts/                      # 29 operational scripts
+│   ├── seed_graph.py · ingest_real_dataset.py · ingest_custom_dataset.py · ingest_banking_dataset.py
+│   ├── data_pipeline_banking.py    # deterministic banking demo dataset
 │   ├── benchmark_real_dataset.py · benchmark_fraud_detection.py · benchmark_edge_cases.py
+│   ├── benchmark_banking_dataset.py · benchmark_answer_quality.py · build_golden_set.py
+│   ├── check_config.py             # one-command trial/production setup validator
 │   ├── export_benchmark_proof.py · build_benchmark_queries.py · auto_pipeline.py
 │   ├── e2e_cdc_demo.py · smoke_test_api.py · backup_neo4j.py
 │   └── verify_*.py                # per-feature verification (dashboard, audit, cypher, …)
 │
-├── tests/                        # 186 test functions (~281 collected) across 27 files
+├── tests/                        # 476 passing / 12 DB-dependent skips across 49 files
 │   ├── unit: reranker, pruner, token_counter, change_detector, graph_updater, …
 │   ├── integration: api (upload/query/session), audit flow, custom sessions, fraud benchmark
-│   └── production: security, rate_limiter, validators, health endpoints
+│   ├── production: security, rate_limiter, validators, health endpoints
+│   └── v2: identity/OIDC, pii, guardrails, cache, streaming, jobs, tracing,
+│       prometheus, evals, embeddings, vector store, hybrid reranker,
+│       extraction review, domains + banking end-to-end
 │
 ├── data/
 │   ├── Real_datasets/             # fraud_oracle (15.4k) · insurance_claims (1k) · insurance_dataset + data_synthetic (13k + 53.5k)
