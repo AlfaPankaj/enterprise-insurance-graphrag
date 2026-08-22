@@ -373,4 +373,50 @@ criteria. Order reflects dependency, not necessarily priority — see §6.
 * **Tests** — 187 new tests across the v2 slices: **455 passed, 12 skipped**
   (skips = DB-dependent, unchanged baseline).
 
-**Next slice:** WS-E (banking domain, Aura topology).
+**Done — WS-E (v2 slice 8): banking domain + Aura topology — blueprint complete**
+
+* **Pluggable domain layer (G18)** — `src/graphrag/domains/`: `DomainSpec`
+  dataclass + registry (`insurance`, `banking`). Every ontology-dependent
+  surface — entity-id regex, keyword props, numeric props, prop-focus,
+  serialization text props, node kinds, answer-type label hints, seeding
+  stopwords, required fields, strict id patterns, PII classes — is now
+  **merged from the registered specs**, with the insurance spec carrying the
+  EXACT v1 values (insurance first in every merge). The full v1 suite passed
+  unchanged, so the refactor is bit-identical for insurance.
+* **Banking domain** — `domains/banking.py` ontology
+  (Customer/Account/Transaction/Dispute/AMLAlert;
+  HOLDS/POSTED/HAS_DISPUTE/ABOUT/HAS_ALERT), `scripts/data_pipeline_banking.py`
+  (deterministic demo dataset, ground truth by construction →
+  `data/samples/banking.json`), `scripts/ingest_banking_dataset.py` (same
+  machinery: tenant stamping + PII encryption + Dataset marker/rev),
+  `scripts/benchmark_banking_dataset.py` (id lookups, dispute/AML/holder
+  queries, balance thresholds, a no-id merchant paraphrase, negative probes →
+  `data/benchmarks/real_banking.json`), **`banking_demo` session** (sidebar
+  switcher, marker mapping, seed command) + a Pipeline Validation row. The
+  end-to-end tests prove the banking graph flows through the unchanged
+  retrieve → rank → prune → answer → audit pipeline (incl. tenant/PII paths).
+* **Aura topology (G19/G20)** — `docker-compose.aura.yml` (app tier only,
+  Aura-backed, native `neo4j+s://` TLS, audit/jobs volumes) +
+  `docs/AURA_TOPOLOGY.md` (provisioning, tenancy models — instance-per-tenant
+  vs `TENANT_MODE=column`, backup/restore with RPO/RTO targets, restore
+  drill, production hardening checklist, topology diagram).
+* **Tests** — 208 new tests across the v2 slices: **476 passed, 12 skipped**
+  (skips = DB-dependent, unchanged baseline).
+
+## 9. Blueprint completion — final state
+
+All five workstreams are implemented on this branch across 8 slices:
+
+| Workstream | Status |
+|---|---|
+| WS-A Platform core | ✅ providers, cache, streaming, jobs, metrics, tracing |
+| WS-B Trust & compliance | ✅ identity/RBAC/OIDC, PII mask+encrypt, tenant isolation, tamper-evident audit, guardrails, UI login |
+| WS-C Retrieval & document intelligence | ✅ hybrid retrieval (RRF + vector store), answer-quality evals + golden set + CI gate script, extraction confidence + review queue, real-document key parsing |
+| WS-D Observability & CI gates | ✅ Prometheus, OTel (tracing optional-dep), benchmark+eval gate scripts (CI workflow edit awaits a push with `workflows` permission) |
+| WS-E Domain, deployment & governance | ✅ pluggable ontology + banking domain + benchmarks, Aura topology + compose, repo hygiene |
+
+What remains intentionally open (production-only items, documented in the
+blueprint): KMS envelope encryption, Redis-backed rate limiting, shared
+audit storage for multi-replica, banking extraction prompts for arbitrary
+real documents, and the CI workflow push (needs a token with `workflows`
+permission — the edit is staged in the working tree).

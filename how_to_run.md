@@ -35,7 +35,7 @@
 
 ## Sessions — no terminal needed for dataset switching
 
-Inside `app.py`, the sidebar's **Active Session** selector exposes 4 sessions:
+Inside `app.py`, the sidebar's **Active Session** selector exposes 5 sessions:
 
 | Session | Pipeline | Seeded by |
 |---|---|---|
@@ -43,6 +43,7 @@ Inside `app.py`, the sidebar's **Active Session** selector exposes 4 sessions:
 | `insurance_claims` | Excel / real CSV | `scripts/ingest_real_dataset.py insurance_claims --reset` |
 | `insurance_dataset` | Excel / real CSV | `scripts/ingest_real_dataset.py insurance_dataset --reset` |
 | `pdf_demo` | PDF / synthetic demo graph | `scripts/seed_graph.py --reset --apply-schema` |
+| `banking_demo` | Banking demo (v2, WS-E) | `scripts/ingest_banking_dataset.py --reset` |
 
 Picking a different session re-seeds the graph **inside the app's backend
 process** (idempotent — it is a no-op if that session is already loaded; the

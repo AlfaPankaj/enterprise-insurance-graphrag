@@ -179,6 +179,9 @@ def validation_entries(loaded: str | None) -> list[dict]:
         {"label": "pdf_demo (PDF pipeline)", "files": ["synthetic"],
          "desc": "Synthetic demo graph — policies, claims, endorsements",
          "kind": "pdf", "fraud_name": "synthetic"},
+        {"label": "banking_demo (banking pipeline)", "files": ["banking"],
+         "desc": "60 customers · 80 accounts · 400 transactions · 30 disputes · 18 AML alerts",
+         "kind": "real"},
     ]
     for rec in list_custom_sessions():
         entries.append({
@@ -354,7 +357,8 @@ with st.sidebar:
     sess = get_session_meta(sel_session) or {}
     kind_note = ("📊 Excel / real CSV" if sess.get("kind") == "excel"
                  else ("📤 Custom upload" if sess.get("kind") == "custom"
-                       else "📄 PDF / synthetic demo"))
+                       else ("🏦 Banking demo" if sess.get("kind") == "banking"
+                             else "📄 PDF / synthetic demo")))
     st.caption(f"Pipeline: {kind_note} — {sess.get('desc', '')}")
     if switch_in_progress():
         render_switch_progress()

@@ -1,5 +1,14 @@
 # GraphRAG Insurance Claims System
 
+> **v2 (this branch):** the system upgrade blueprint is implemented —
+> multi-provider LLMs, identity/RBAC + OIDC, PII masking & at-rest encryption,
+> tenant isolation, tamper-evident audit, guardrails, streaming, answer cache,
+> Prometheus/OTel, durable jobs, hybrid (vector+BM25+graph) retrieval,
+> answer-quality evals with a CI gate, an extraction review queue, and a
+> **second business domain (banking)** with Aura topology. See
+> [`docs/System_Upgrade_Blueprint_Enterprise_GraphRAG_v2.md`](docs/System_Upgrade_Blueprint_Enterprise_GraphRAG_v2.md)
+> and [`docs/TESTING_WITH_FREE_TRIALS.md`](docs/TESTING_WITH_FREE_TRIALS.md).
+
 A **production-grade, incrementally-updating GraphRAG system** for commercial
 insurance processing. Unstructured insurance PDFs → Neo4j knowledge graph →
 multi-hop questions with full explainability — built around three production
@@ -57,8 +66,8 @@ python -m venv .venv && .venv/Scripts/pip install -r requirements.txt   # Window
 
 ## Sessions (switch from the web UI)
 
-The sidebar's **Active Session** selector in `app.py` exposes 4 sessions — 3
-real Excel datasets + the PDF demo graph:
+The sidebar's **Active Session** selector in `app.py` exposes 5 sessions — 3
+real Excel datasets + the PDF demo graph + the v2 banking demo:
 
 | Session | Pipeline | Source |
 |---|---|---|
@@ -66,6 +75,7 @@ real Excel datasets + the PDF demo graph:
 | `insurance_claims` | Excel | 1,000 claims · 247 fraud labels |
 | `insurance_dataset` | Excel | 13,000 claims (+ `data_synthetic` variant, same source) |
 | `pdf_demo` | PDF | synthetic demo graph (policies / claims / endorsements) |
+| `banking_demo` | Banking (v2) | 60 customers · 80 accounts · 400 transactions · 30 disputes · 18 AML alerts |
 
 Picking a different session **re-seeds the graph automatically in the app's
 backend process** (idempotent — no re-ingest if it is already loaded; the

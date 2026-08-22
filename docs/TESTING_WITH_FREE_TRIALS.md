@@ -397,6 +397,50 @@ EXTRACTION_CONFIDENCE_THRESHOLD=0.7
 > Guarantee this gives auditors: **CDC only ever applies confirmed changes** —
 > nothing low-confidence reaches the graph without a human decision.
 
+## 6j. Banking domain demo (v2 — second business domain)
+
+The same pipeline now speaks a **banking ontology** (Customer / Account /
+Transaction / Dispute / AMLAlert):
+
+```bash
+python scripts/data_pipeline_banking.py       # data/samples/banking.json (deterministic)
+python scripts/ingest_banking_dataset.py --reset
+python scripts/benchmark_banking_dataset.py   # -> data/benchmarks/real_banking.json
+```
+
+1. Pick **`banking_demo`** in the app's sidebar (or
+   `POST /api/v1/session {"session_id": "banking_demo"}`) — the graph
+   re-seeds with 60 customers · 80 accounts · 400 transactions · 30 disputes
+   · 18 AML alerts.
+2. Try these on the Dashboard:
+   - `What is the status of account ACC-0035?`
+   - `Is there a dispute on account ACC-0035?`
+   - `Who holds account ACC-0035?`
+   - `Which accounts have a balance over $40,000?`
+   - `Which customers have been flagged for possible money laundering on account ACC-0035?`
+   - `Which account posted a payment to Aurora Rare Goods Co.?` *(no id — paraphrase seeding)*
+3. The benchmark validates retrieval + pruning accuracy on all of these
+   (plus negative probes) and the Dashboard's Pipeline Validation table shows
+   the **banking_demo** row.
+4. PII masking + encryption apply to Customer fields; tenant mode stamps and
+   scopes banking nodes exactly like insurance ones.
+
+## 6k. Neo4j Aura (managed graph) topology
+
+Prefer a managed graph? Point the app tier at **AuraDB Free** instead of
+local Neo4j:
+
+```bash
+# .env:  NEO4J_URI=neo4j+s://xxxx.databases.neo4j.io  (native TLS, no config)
+docker compose -f docker-compose.aura.yml up -d --build
+python scripts/check_config.py   # probes the Aura instance
+```
+
+Full runbook — provisioning, tenancy models (instance-per-tenant vs
+`TENANT_MODE=column`), backup/restore with RPO/RTO, restore drill, and the
+production hardening checklist — lives in
+[`docs/AURA_TOPOLOGY.md`](AURA_TOPOLOGY.md).
+
 ## 7. Trial-account caveats (set expectations before the demo)
 
 * **AuraDB Free** — limited instance size/memory; fine for the demo graph and

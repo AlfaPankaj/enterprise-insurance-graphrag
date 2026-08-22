@@ -24,7 +24,7 @@ def _client():
     return TestClient(app)
 
 
-def test_get_session_lists_four_sessions(monkeypatch):
+def test_get_session_lists_all_sessions(monkeypatch):
     monkeypatch.setattr(settings, "API_KEY", "")
     monkeypatch.setattr(api, "current_session_id", lambda d: "pdf_demo")
     with _client() as client:
@@ -34,7 +34,7 @@ def test_get_session_lists_four_sessions(monkeypatch):
         assert body["current_session"] == "pdf_demo"
         ids = [s["id"] for s in body["sessions"]]
         assert ids == ["fraud_oracle", "insurance_claims",
-                       "insurance_dataset", "pdf_demo"]
+                       "insurance_dataset", "pdf_demo", "banking_demo"]
 
 
 def test_post_session_auth_enforced(monkeypatch):

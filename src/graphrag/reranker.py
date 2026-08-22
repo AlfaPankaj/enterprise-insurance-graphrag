@@ -23,6 +23,7 @@ import threading
 from collections import Counter
 
 from graphrag.config import settings
+from graphrag.domains import merged_label_hints
 from graphrag.graph_retriever import ENTITY_ID_RE, query_tokens, serialize_node
 
 logger = logging.getLogger("graphrag.reranker")
@@ -31,16 +32,9 @@ _TOKEN_RE = re.compile(r"[a-zA-Z]+")
 
 # Answer-type hints: query phrases -> node labels. A small lexical prior added
 # on top of the neural score (hybrid retrieval) — it guarantees the answer type
-# is not starved out by the token budget.
-_LABEL_HINTS: list[tuple[tuple[str, ...], str]] = [
-    (("coverage", "coverages", "covers"), "Coverage"),
-    (("fraud", "flag", "flagged"), "FraudFlag"),
-    (("investigat", "handled by", "assigned"), "Investigator"),
-    (("endorsement", "endorsements"), "Endorsement"),
-    (("policy", "policies"), "Policy"),
-    (("claim", "claims"), "Claim"),
-    (("policyholder", "holder", "held by"), "Policyholder"),
-]
+# is not starved out by the token budget. Merged across domains (v2 banking
+# adds dispute/AML/transaction/account/customer hints).
+_LABEL_HINTS: list[tuple[tuple[str, ...], str]] = merged_label_hints()
 _LABEL_PRIOR = 2.5
 
 

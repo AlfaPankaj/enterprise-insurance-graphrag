@@ -63,33 +63,18 @@ _TERM = re.compile(r"^(\d{4}-\d{2}-\d{2})\s+to\s+(\d{4}-\d{2}-\d{2})$")
 # v2 — extraction confidence scoring (WS-C, G17)
 # ---------------------------------------------------------------------------
 
-# Required fields per label (mirrors docs/graph_schema.md §2). Confidence =
-# 0.6 × required-field coverage + 0.4 × id well-formedness — deterministic and
-# honest: a complete, well-formed entity scores 1.0; anything a human should
-# look at scores below the review threshold.
-_REQUIRED_FIELDS: dict[str, list[str]] = {
-    "Policyholder": ["id", "name", "dob", "address", "phone", "email", "risk_score"],
-    "Policy": ["id", "policy_number", "type", "start_date", "end_date",
-               "premium", "deductible", "status"],
-    "Coverage": ["id", "code", "category", "limit", "deductible"],
-    "Claim": ["id", "claim_number", "date", "amount", "status", "cause"],
-    "FraudFlag": ["id", "reason", "confidence", "severity", "created_by"],
-    "Investigator": ["id", "name", "role", "email"],
-    "Endorsement": ["id", "endorsement_number", "type", "effective_date",
-                    "premium_adjustment"],
-}
+# Required fields per label (mirrors docs/graph_schema.md §2 + the banking
+# domain spec). Confidence = 0.6 × required-field coverage + 0.4 × id
+# well-formedness — deterministic and honest: a complete, well-formed entity
+# scores 1.0; anything a human should look at scores below the review
+# threshold. Merged across registered domains (v2).
+from graphrag.domains import merged_id_patterns, merged_required_fields  # noqa: E402
 
-# Strict id patterns per label (the demo scheme) + a generic fallback for
+_REQUIRED_FIELDS: dict[str, list[str]] = merged_required_fields()
+
+# Strict id patterns per label (demo schemes) + a generic fallback for
 # real-world id schemes (e.g. CL-2024-010101 on real documents).
-_ID_PATTERNS: dict[str, re.Pattern] = {
-    "Policyholder": re.compile(r"^PH-\d{3,}$"),
-    "Policy": re.compile(r"^POL-\d{3,}$"),
-    "Coverage": re.compile(r"^COV-\d{3,}$"),
-    "Claim": re.compile(r"^CLM-\d{3,}$"),
-    "FraudFlag": re.compile(r"^FRD-\d{3,}$"),
-    "Investigator": re.compile(r"^INV-\d{3,}$"),
-    "Endorsement": re.compile(r"^END-\d{3,}$"),
-}
+_ID_PATTERNS: dict[str, re.Pattern] = merged_id_patterns()
 # real-world id schemes: letter prefix + dash + alphanumeric/dash tail
 # (e.g. CL-2024-010101, POL/2024/999)
 _GENERIC_ID = re.compile(r"^[A-Z]{2,8}[-/][A-Z0-9-]{2,40}$")

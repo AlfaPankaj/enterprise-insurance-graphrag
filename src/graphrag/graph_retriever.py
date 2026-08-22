@@ -21,6 +21,10 @@ from __future__ import annotations
 import re
 
 from graphrag.config import settings
+from graphrag.domains import (merged_entity_id_re, merged_keyword_props,
+                              merged_node_kinds, merged_numeric_props,
+                              merged_prop_focus, merged_stopwords,
+                              merged_text_props)
 
 # ---------------------------------------------------------------------------
 # v2 tenant isolation (WS-B, G4)
@@ -40,8 +44,9 @@ def tenant_active(tenant_id: str | None) -> bool:
     """True when scoping should be applied (mode on AND a tenant is known)."""
     return bool(tenant_id) and settings.TENANT_MODE == "column"
 
-# Entity ids used across the synthetic dataset (matches docs/graph_schema.md).
-ENTITY_ID_RE = re.compile(r"\b((?:POL|CLM|PH|END|FRD|INV)-\d{3,})\b")
+# Entity ids across all registered domains (insurance + banking; matches
+# docs/graph_schema.md and src/graphrag/domains/*.py).
+ENTITY_ID_RE = merged_entity_id_re()
 # Schema nouns are stopwords for KEYWORD seeding: they match generic prop
 # values everywhere ("claim" hits every fraud reason, "clm" hits every claim
 # number). Entity ids and value tokens (names, causes, statuses) do the real
@@ -76,38 +81,24 @@ STOPWORDS = {
     "investigator", "investigators", "policyholder", "holder", "status",
     "type", "premium", "deductible", "amount", "annual", "risk", "score",
     "number", "numbers", "id", "ids",
-}
+} | merged_stopwords()  # v2: banking schema nouns (account, dispute, …)
 
-# Text properties searched for query keywords (all labels flattened).
-# occupation is included for the real datasets (insurance_dataset.csv has no
-# name column — "claims from doctors" must still seed).
-_KEYWORD_PROPS = sorted({
-    "name", "address", "email", "policy_number", "type", "status",
-    "claim_number", "cause", "reason", "severity", "endorsement_number",
-    "role", "category", "occupation",
-})
+# Text properties searched for query keywords (all labels flattened, merged
+# across domains). occupation is included for the real datasets
+# (insurance_dataset.csv has no name column — "claims from doctors" must
+# still seed).
+_KEYWORD_PROPS = merged_keyword_props()
 
 # Numeric props + the label that owns them, for amount/threshold keywords
 # ("claims over $100,000" -> Claim.amount >= 100000).
-_NUMERIC_PROPS: list[tuple[str, str]] = [
-    ("amount", "Claim"), ("limit", "Coverage"), ("premium", "Policy"),
-    ("deductible", "Policy"), ("risk_score", "Policyholder"),
-    ("confidence", "FraudFlag"),
-]
+_NUMERIC_PROPS: list[tuple[str, str]] = merged_numeric_props()
 
 # When the query NAMES a numeric schema noun ("premium", "deductible", ...),
 # the threshold scan must be restricted to that prop's label — otherwise
 # "premium over $5,000" would seed any Coverage whose *limit* exceeds $5k.
 # Keys are query words (checked whole-word, lowercase); the schema nouns are
 # stopwords for keyword seeding, so this is the only place they signal intent.
-_PROP_FOCUS: dict[str, list[tuple[str, str]]] = {
-    "premium": [("premium", "Policy")],
-    "deductible": [("deductible", "Policy"), ("deductible", "Coverage")],
-    "amount": [("amount", "Claim")],
-    "limit": [("limit", "Coverage")],
-    "risk": [("risk_score", "Policyholder")],
-    "confidence": [("confidence", "FraudFlag")],
-}
+_PROP_FOCUS: dict[str, list[tuple[str, str]]] = merged_prop_focus()
 
 
 def _numeric_prop_focus(query: str) -> list[tuple[str, str]] | None:
@@ -121,6 +112,9 @@ def _numeric_prop_focus(query: str) -> list[tuple[str, str]] | None:
         return [("amount", "Claim")]
     if "coverage" in words or "coverages" in words:
         return [("limit", "Coverage")]
+    # v2 banking: "accounts with a balance over $X" -> Account.balance
+    if "balance" in words or "account" in words or "accounts" in words:
+        return [("balance", "Account")]
     return None
 
 
@@ -138,29 +132,10 @@ def _singular(tok: str) -> str:
 _THRESHOLD_ABOVE = ("over", "above", "more", "exceeds", "exceeding", "greater", "higher")
 _THRESHOLD_BELOW = ("under", "below", "less", "lower")
 
-_NODE_TEXT_PROPS = {
-    "Policyholder": ["name", "risk_score"],
-    "Policy": ["policy_number", "type", "status", "premium", "deductible",
-               "start_date", "end_date"],
-    "Claim": ["claim_number", "status", "amount", "date", "cause"],
-    "FraudFlag": ["severity", "confidence", "reason", "created_by"],
-    "Endorsement": ["endorsement_number", "type", "effective_date",
-                    "premium_adjustment"],
-    "Investigator": ["name", "role", "email"],
-    "Coverage": ["code", "category", "limit", "deductible"],
-}
-
-# Natural-language descriptor per label — helps neural AND lexical scorers
-# connect query words ("coverage", "fraud flag") to the node text.
-_NODE_KIND = {
-    "Policyholder": "policyholder",
-    "Policy": "insurance policy",
-    "Claim": "insurance claim",
-    "FraudFlag": "fraud flag",
-    "Endorsement": "policy endorsement",
-    "Investigator": "claims investigator",
-    "Coverage": "coverage",
-}
+# Serialized text properties per label + natural-language descriptors —
+# merged across domains (v2 banking adds its own surfaces).
+_NODE_TEXT_PROPS: dict[str, list[str]] = merged_text_props()
+_NODE_KIND: dict[str, str] = merged_node_kinds()
 
 
 def query_tokens(query: str) -> list[str]:

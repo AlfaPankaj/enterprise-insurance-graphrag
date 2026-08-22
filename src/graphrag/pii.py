@@ -36,19 +36,11 @@ from graphrag.config import settings
 # policies can treat it more strictly later.
 PII_CLASSES = ("PII_IDENTITY", "PII_CONTACT", "PII_HEALTH")
 
-_CLASSIFIED: dict[tuple[str, str], str] = {
-    # Policyholder — the PII-heavy entity
-    ("Policyholder", "name"): "PII_IDENTITY",
-    ("Policyholder", "dob"): "PII_IDENTITY",
-    ("Policyholder", "address"): "PII_CONTACT",
-    ("Policyholder", "phone"): "PII_CONTACT",
-    ("Policyholder", "email"): "PII_CONTACT",
-    # Investigator — internal staff PII
-    ("Investigator", "name"): "PII_IDENTITY",
-    ("Investigator", "email"): "PII_CONTACT",
-    # Any entity carrying contact/identity-like fields (custom CSVs etc.)
-    ("Policy", "policyholder_name"): "PII_IDENTITY",
-}
+# (label, property) -> PII class, merged across the registered domains
+# (v2: banking adds Customer identity/contact fields).
+from graphrag.domains import merged_pii_classes  # noqa: E402
+
+_CLASSIFIED: dict[tuple[str, str], str] = merged_pii_classes()
 
 # Generic field-name fallback for unlisted labels (custom CSV uploads):
 # a property whose *name* matches these patterns is classified by pattern.
