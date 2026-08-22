@@ -407,7 +407,8 @@ def _expand_graph(session, seed_ids: list[str], max_hops: int,
 
 
 def retrieve_subgraph(driver, query: str, max_hops: int | None = None,
-                      tenant_id: str | None = None) -> dict:
+                      tenant_id: str | None = None,
+                      vector_store=None) -> dict:
     """Retrieve the multi-hop sub-graph reachable from the query's seed nodes.
 
     If the query names an entity id (precise anchor), keyword filters are
@@ -418,6 +419,11 @@ def retrieve_subgraph(driver, query: str, max_hops: int | None = None,
     ``tenant_id`` (with ``settings.TENANT_MODE="column"``) scopes every
     Cypher statement to nodes carrying that ``tenant_id`` — the v2 tenant
     isolation guard. ``None`` = unscoped (v1 behavior).
+
+    ``vector_store`` (v2 hybrid retrieval): when id/keyword/numeric seeding
+    finds NOTHING, the query is embedded and the store supplies semantic
+    seeds (``kind="semantic"``) — the paraphrase fallback. Omit for pure
+    v1 behavior.
     """
     max_hops = max_hops or settings.MAX_HOPS
     with driver.session() as session:
@@ -446,6 +452,10 @@ def retrieve_subgraph(driver, query: str, max_hops: int | None = None,
                 seeds += _numeric_seeds_global(session, numbers, direction, pairs=prop_focus,
                                                tenant_id=tenant_id)
             seeds = list({s["id"]: s for s in seeds}.values())  # dedup by id
+            # v2 semantic fallback: paraphrase queries with no lexical signal
+            if not seeds and vector_store is not None:
+                from graphrag.vector_store import semantic_seeds
+                seeds = semantic_seeds(session, query, vector_store, k=3)
             visited, edges = _expand_graph(session, [s["id"] for s in seeds],
                                            max_hops, tenant_id=tenant_id)
             nodes = _fetch_nodes(session, list(visited), tenant_id=tenant_id)

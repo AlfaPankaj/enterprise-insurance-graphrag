@@ -92,6 +92,10 @@ the script's output tail. Valid ids: `fraud_oracle`, `insurance_claims`,
  "reranker_mode": "auto", "answer_mode": "auto"}
 ```
 
+`reranker_mode`: `auto` | `cross-encoder` | `lexical` | **`hybrid`** (v2 —
+RRF fusion of BM25 + semantic cosine + seed proximity; adds a semantic seed
+fallback for paraphrase queries with no id/keyword signal).
+
 Response: `{status, query, answer, answer_mode, answer_model,
 answer_fallback, reranker, tokens: {before, after, savings_percent},
 retrieval: {seeds, node_count, edge_count}, pruned: {kept, dropped, ...},

@@ -161,6 +161,9 @@ def main(argv: list[str] | None = None) -> int:
     _ok("Rate limit", f"{settings.RATE_LIMIT_PER_MINUTE}/min")
     _ok("Max hops / tokens", f"{settings.MAX_HOPS} / {settings.MAX_TOKENS}")
     _ok("Reranker", settings.RERANKER_MODE)
+    _ok("Embeddings", settings.EMBEDDING_PROVIDER + (
+        f" ({settings.EMBEDDING_MODEL})" if settings.EMBEDDING_PROVIDER != "hash" and settings.OPENAI_BASE_URL else
+        f" ({settings.EMBEDDING_OLLAMA_MODEL})" if settings.EMBEDDING_PROVIDER == "ollama" else ""))
     _ok("Audit dir", str(PROJECT_ROOT / settings.AUDIT_DIR))
 
     print("\n[Observability & jobs (v2)]")

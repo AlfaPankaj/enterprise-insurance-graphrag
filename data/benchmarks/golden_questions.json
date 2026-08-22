@@ -1,0 +1,461 @@
+{
+  "built_from": [
+    "data/samples/policies.json",
+    "data/samples/claims.json"
+  ],
+  "count": 46,
+  "questions": [
+    {
+      "query": "What is the status of claim CLM-0056?",
+      "category": "status",
+      "answerable": true,
+      "expected_ids": [
+        "CLM-0056"
+      ],
+      "expected_token": "approved"
+    },
+    {
+      "query": "Does claim CLM-0190 have a fraud flag?",
+      "category": "fraud",
+      "answerable": true,
+      "expected_ids": [
+        "CLM-0190"
+      ],
+      "ground_truth": "fraud"
+    },
+    {
+      "query": "What is the status of claim CLM-0008?",
+      "category": "status",
+      "answerable": true,
+      "expected_ids": [
+        "CLM-0008"
+      ],
+      "expected_token": "denied"
+    },
+    {
+      "query": "Who investigates claim CLM-0030?",
+      "category": "investigator",
+      "answerable": true,
+      "expected_ids": [
+        "INV-0004"
+      ]
+    },
+    {
+      "query": "Is there any sign of fraudulent activity on this claim file?",
+      "category": "paraphrase",
+      "answerable": true,
+      "expected_ids": [
+        "CLM-0098"
+      ],
+      "paraphrase_of": "Does claim CLM-0098 have a fraud flag?"
+    },
+    {
+      "query": "Which coverages apply to policy POL-0029?",
+      "category": "coverage",
+      "answerable": true,
+      "expected_ids": [
+        "COV-0113"
+      ]
+    },
+    {
+      "query": "Which coverages apply to policy POL-0054?",
+      "category": "coverage",
+      "answerable": true,
+      "expected_ids": [
+        "COV-0213"
+      ]
+    },
+    {
+      "query": "Who holds policy POL-0021?",
+      "category": "policyholder",
+      "answerable": true,
+      "expected_ids": [
+        "PH-0021"
+      ]
+    },
+    {
+      "query": "Which coverages apply to policy POL-0070?",
+      "category": "coverage",
+      "answerable": true,
+      "expected_ids": [
+        "COV-0277"
+      ]
+    },
+    {
+      "query": "Who holds policy POL-0036?",
+      "category": "policyholder",
+      "answerable": true,
+      "expected_ids": [
+        "PH-0036"
+      ]
+    },
+    {
+      "query": "Does claim CLM-99999 have a fraud flag?",
+      "category": "negative",
+      "answerable": false,
+      "expected_ids": []
+    },
+    {
+      "query": "Which coverages apply to policy POL-0072?",
+      "category": "coverage",
+      "answerable": true,
+      "expected_ids": [
+        "COV-0285"
+      ]
+    },
+    {
+      "query": "What protections does this commercial policy offer to its holder?",
+      "category": "paraphrase",
+      "answerable": true,
+      "expected_ids": [
+        "COV-0045",
+        "COV-0046"
+      ],
+      "paraphrase_of": "Which coverages apply to policy POL-0012?"
+    },
+    {
+      "query": "Who holds policy POL-0001?",
+      "category": "policyholder",
+      "answerable": true,
+      "expected_ids": [
+        "PH-0001"
+      ]
+    },
+    {
+      "query": "Does claim CLM-0194 have a fraud flag?",
+      "category": "fraud",
+      "answerable": true,
+      "expected_ids": [
+        "CLM-0194"
+      ],
+      "ground_truth": "clean"
+    },
+    {
+      "query": "Which coverages apply to policy POL-99999?",
+      "category": "negative",
+      "answerable": false,
+      "expected_ids": []
+    },
+    {
+      "query": "What is the status of claim CLM-0130?",
+      "category": "status",
+      "answerable": true,
+      "expected_ids": [
+        "CLM-0130"
+      ],
+      "expected_token": "submitted"
+    },
+    {
+      "query": "What is the status of claim CLM-0007?",
+      "category": "status",
+      "answerable": true,
+      "expected_ids": [
+        "CLM-0007"
+      ],
+      "expected_token": "denied"
+    },
+    {
+      "query": "Who investigates claim CLM-0100?",
+      "category": "investigator",
+      "answerable": true,
+      "expected_ids": [
+        "INV-0003"
+      ]
+    },
+    {
+      "query": "Does claim CLM-0140 have a fraud flag?",
+      "category": "fraud",
+      "answerable": true,
+      "expected_ids": [
+        "CLM-0140"
+      ],
+      "ground_truth": "clean"
+    },
+    {
+      "query": "What is the status of claim CLM-0024?",
+      "category": "status",
+      "answerable": true,
+      "expected_ids": [
+        "CLM-0024"
+      ],
+      "expected_token": "approved"
+    },
+    {
+      "query": "Does claim CLM-0180 have a fraud flag?",
+      "category": "fraud",
+      "answerable": true,
+      "expected_ids": [
+        "CLM-0180"
+      ],
+      "ground_truth": "clean"
+    },
+    {
+      "query": "Who holds policy POL-0098?",
+      "category": "policyholder",
+      "answerable": true,
+      "expected_ids": [
+        "PH-0098"
+      ]
+    },
+    {
+      "query": "Does claim CLM-0066 have a fraud flag?",
+      "category": "fraud",
+      "answerable": true,
+      "expected_ids": [
+        "CLM-0066"
+      ],
+      "ground_truth": "fraud"
+    },
+    {
+      "query": "Who holds policy POL-0058?",
+      "category": "policyholder",
+      "answerable": true,
+      "expected_ids": [
+        "PH-0058"
+      ]
+    },
+    {
+      "query": "Which policies have a premium over $24,572?",
+      "category": "threshold",
+      "answerable": true,
+      "expected_ids": [
+        "POL-0001",
+        "POL-0004",
+        "POL-0005",
+        "POL-0006",
+        "POL-0007",
+        "POL-0008",
+        "POL-0010",
+        "POL-0011",
+        "POL-0012",
+        "POL-0013",
+        "POL-0015",
+        "POL-0017",
+        "POL-0018",
+        "POL-0019",
+        "POL-0020",
+        "POL-0021",
+        "POL-0022",
+        "POL-0023",
+        "POL-0024",
+        "POL-0025",
+        "POL-0026",
+        "POL-0027",
+        "POL-0030",
+        "POL-0032",
+        "POL-0033",
+        "POL-0035",
+        "POL-0036",
+        "POL-0038",
+        "POL-0040",
+        "POL-0042",
+        "POL-0043",
+        "POL-0044",
+        "POL-0045",
+        "POL-0046",
+        "POL-0047",
+        "POL-0048",
+        "POL-0049",
+        "POL-0051",
+        "POL-0057",
+        "POL-0058",
+        "POL-0064",
+        "POL-0065",
+        "POL-0066",
+        "POL-0070",
+        "POL-0071",
+        "POL-0072",
+        "POL-0073",
+        "POL-0074",
+        "POL-0075",
+        "POL-0076",
+        "POL-0077",
+        "POL-0079",
+        "POL-0080",
+        "POL-0083",
+        "POL-0085",
+        "POL-0087",
+        "POL-0088",
+        "POL-0089",
+        "POL-0090",
+        "POL-0093",
+        "POL-0094",
+        "POL-0095",
+        "POL-0096",
+        "POL-0097",
+        "POL-0098",
+        "POL-0099",
+        "POL-0100"
+      ]
+    },
+    {
+      "query": "Does claim CLM-0026 have a fraud flag?",
+      "category": "fraud",
+      "answerable": true,
+      "expected_ids": [
+        "CLM-0026"
+      ],
+      "ground_truth": "clean"
+    },
+    {
+      "query": "Who investigates claim CLM-0086?",
+      "category": "investigator",
+      "answerable": true,
+      "expected_ids": [
+        "INV-0005"
+      ]
+    },
+    {
+      "query": "Who investigates claim CLM-0055?",
+      "category": "investigator",
+      "answerable": true,
+      "expected_ids": [
+        "INV-0001"
+      ]
+    },
+    {
+      "query": "Which coverages apply to policy POL-0026?",
+      "category": "coverage",
+      "answerable": true,
+      "expected_ids": [
+        "COV-0101"
+      ]
+    },
+    {
+      "query": "Does claim CLM-0038 have a fraud flag?",
+      "category": "fraud",
+      "answerable": true,
+      "expected_ids": [
+        "CLM-0038"
+      ],
+      "ground_truth": "fraud"
+    },
+    {
+      "query": "Does claim CLM-0058 have a fraud flag?",
+      "category": "fraud",
+      "answerable": true,
+      "expected_ids": [
+        "CLM-0058"
+      ],
+      "ground_truth": "fraud"
+    },
+    {
+      "query": "What is the status of claim CLM-0009?",
+      "category": "status",
+      "answerable": true,
+      "expected_ids": [
+        "CLM-0009"
+      ],
+      "expected_token": "in_review"
+    },
+    {
+      "query": "Which coverages apply to policy POL-0084?",
+      "category": "coverage",
+      "answerable": true,
+      "expected_ids": [
+        "COV-0333",
+        "COV-0334"
+      ]
+    },
+    {
+      "query": "What is the status of claim CLM-0155?",
+      "category": "status",
+      "answerable": true,
+      "expected_ids": [
+        "CLM-0155"
+      ],
+      "expected_token": "approved"
+    },
+    {
+      "query": "Does claim CLM-0057 have a fraud flag?",
+      "category": "fraud",
+      "answerable": true,
+      "expected_ids": [
+        "CLM-0057"
+      ],
+      "ground_truth": "fraud"
+    },
+    {
+      "query": "Which coverages apply to policy POL-0090?",
+      "category": "coverage",
+      "answerable": true,
+      "expected_ids": [
+        "COV-0357"
+      ]
+    },
+    {
+      "query": "Does claim CLM-0030 have a fraud flag?",
+      "category": "fraud",
+      "answerable": true,
+      "expected_ids": [
+        "CLM-0030"
+      ],
+      "ground_truth": "clean"
+    },
+    {
+      "query": "Who investigates claim CLM-0120?",
+      "category": "investigator",
+      "answerable": true,
+      "expected_ids": [
+        "INV-0002"
+      ]
+    },
+    {
+      "query": "Who holds policy POL-0076?",
+      "category": "policyholder",
+      "answerable": true,
+      "expected_ids": [
+        "PH-0076"
+      ]
+    },
+    {
+      "query": "Does claim CLM-0021 have a fraud flag?",
+      "category": "fraud",
+      "answerable": true,
+      "expected_ids": [
+        "CLM-0021"
+      ],
+      "ground_truth": "fraud"
+    },
+    {
+      "query": "What is the status of claim CLM-0060?",
+      "category": "status",
+      "answerable": true,
+      "expected_ids": [
+        "CLM-0060"
+      ],
+      "expected_token": "paid"
+    },
+    {
+      "query": "Who investigates claim CLM-0071?",
+      "category": "investigator",
+      "answerable": true,
+      "expected_ids": [
+        "INV-0002"
+      ]
+    },
+    {
+      "query": "What is the status of policy POL-99999?",
+      "category": "negative",
+      "answerable": false,
+      "expected_ids": []
+    },
+    {
+      "query": "Which coverages apply to policy POL-0092?",
+      "category": "coverage",
+      "answerable": true,
+      "expected_ids": [
+        "COV-0365"
+      ]
+    },
+    {
+      "query": "Does claim CLM-0046 have a fraud flag?",
+      "category": "fraud",
+      "answerable": true,
+      "expected_ids": [
+        "CLM-0046"
+      ],
+      "ground_truth": "clean"
+    }
+  ]
+}

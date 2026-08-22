@@ -315,5 +315,32 @@ criteria. Order reflects dependency, not necessarily priority — see §6.
 * **Tests** — 133 new tests across the v2 slices: **401 passed, 12 skipped**
   (skips = DB-dependent, unchanged baseline).
 
-**Next slices (in order):** WS-C (hybrid retrieval + answer-quality evals)
+**Done — WS-C (v2 slice 6):**
+
+* **Hybrid retrieval (G16)** — `embeddings.py` (pluggable providers:
+  OpenAI-compatible `/embeddings`, Ollama `/api/embeddings`, **deterministic
+  hash embedder** as the zero-dependency fallback — hybrid works with no API
+  keys), `vector_store.py` (revision-cached in-memory index of node texts,
+  tenant-scoped, node-capped; `semantic_seeds()`), `HybridReranker` in
+  `reranker.py` (RRF fusion of lexical BM25 + semantic cosine + seed
+  proximity with the answer-type prior; degrades to pure lexical). Pipeline:
+  `RERANKER_MODE=hybrid` (API pattern + UI selectboxes), semantic seed
+  fallback fires only when id/keyword/numeric seeding finds nothing —
+  existing retrieval semantics and the 10,200-query benchmark are untouched.
+* **Answer-quality evaluation (G15)** — `evals.py`: deterministic rules
+  engine (faithfulness / relevance / groundedness / refusal, weighted
+  composite) + provider-backed rubric judge (`judge_answer`, JSON rubric,
+  rules fallback). Golden set built **from the source samples**
+  (`scripts/build_golden_set.py`, 46 questions: fraud, status, coverage,
+  policyholder, investigator, thresholds, paraphrases, negative probes).
+  `scripts/benchmark_answer_quality.py` runs it through the full pipeline
+  (`include_context` opt-in on `run_query`), writes
+  `data/benchmarks/answer_quality_synthetic.json`, and enforces
+  `--min-faithfulness/--min-overall` floors. **CI now gates answer quality**
+  (golden set + floors in `.github/workflows/ci.yml`) — a quality regression
+  can no longer merge silently.
+* **Tests** — 173 new tests across the v2 slices: **441 passed, 12 skipped**
+  (skips = DB-dependent, unchanged baseline).
+
+**Next slices:** WS-C remainder (real-document extraction + review queue)
 → WS-E (banking domain, Aura topology).

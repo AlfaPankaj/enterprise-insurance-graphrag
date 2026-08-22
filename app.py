@@ -461,7 +461,7 @@ elif page == "Dashboard":
         c1, c2, c3, c4 = st.columns(4)
         max_hops = c1.slider("Max hops", 1, 4, settings.MAX_HOPS)
         token_budget = c2.slider("Token budget", 256, 8192, settings.MAX_TOKENS, step=256)
-        reranker_mode = c3.selectbox("Reranker", ["auto", "cross-encoder", "lexical"])
+        reranker_mode = c3.selectbox("Reranker", ["auto", "cross-encoder", "lexical", "hybrid"])
         answer_mode = c4.selectbox("Answer mode", ["extractive", "auto", "llm"],
                                    index=["extractive", "auto", "llm"].index(settings.ANSWER_MODE) if settings.ANSWER_MODE in ("extractive", "auto", "llm") else 0)
         stream_answers = st.checkbox(

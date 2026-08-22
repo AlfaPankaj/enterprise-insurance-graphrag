@@ -82,7 +82,38 @@ def _prepare(driver, query: str, max_hops: int, token_budget: int,
     baseline_tokens = count_tokens(baseline_text)
     t1 = time.perf_counter()
 
-    reranker = make_reranker(reranker_mode)
+    hybrid_mode = (reranker_mode or settings.RERANKER_MODE) == "hybrid"
+    if hybrid_mode:
+        # v2 semantic seed fallback: when id/keyword/numeric seeding found
+        # nothing, embed the query and seed from the revision-cached vector
+        # index (paraphrase queries). Builds the index lazily, once per
+        # dataset revision; pure-Cypher retrieval is untouched otherwise.
+        try:
+            from graphrag.vector_store import build_vector_store
+            store = build_vector_store(driver)
+        except Exception:  # noqa: BLE001 - hybrid degrades to lexical
+            store = None
+        if store is not None and not subgraph["seeds"]:
+            try:
+                from graphrag.vector_store import semantic_seeds
+                with start_span("graphrag.semantic_seeds",
+                                {"query_hash": qhash, "store_size": len(store)}):
+                    with driver.session() as session:
+                        extra = semantic_seeds(session, query, store, k=3)
+                if extra:
+                    from graphrag.graph_retriever import (retrieve_subgraph as _rs)
+                    subgraph = _rs(driver, query, max_hops,
+                                   tenant_id=scoped_tenant,
+                                   vector_store=store)
+                    if pii_policy.active:
+                        subgraph["nodes"] = [redact_node(n, pii_policy)
+                                             for n in subgraph["nodes"]]
+                    baseline_text = serialize_subgraph(subgraph)
+                    baseline_tokens = count_tokens(baseline_text)
+            except Exception:  # noqa: BLE001
+                pass
+
+    reranker = make_reranker(reranker_mode, driver=driver)
 
     # edge-aware ranking text: each node carries its direct neighbors + edge
     # types, so the scorer can connect "coverage COV-0017" to the claim's policy
@@ -90,12 +121,24 @@ def _prepare(driver, query: str, max_hops: int, token_budget: int,
     for e in subgraph["edges"]:
         neighbors.setdefault(e["source"], []).append(f"{e['type']}: {e['target']}")
         neighbors.setdefault(e["target"], []).append(f"{e['type']}: {e['source']}")
+    # hop distance from seeds (hybrid proximity signal)
+    dist: dict[str, int] = {s["id"]: 0 for s in subgraph["seeds"]}
+    frontier = list(dist)
+    while frontier:
+        nxt: list[str] = []
+        for e in subgraph["edges"]:
+            for a, b in ((e["source"], e["target"]), (e["target"], e["source"])):
+                if a in frontier and b not in dist:
+                    dist[b] = dist[a] + 1
+                    nxt.append(b)
+        frontier = nxt
     rank_nodes = []
     for n in subgraph["nodes"]:
         ctx = neighbors.get(n["id"])
         if ctx:
             copy = dict(n)
-            copy["props"] = {**n["props"], "_ctx": "neighbors: " + ", ".join(sorted(ctx))}
+            copy["props"] = {**n["props"], "_ctx": "neighbors: " + ", ".join(sorted(ctx)),
+                             "_dist": dist.get(n["id"])}
             rank_nodes.append(copy)
         else:
             rank_nodes.append(n)
@@ -303,6 +346,8 @@ def _serve_cache_hit(key: str, query: str) -> dict:
     result["cached_original_execution_ms"] = result.get("execution_time_ms")
     result["execution_time_ms"] = hit_ms
     result["traversal"] = {**result["traversal"], "audit_id": new_audit["audit_id"]}
+    if entry.get("context") is not None:
+        result["context"] = entry["context"]
     cache_hits_total.inc()
     return result
 
@@ -310,7 +355,8 @@ def _serve_cache_hit(key: str, query: str) -> dict:
 def run_query(driver, query: str, max_hops: int | None = None,
               token_budget: int | None = None, reranker_mode: str | None = None,
               answer_mode: str | None = None,
-              identity: UserIdentity | None = None) -> dict:
+              identity: UserIdentity | None = None,
+              include_context: bool = False) -> dict:
     """Full token-optimized retrieval pipeline for a natural-language query.
 
     Returns the answer + token savings, and — for explainability (Shot 3) —
@@ -326,6 +372,10 @@ def run_query(driver, query: str, max_hops: int | None = None,
     ``answer_mode`` in {"extractive", "auto", "llm"} — default
     ``settings.ANSWER_MODE`` (extractive = deterministic; auto = provider
     chain with extractive fallback; llm = require a provider).
+
+    ``include_context`` (v2, benchmarks/evals): attach the pruned context
+    text + node list to the result as ``result["context"]`` — off by default
+    to keep the API payload lean.
     """
     max_hops = max_hops or settings.MAX_HOPS
     token_budget = token_budget or settings.MAX_TOKENS
@@ -357,8 +407,19 @@ def run_query(driver, query: str, max_hops: int | None = None,
     result = _finalize(ctx, answer)
 
     if key is not None:
-        query_cache.put(key, {"result": result, "audit": ctx["_audit_record"]})
+        query_cache.put(key, {"result": result, "audit": ctx["_audit_record"],
+                              "context": _context_payload(ctx) if include_context else None})
+    if include_context:
+        result["context"] = _context_payload(ctx)
     return result
+
+
+def _context_payload(ctx: dict) -> dict:
+    """Pruned context text + nodes (for benchmarks/evals)."""
+    return {
+        "text": ctx["pruned"].get("text", ""),
+        "nodes": ctx["pruned"].get("nodes", []),
+    }
 
 
 def stream_query(driver, query: str, max_hops: int | None = None,

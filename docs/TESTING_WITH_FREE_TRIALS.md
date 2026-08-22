@@ -329,6 +329,45 @@ TRACING_OTLP_ENDPOINT=http://localhost:4318/v1/traces   # Jaeger/Tempo/…
 * Without the OTel packages (or with `TRACING_ENABLED=false`) everything
   degrades to no-ops — zero overhead.
 
+## 6g. Hybrid retrieval (semantic + lexical + graph)
+
+```dotenv
+# all optional — hybrid works with zero keys via deterministic hash embeddings
+EMBEDDING_PROVIDER=auto          # auto → OpenAI → Ollama → hash
+EMBEDDING_MODEL=text-embedding-3-small
+EMBEDDING_OLLAMA_MODEL=nomic-embed-text   # ollama pull nomic-embed-text
+```
+
+1. In the Dashboard's Query Controls pick **Reranker = hybrid** (or send
+   `"reranker_mode": "hybrid"` to `/api/v1/query`): ranking fuses BM25 +
+   semantic cosine + hop-distance-from-seeds (RRF), over a vector index that
+   is cached per dataset revision.
+2. **Paraphrase demo** — hybrid adds a semantic seed fallback: queries with
+   no entity id and no keyword signal (e.g. *"What protections does this
+   commercial policy offer to its holder?"*) now seed from the vector index
+   instead of returning nothing. Compare hybrid vs lexical on such queries.
+3. With `OPENAI_BASE_URL` set, embeddings come from the real
+   `/embeddings` endpoint; otherwise Ollama's `nomic-embed-text`; otherwise
+   the built-in hash embedder (free, deterministic — great for trials).
+
+## 6h. Answer-quality evaluation (the new quality gate)
+
+```bash
+python scripts/build_golden_set.py              # 46 golden questions from data/samples
+python scripts/benchmark_answer_quality.py      # rules engine (no API cost)
+python scripts/benchmark_answer_quality.py --llm-judge --answer-mode auto
+```
+
+* Scores every answer on **faithfulness / relevance / groundedness /
+  refusal** (0–1 + weighted overall), writes
+  `data/benchmarks/answer_quality_synthetic.json`, and exits 1 when
+  `--min-faithfulness` / `--min-overall` floors are missed — the same gate CI
+  runs on every push.
+* `--llm-judge` uses the provider rubric judge (falls back to rules per
+  question when no provider is up).
+* The golden set includes paraphrases (no id quoted) and negative probes
+  (non-existent ids that must be refused, never hallucinated).
+
 ## 7. Trial-account caveats (set expectations before the demo)
 
 * **AuraDB Free** — limited instance size/memory; fine for the demo graph and

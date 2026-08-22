@@ -127,5 +127,18 @@ class Settings(BaseSettings):
     # they survive restarts and expose status via POST/GET /api/v1/jobs.
     JOB_DB_PATH: str = "data/jobs.db"
 
+    # ------------------------------------------------------------------
+    # v2 — hybrid retrieval (WS-C, G16)
+    # ------------------------------------------------------------------
+    # Embedding backend for semantic seed fallback + hybrid re-ranking:
+    # auto = OpenAI-compatible when configured, else Ollama, else a
+    # zero-dependency deterministic hash embedder (always available).
+    EMBEDDING_PROVIDER: str = "auto"
+    EMBEDDING_MODEL: str = "text-embedding-3-small"
+    EMBEDDING_OLLAMA_MODEL: str = "nomic-embed-text"
+    # cap on nodes indexed into the in-memory vector store (large CSV
+    # sessions stay bounded; the store is cached per dataset revision)
+    VECTOR_INDEX_MAX_NODES: int = 25000
+
 
 settings = Settings()

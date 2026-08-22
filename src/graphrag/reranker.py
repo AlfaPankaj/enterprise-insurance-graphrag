@@ -179,6 +179,96 @@ class CrossEncoderReranker:
 
 
 # ---------------------------------------------------------------------------
+# hybrid backend (v2 — WS-C): RRF fusion of lexical + semantic + proximity
+# ---------------------------------------------------------------------------
+
+class HybridReranker:
+    """Reciprocal-Rank-Fusion of three signals over the retrieved subgraph:
+
+      * **lexical** — the zero-dependency BM25 rank (always available)
+      * **semantic** — cosine similarity to the query embedding, over a
+        revision-cached in-memory vector index of the graph node texts
+        (embedding provider: OpenAI-compatible → Ollama → deterministic hash)
+      * **proximity** — hop distance from the seed nodes (nodes carry
+        ``_dist``, injected by the pipeline)
+
+    Degrades gracefully: without a readable graph revision (no vector index)
+    or with no proximity info it simply returns the lexical ranking, so the
+    hybrid path can never break a query.
+    """
+
+    name = "hybrid"
+    _RRF_K = 60.0
+
+    def __init__(self, driver=None):
+        self.driver = driver
+        self._lexical = LexicalReranker()
+
+    @staticmethod
+    def _rrf(ranked_lists: list[list[str]]) -> dict[str, float]:
+        fused: dict[str, float] = {}
+        for ranked in ranked_lists:
+            for rank, node_id in enumerate(ranked):
+                fused[node_id] = fused.get(node_id, 0.0) + \
+                    1.0 / (HybridReranker._RRF_K + rank + 1)
+        return fused
+
+    def rank(self, query: str, nodes: list[dict]) -> list[tuple[dict, float]]:
+        if not nodes:
+            return []
+        node_by_id = {n["id"]: n for n in nodes}
+
+        # 1) lexical
+        lexical = self._lexical.rank(query, nodes)
+        lex_ids = [n["id"] for n, _ in lexical]
+
+        # 2) semantic (optional: vector index over node texts)
+        vec_ids: list[str] = []
+        store = None
+        if self.driver is not None:
+            try:
+                from graphrag.vector_store import build_vector_store
+                store = build_vector_store(self.driver)
+            except Exception:  # noqa: BLE001 - hybrid must never break a query
+                store = None
+        if store is not None and len(store):
+            try:
+                from graphrag.embeddings import cosine, embed_texts
+                texts = [serialize_node(n) for n in nodes]
+                query_vec = embed_texts([query])[0]
+                scored = sorted(
+                    ((node_by_id[n["id"]], cosine(query_vec, vec))
+                     for n, vec in zip(nodes, embed_texts(texts))),
+                    key=lambda t: t[1], reverse=True,
+                )
+                vec_ids = [n["id"] for n, _ in scored]
+            except Exception:  # noqa: BLE001
+                vec_ids = []
+
+        # 3) proximity (hop distance from seeds, injected as _dist)
+        prox_ids: list[str] = []
+        dist = {n["id"]: n.get("props", {}).get("_dist")
+                for n in nodes}
+        if any(d is not None for d in dist.values()):
+            prox_ids = [n["id"] for n in sorted(
+                nodes, key=lambda n: (dist[n["id"]]
+                                      if dist[n["id"]] is not None else 10 ** 6))]
+
+        fused = self._rrf([lst for lst in (lex_ids, vec_ids, prox_ids) if lst])
+        if not fused:
+            return lexical
+        # answer-type prior (parity with the cross-encoder path)
+        label_hits = _label_prior_hits(query)
+        for n in nodes:
+            if n["label"] in label_hits:
+                fused[n["id"]] = fused.get(n["id"], 0.0) + 0.01 * _LABEL_PRIOR
+        scored = sorted(((node_by_id[nid], score)
+                         for nid, score in fused.items()),
+                        key=lambda t: t[1], reverse=True)
+        return scored
+
+
+# ---------------------------------------------------------------------------
 # factory
 # ---------------------------------------------------------------------------
 
@@ -198,10 +288,16 @@ def cross_encoder_available() -> bool:
 _cross_encoder_cache: CrossEncoderReranker | None = None
 
 
-def make_reranker(mode: str | None = None):
-    """Build the configured reranker; ``auto`` prefers cross-encoder."""
+def make_reranker(mode: str | None = None, driver=None):
+    """Build the configured reranker; ``auto`` prefers cross-encoder.
+
+    ``hybrid`` builds the v2 RRF fusion reranker (lexical + semantic +
+    proximity); ``driver`` lets it build its revision-cached vector index.
+    """
     global _cross_encoder_cache
     mode = mode or settings.RERANKER_MODE
+    if mode == "hybrid":
+        return HybridReranker(driver)
     if mode == "cross-encoder" or (mode == "auto" and cross_encoder_available()):
         if _cross_encoder_cache is None:
             try:

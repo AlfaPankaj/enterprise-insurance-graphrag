@@ -66,7 +66,7 @@ class QueryRequest(BaseModel):
     query: str = Field(..., min_length=1, max_length=500)
     max_hops: int = Field(settings.MAX_HOPS, ge=1, le=4)
     token_budget: int = Field(settings.MAX_TOKENS, ge=128, le=16384)
-    reranker_mode: str | None = Field(None, pattern=r"^(auto|cross-encoder|lexical)$")
+    reranker_mode: str | None = Field(None, pattern=r"^(auto|cross-encoder|lexical|hybrid)$")
     answer_mode: str | None = Field(None, pattern=r"^(extractive|auto|llm)$")
 
 
