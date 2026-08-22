@@ -116,5 +116,16 @@ class Settings(BaseSettings):
     CACHE_TTL_S: int = 300
     CACHE_MAX_ENTRIES: int = 1000
 
+    # v2 — OpenTelemetry tracing (WS-D). Optional deps: requirements-otel.txt.
+    # When enabled + endpoint set, spans flow to any OTLP collector (Jaeger,
+    # Tempo, Datadog, New Relic). Response headers carry X-Trace-ID.
+    TRACING_ENABLED: bool = False
+    TRACING_OTLP_ENDPOINT: str = ""     # e.g. http://localhost:4318/v1/traces
+
+    # v2 — durable job runner (WS-A, G11). Seeding / benchmark jobs are
+    # tracked in SQLite (data/jobs.db) instead of only in-process threads:
+    # they survive restarts and expose status via POST/GET /api/v1/jobs.
+    JOB_DB_PATH: str = "data/jobs.db"
+
 
 settings = Settings()

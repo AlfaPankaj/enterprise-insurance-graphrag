@@ -1,0 +1,7 @@
+# Optional v2 extras — OpenTelemetry tracing (WS-D).
+# Install on top of requirements.txt when TRACING_ENABLED=true:
+#   pip install -r requirements-otel.txt
+# The app runs fine without these (tracing degrades to no-op).
+opentelemetry-api>=1.20
+opentelemetry-sdk>=1.20
+opentelemetry-exporter-otlp-proto-http>=1.20

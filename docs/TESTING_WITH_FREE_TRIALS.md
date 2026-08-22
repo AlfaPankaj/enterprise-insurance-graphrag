@@ -282,6 +282,53 @@ After sign-in the sidebar shows the user + roles, every query runs as that
 identity (tenant scoping + PII masking apply), and Sign out resets it. With
 auth off (dev), the app behaves exactly as before.
 
+## 6e. Background jobs (v2 durable job runner)
+
+Long-running work (session switches, benchmarks) can run as **tracked jobs**
+stored in `data/jobs.db` — they survive API restarts and expose progress:
+
+```bash
+# enqueue (admin role)
+curl -X POST http://localhost:8000/api/v1/jobs \
+  -H "Content-Type: application/json" \
+  -d '{"kind": "session_switch", "params": {"session_id": "insurance_claims", "force": true}}'
+
+# poll status (admin/auditor)
+curl http://localhost:8000/api/v1/jobs/<job_id>
+
+# list recent / cancel
+curl http://localhost:8000/api/v1/jobs?limit=10
+curl -X POST http://localhost:8000/api/v1/jobs/<job_id>/cancel
+```
+
+Job kinds: `session_switch` `{session_id, force?}` · `benchmark`
+`{dataset, queries?, workers?}` · `fraud_benchmark` `{dataset, negatives?}`.
+Statuses: `pending → running → succeeded | failed | cancelled`; a job left
+running by a crashed process is marked `interrupted` on the next start.
+The Dashboard shows recent jobs under **Background Jobs** (expandable), and
+`/metrics` exposes `graphrag_jobs_running` + `graphrag_jobs_completed_total`.
+
+## 6f. OpenTelemetry tracing
+
+```bash
+pip install -r requirements-otel.txt
+```
+
+```dotenv
+TRACING_ENABLED=true
+TRACING_OTLP_ENDPOINT=http://localhost:4318/v1/traces   # Jaeger/Tempo/…
+```
+
+* Every HTTP request gets a span (`http.request`) with request-id, caller
+  subject/tenant, and status code; responses carry **`X-Trace-ID`** for
+  support correlation.
+* Every query trace shows the pipeline stages:
+  `graphrag.retrieve → rerank → prune → answer`.
+* A local Jaeger for trials: `docker run -p 16686:16686 -p 4318:4318
+  jaegertracing/all-in-one:latest` → UI at http://localhost:16686.
+* Without the OTel packages (or with `TRACING_ENABLED=false`) everything
+  degrades to no-ops — zero overhead.
+
 ## 7. Trial-account caveats (set expectations before the demo)
 
 * **AuraDB Free** — limited instance size/memory; fine for the demo graph and

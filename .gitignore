@@ -30,6 +30,8 @@ data/audit_trail/*.jsonl
 data/audit_trail/exports/
 data/custom/
 data/benchmarks/.auto_pipeline_state.json
+data/jobs.db
+data/jobs.db-*
 *.log
 
 # ---- OS / editor ----

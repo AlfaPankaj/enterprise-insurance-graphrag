@@ -35,10 +35,17 @@ from graphrag.prometheus import (cache_hits_total, cache_misses_total,
                                  token_savings)
 from graphrag.reranker import _label_prior_hits, make_reranker
 from graphrag.token_counter import count_tokens
+from graphrag.tracing import start_span
 from graphrag.traversal_logger import audit_store, build_audit_record
 
 _BLOCKED_ANSWER = ("Query blocked by guardrail policy "
                    "(instruction injection detected).")
+
+
+def _query_hash(query: str) -> str:
+    """Short hash for span attributes (never log raw query text)."""
+    import hashlib
+    return hashlib.sha256(query.encode("utf-8")).hexdigest()[:12]
 
 
 def _pii_scope(policy: MaskingPolicy) -> str:
@@ -62,8 +69,12 @@ def _prepare(driver, query: str, max_hops: int, token_budget: int,
     tenant_id = identity.tenant_id if identity else None
     scoped_tenant = tenant_id if settings.TENANT_MODE == "column" else None
     pii_policy = MaskingPolicy.for_roles(set(identity.roles) if identity else None)
+    qhash = _query_hash(query)
 
-    subgraph = retrieve_subgraph(driver, query, max_hops, tenant_id=scoped_tenant)
+    with start_span("graphrag.retrieve", {"query_hash": qhash,
+                                          "max_hops": max_hops,
+                                          "tenant": scoped_tenant or ""}):
+        subgraph = retrieve_subgraph(driver, query, max_hops, tenant_id=scoped_tenant)
     # PII masking: rank/prune/answer only ever see the policy-applied view
     if pii_policy.active:
         subgraph["nodes"] = [redact_node(n, pii_policy) for n in subgraph["nodes"]]
@@ -89,7 +100,9 @@ def _prepare(driver, query: str, max_hops: int, token_budget: int,
         else:
             rank_nodes.append(n)
 
-    ranked = reranker.rank(query, rank_nodes)
+    with start_span("graphrag.rerank", {"query_hash": qhash,
+                                        "nodes": len(rank_nodes)}):
+        ranked = reranker.rank(query, rank_nodes)
     t2 = time.perf_counter()
     # map scores back onto the ORIGINAL (un-enriched) nodes, so the pruned
     # context serializes identically to the baseline — token accounting stays
@@ -124,8 +137,11 @@ def _prepare(driver, query: str, max_hops: int, token_budget: int,
             if other:
                 protected.add(other)
 
-    pruned = prune_context(ranked, token_budget, edges=subgraph["edges"],
-                           protected_ids=sorted(protected))
+    with start_span("graphrag.prune", {"query_hash": qhash,
+                                       "budget": token_budget,
+                                       "baseline_tokens": baseline_tokens}):
+        pruned = prune_context(ranked, token_budget, edges=subgraph["edges"],
+                               protected_ids=sorted(protected))
     t3 = time.perf_counter()
 
     # no-result queries must not report "100% savings" — nothing was retrieved
@@ -335,7 +351,9 @@ def run_query(driver, query: str, max_hops: int | None = None,
         cache_misses_total.inc()
 
     ctx = _prepare(driver, query, max_hops, token_budget, reranker_mode, identity)
-    answer = generate_answer(query, ctx["pruned"], mode=answer_mode)
+    with start_span("graphrag.answer", {"query_hash": _query_hash(query),
+                                        "mode": answer_mode or settings.ANSWER_MODE}):
+        answer = generate_answer(query, ctx["pruned"], mode=answer_mode)
     result = _finalize(ctx, answer)
 
     if key is not None:
@@ -391,16 +409,19 @@ def stream_query(driver, query: str, max_hops: int | None = None,
     use_live = not pii_policy.active
     if use_live:
         answer_dict: dict | None = None
-        for ev in stream_answer(query, pruned, mode=answer_mode):
-            if ev["type"] == "delta":
-                yield {"type": "delta", "text": ev["text"]}
-            else:
-                answer_dict = {
-                    "answer": ev["answer"], "mode": ev["mode"],
-                    "model": ev.get("model"), "provider": ev.get("provider"),
-                    "usage": ev.get("usage"), "cost_usd": ev.get("cost_usd"),
-                    "fallback_reason": ev.get("fallback_reason"),
-                }
+        with start_span("graphrag.answer.stream",
+                        {"query_hash": _query_hash(query),
+                         "mode": answer_mode or settings.ANSWER_MODE}):
+            for ev in stream_answer(query, pruned, mode=answer_mode):
+                if ev["type"] == "delta":
+                    yield {"type": "delta", "text": ev["text"]}
+                else:
+                    answer_dict = {
+                        "answer": ev["answer"], "mode": ev["mode"],
+                        "model": ev.get("model"), "provider": ev.get("provider"),
+                        "usage": ev.get("usage"), "cost_usd": ev.get("cost_usd"),
+                        "fallback_reason": ev.get("fallback_reason"),
+                    }
         if answer_dict is None:  # pragma: no cover - stream_answer always ends with done
             answer_dict = generate_answer(query, pruned, mode=answer_mode)
     else:

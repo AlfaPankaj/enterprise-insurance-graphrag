@@ -41,6 +41,7 @@ from graphrag.health_check import register_health_endpoints
 from graphrag.identity import (AUDIT_ROLES, METRICS_ROLES, QUERY_ROLES,
                                SESSION_ROLES, UPLOAD_ROLES, UserIdentity,
                                require_user)
+from graphrag.jobs import JobError, get_store, register_default_handlers
 from graphrag.logger_config import setup_logging
 from graphrag.monitoring import monitor
 from graphrag.pdf_processor import extract_text_from_pdf
@@ -50,6 +51,8 @@ from graphrag.rate_limiter import rate_limit
 from graphrag.security import setup_security
 from graphrag.sessions import (all_sessions, current_session_id,
                                session_exists, switch_session)
+from graphrag.tracing import configure as configure_tracing
+from graphrag.tracing import current_trace_id, start_span
 from graphrag.traversal_logger import audit_store
 from graphrag.validators import UploadValidationError, validate_pdf_upload
 
@@ -74,12 +77,26 @@ class SessionRequest(BaseModel):
     force: bool = Field(False, description="re-ingest even if already loaded")
 
 
+class JobSubmitRequest(BaseModel):
+    """Enqueue a background job (v2 durable job runner).
+
+    Supported kinds (registered at startup): ``session_switch``
+    (``{session_id, force?}``), ``benchmark`` (``{dataset, queries?, workers?}``),
+    ``fraud_benchmark`` (``{dataset, negatives?}``).
+    """
+
+    kind: str = Field(..., min_length=1, max_length=64)
+    params: dict = Field(default_factory=dict)
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     app.state.driver = GraphDatabase.driver(
         settings.NEO4J_URI, auth=(settings.NEO4J_USER, settings.NEO4J_PASSWORD)
     )
     logger.info("Neo4j driver connected: %s", settings.NEO4J_URI)
+    configure_tracing()
+    register_default_handlers(lambda: app.state.driver)
     yield
     app.state.driver.close()
     logger.info("Neo4j driver closed")
@@ -98,6 +115,31 @@ register_exception_handlers(app)
 # health routes are registered at module scope; the readiness probe reads the
 # driver from app.state at request time (no lifespan coupling)
 register_health_endpoints(app)
+
+
+@app.middleware("http")
+async def trace_requests(request, call_next):
+    """v2 OTel: one span per HTTP request; X-Trace-ID for correlation."""
+    with start_span("http.request", {
+        "http.method": request.method,
+        "http.url.path": request.url.path,
+    }) as span:
+        response = await call_next(request)
+        if span is not None:
+            span.set_attribute("http.status_code", response.status_code)
+            # the security middleware stamps request.state.request_id inside
+            # the call — attach it (and the caller identity) at response time
+            span.set_attribute("request_id",
+                               getattr(request.state, "request_id", None))
+            user = getattr(request.state, "user", None)
+            if user is not None:
+                span.set_attribute("enduser.id", user.subject)
+                span.set_attribute("user.tenant", user.tenant_id)
+                span.set_attribute("user.auth", user.auth_method)
+        trace_id = current_trace_id()
+        if trace_id:
+            response.headers["X-Trace-ID"] = trace_id
+        return response
 
 
 @app.post("/api/v1/upload")
@@ -351,6 +393,58 @@ async def get_audit(limit: int = 50,
 async def verify_audit(user: UserIdentity = Depends(require_user(*AUDIT_ROLES))):
     """Verify the hash-chain integrity of the audit store (v2)."""
     return {"status": "success", **audit_store.verify()}
+
+
+# ---------------------------------------------------------------------------
+# v2 durable jobs (WS-A, G11)
+# ---------------------------------------------------------------------------
+
+@app.post("/api/v1/jobs")
+async def submit_job(
+    request: JobSubmitRequest,
+    user: UserIdentity = Depends(require_user(*SESSION_ROLES)),
+    _rl=Depends(rate_limit()),
+):
+    """Enqueue a background job (session switch / benchmark)."""
+    try:
+        job_id = await asyncio.to_thread(
+            get_store().submit, request.kind, request.params
+        )
+    except JobError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    prom.requests_total.inc(kind="job")
+    return {"status": "success", "job_id": job_id,
+            "kind": request.kind, "job": get_store().get(job_id)}
+
+
+@app.get("/api/v1/jobs")
+async def list_jobs(limit: int = 20,
+                    user: UserIdentity = Depends(require_user(*AUDIT_ROLES))):
+    """Recent background jobs (newest first)."""
+    return {"status": "success",
+            "jobs": await asyncio.to_thread(get_store().list, min(limit, 100))}
+
+
+@app.get("/api/v1/jobs/{job_id}")
+async def get_job(job_id: str,
+                  user: UserIdentity = Depends(require_user(*AUDIT_ROLES))):
+    """One job's status, progress lines, and result."""
+    job = await asyncio.to_thread(get_store().get, job_id)
+    if job is None:
+        raise HTTPException(status_code=404, detail=f"unknown job '{job_id}'")
+    return {"status": "success", "job": job}
+
+
+@app.post("/api/v1/jobs/{job_id}/cancel")
+async def cancel_job(job_id: str,
+                     user: UserIdentity = Depends(require_user(*SESSION_ROLES)),
+                     _rl=Depends(rate_limit())):
+    """Cancel a pending job (or flag a running one for cooperative cancel)."""
+    ok = await asyncio.to_thread(get_store().cancel, job_id)
+    if not ok:
+        raise HTTPException(status_code=409,
+                            detail="job not found or already finished")
+    return {"status": "success", "job_id": job_id}
 
 
 @app.get("/metrics")

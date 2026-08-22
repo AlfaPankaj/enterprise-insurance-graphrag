@@ -29,6 +29,11 @@ def _ok(label: str, value: str, warn: str | None = None) -> None:
         print(f"       └─ {warn}")
 
 
+def importlib_available(module: str) -> bool:
+    import importlib.util
+    return importlib.util.find_spec(module) is not None
+
+
 def probe_neo4j() -> str:
     """Reachability probe with a short acquisition timeout."""
     from neo4j import GraphDatabase
@@ -157,6 +162,20 @@ def main(argv: list[str] | None = None) -> int:
     _ok("Max hops / tokens", f"{settings.MAX_HOPS} / {settings.MAX_TOKENS}")
     _ok("Reranker", settings.RERANKER_MODE)
     _ok("Audit dir", str(PROJECT_ROOT / settings.AUDIT_DIR))
+
+    print("\n[Observability & jobs (v2)]")
+    _ok("Tracing", "enabled" if settings.TRACING_ENABLED else "off",
+        None if settings.TRACING_ENABLED else
+        "set TRACING_ENABLED=true (+ pip install -r requirements-otel.txt) for OTel")
+    if settings.TRACING_ENABLED:
+        _ok("OTLP endpoint", settings.TRACING_OTLP_ENDPOINT or
+            "(env OTEL_EXPORTER_OTLP_ENDPOINT)",
+            None if settings.TRACING_OTLP_ENDPOINT else
+            "no exporter configured — spans are created but not exported")
+        if not importlib_available("opentelemetry"):
+            print("  [WARN] opentelemetry packages not installed — "
+                  "run: pip install -r requirements-otel.txt")
+    _ok("Job DB", str(PROJECT_ROOT / settings.JOB_DB_PATH))
 
     env_file = PROJECT_ROOT / ".env"
     print("\n[Files]")

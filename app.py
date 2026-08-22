@@ -515,6 +515,24 @@ elif page == "Dashboard":
     _render_validation_table(ds)
 
     st.markdown("---")
+    with st.expander("Background Jobs (v2 job runner)", expanded=False):
+        try:
+            from src.graphrag.jobs import get_store
+            jobs = get_store().list(10)
+            if not jobs:
+                st.caption("No jobs yet — enqueue via POST /api/v1/jobs "
+                           "(session_switch / benchmark / fraud_benchmark).")
+            else:
+                st.dataframe(pd.DataFrame([
+                    {"id": j["id"], "kind": j["kind"], "status": j["status"],
+                     "created": j["created_at"],
+                     "result": str(j["result"])[:48] if j["result"] else ""}
+                    for j in jobs
+                ]), width="stretch", hide_index=True)
+        except Exception as exc:  # the jobs view must never break the dashboard
+            st.caption(f"Job store unavailable: {exc}")
+
+    st.markdown("---")
     st.markdown("#### Live Query Runner")
     query = st.text_input("Ask a question", placeholder="e.g. Does claim CLM-0003 have a fraud flag?", label_visibility="collapsed")
     run = st.button("Run query", type="primary")

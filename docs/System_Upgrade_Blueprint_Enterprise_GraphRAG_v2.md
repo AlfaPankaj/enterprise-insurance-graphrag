@@ -293,6 +293,27 @@ criteria. Order reflects dependency, not necessarily priority — see §6.
 * **Tests** — 115 new tests across the v2 slices: **385 passed, 12 skipped**
   (skips = DB-dependent, unchanged baseline).
 
-**Next slices (in order):** WS-A remainder (durable job runner, OTel tracing)
-→ WS-C (hybrid retrieval + answer-quality evals) → WS-E (banking domain,
-Aura topology).
+**Done — WS-A remainder (v2 slice 5):**
+
+* **Durable job runner** — `src/graphrag/jobs.py`: SQLite-backed
+  (`settings.JOB_DB_PATH`, WAL, zero new dependencies) registry with
+  `pending → running → succeeded | failed | cancelled` lifecycle, live
+  progress lines, cooperative cancel, and **crash recovery** (running jobs
+  from a dead process become `interrupted` on startup). Handlers are a
+  registry (`session_switch`, `benchmark`, `fraud_benchmark` wired at API
+  startup); API: `POST /api/v1/jobs` (admin), `GET /api/v1/jobs[/{id}]`
+  (admin/auditor), `POST /api/v1/jobs/{id}/cancel`; Dashboard shows recent
+  jobs; Prometheus `graphrag_jobs_running` /
+  `graphrag_jobs_completed_total`. (G11)
+* **OpenTelemetry tracing** — `src/graphrag/tracing.py` (optional deps,
+  `requirements-otel.txt`; no-op when absent/disabled): OTLP HTTP export
+  (`TRACING_OTLP_ENDPOINT`), per-request spans (`http.request` with request
+  id/caller/tenant/status) + **`X-Trace-ID`** response header, pipeline
+  stage spans (`graphrag.retrieve/rerank/prune/answer`), provider
+  reconfiguration support. (G12 — OTel half; JSON logs + Prometheus already
+  done)
+* **Tests** — 133 new tests across the v2 slices: **401 passed, 12 skipped**
+  (skips = DB-dependent, unchanged baseline).
+
+**Next slices (in order):** WS-C (hybrid retrieval + answer-quality evals)
+→ WS-E (banking domain, Aura topology).

@@ -50,6 +50,27 @@ class Counter:
             bucket[key] = bucket.get(key, 0.0) + value
 
 
+class Gauge:
+    """A settable metric (increment/decrement/set), optionally labelled."""
+
+    def __init__(self, name: str):
+        self.name = name
+
+    def _value(self, key: tuple) -> float:
+        return _COUNTERS.setdefault(self.name, {}).get(key, 0.0)
+
+    def inc(self, value: float = 1.0, **labels) -> None:
+        self.set(self._value(_labels_tuple(labels)) + value, **labels)
+
+    def dec(self, value: float = 1.0, **labels) -> None:
+        self.inc(-value, **labels)
+
+    def set(self, value: float, **labels) -> None:
+        key = _labels_tuple(labels)
+        with _LOCK:
+            _COUNTERS.setdefault(self.name, {})[key] = value
+
+
 class Histogram:
     """A cumulative histogram over preconfigured buckets."""
 
@@ -77,6 +98,11 @@ def counter(name: str, help_text: str) -> Counter:
     return Counter(name)
 
 
+def gauge(name: str, help_text: str) -> Gauge:
+    _DEFS[name] = ("gauge", help_text)
+    return Gauge(name)
+
+
 def histogram(name: str, help_text: str, buckets: list[float]) -> Histogram:
     _DEFS[name] = ("histogram", help_text)
     return Histogram(name, buckets)
@@ -101,6 +127,9 @@ llm_fallbacks_total = counter("graphrag_llm_fallbacks_total",
 cache_hits_total = counter("graphrag_cache_hits_total", "Answer cache hits.")
 cache_misses_total = counter("graphrag_cache_misses_total", "Answer cache misses.")
 audit_records_total = counter("graphrag_audit_records_total", "Audit trail records written.")
+jobs_running = gauge("graphrag_jobs_running", "Background jobs currently running.")
+jobs_completed_total = counter("graphrag_jobs_completed_total",
+                               "Jobs that reached a terminal state, by status.")
 
 
 # ---------------------------------------------------------------------------
@@ -119,12 +148,12 @@ def render() -> str:
     with _LOCK:
         for name in sorted(_DEFS):
             kind, help_text = _DEFS[name]
-            if kind == "counter":
+            if kind in ("counter", "gauge"):
                 bucket = _COUNTERS.get(name)
                 if not bucket:
                     continue
                 lines.append(f"# HELP {name} {help_text}")
-                lines.append(f"# TYPE {name} counter")
+                lines.append(f"# TYPE {name} {kind}")
                 for key in sorted(bucket):
                     lines.append(f"{name}{_fmt_label(key)} {bucket[key]:.6g}")
             else:

@@ -331,14 +331,17 @@ def _run_blocking(driver, session_id: str, force: bool, timeout: int,
 
 
 def switch_session(driver, session_id: str, force: bool = False,
-                   timeout: int = 900) -> dict:
+                   timeout: int = 900, line_cb=None) -> dict:
     """Seed the graph for the requested session; **blocking** (REST API path).
 
     Returns ``{"status": "already_loaded"|"seeded", "session": id,
     "output": tail-of-log}``. Raises ``ValueError`` for unknown sessions and
     ``RuntimeError`` when the seeding command fails.
+
+    ``line_cb(line)`` (v2, jobs) streams every subprocess stdout line as it
+    arrives — the job runner uses it to record live progress.
     """
-    return _run_blocking(driver, session_id, force, timeout)
+    return _run_blocking(driver, session_id, force, timeout, line_cb=line_cb)
 
 
 # ---------------------------------------------------------------------------
