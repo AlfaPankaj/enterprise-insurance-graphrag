@@ -59,6 +59,128 @@ _COVERAGE_ROW = re.compile(
 _ENDORSEMENT_ROW = re.compile(r"^(END-\d+)\s*(\S+)\s*([A-Z_]+)\s*(\d{4}-\d{2}-\d{2})\s*(-?\$?-?\d[\d,]*)$")
 _TERM = re.compile(r"^(\d{4}-\d{2}-\d{2})\s+to\s+(\d{4}-\d{2}-\d{2})$")
 
+# ---------------------------------------------------------------------------
+# v2 — extraction confidence scoring (WS-C, G17)
+# ---------------------------------------------------------------------------
+
+# Required fields per label (mirrors docs/graph_schema.md §2). Confidence =
+# 0.6 × required-field coverage + 0.4 × id well-formedness — deterministic and
+# honest: a complete, well-formed entity scores 1.0; anything a human should
+# look at scores below the review threshold.
+_REQUIRED_FIELDS: dict[str, list[str]] = {
+    "Policyholder": ["id", "name", "dob", "address", "phone", "email", "risk_score"],
+    "Policy": ["id", "policy_number", "type", "start_date", "end_date",
+               "premium", "deductible", "status"],
+    "Coverage": ["id", "code", "category", "limit", "deductible"],
+    "Claim": ["id", "claim_number", "date", "amount", "status", "cause"],
+    "FraudFlag": ["id", "reason", "confidence", "severity", "created_by"],
+    "Investigator": ["id", "name", "role", "email"],
+    "Endorsement": ["id", "endorsement_number", "type", "effective_date",
+                    "premium_adjustment"],
+}
+
+# Strict id patterns per label (the demo scheme) + a generic fallback for
+# real-world id schemes (e.g. CL-2024-010101 on real documents).
+_ID_PATTERNS: dict[str, re.Pattern] = {
+    "Policyholder": re.compile(r"^PH-\d{3,}$"),
+    "Policy": re.compile(r"^POL-\d{3,}$"),
+    "Coverage": re.compile(r"^COV-\d{3,}$"),
+    "Claim": re.compile(r"^CLM-\d{3,}$"),
+    "FraudFlag": re.compile(r"^FRD-\d{3,}$"),
+    "Investigator": re.compile(r"^INV-\d{3,}$"),
+    "Endorsement": re.compile(r"^END-\d{3,}$"),
+}
+# real-world id schemes: letter prefix + dash + alphanumeric/dash tail
+# (e.g. CL-2024-010101, POL/2024/999)
+_GENERIC_ID = re.compile(r"^[A-Z]{2,8}[-/][A-Z0-9-]{2,40}$")
+
+# real-document key aliases — canonical key for common real-world spellings
+# ("Policy No:", "Loss Date:", "Claim Number:" …). Only unambiguous aliases.
+_KEY_ALIASES: dict[str, str] = {
+    "policy no": "Policy Number",
+    "policy number": "Policy Number",
+    "policy no.": "Policy Number",
+    "policy #": "Policy Number",
+    "policy#": "Policy Number",
+    "policynumber": "Policy Number",
+    "claim no": "Claim Number",
+    "claim number": "Claim Number",
+    "claim no.": "Claim Number",
+    "claim #": "Claim Number",
+    "claim#": "Claim Number",
+    "claimnumber": "Claim Number",
+    "loss date": "Date of Loss",
+    "date of loss": "Date of Loss",
+    "annual premium": "Annual Premium",
+    "premium": "Annual Premium",
+    "policyholder no": "Policyholder ID",
+    "policyholder number": "Policyholder ID",
+    "policyholder id": "Policyholder ID",
+    "endorsement no": "Endorsement Number",
+    "endorsement number": "Endorsement Number",
+    "flag no": "Flag ID",
+    "flag id": "Flag ID",
+    "investigator no": "Investigator ID",
+    "investigator number": "Investigator ID",
+}
+
+
+def score_entity(label: str, eid: str, props: dict) -> tuple[float, list[str]]:
+    """Confidence of one extracted entity: field coverage + id well-formedness.
+
+    Returns (score 0..1, reasons) — reasons feed the review queue's
+    justification ("missing_required_fields", "malformed_id").
+    """
+    reasons: list[str] = []
+    required = _REQUIRED_FIELDS.get(label)
+    if required:
+        coverage = sum(1 for f in required if props.get(f) not in (None, "", [])) \
+            / len(required)
+        if coverage < 1.0:
+            reasons.append("missing_required_fields")
+    else:
+        coverage = 1.0
+    strict = _ID_PATTERNS.get(label)
+    # strict demo-scheme id first; real-world schemes fall through to the
+    # generic letter-prefix pattern (both count as well-formed)
+    id_ok = bool((strict.fullmatch(str(eid)) if strict else True)
+                 or _GENERIC_ID.fullmatch(str(eid)))
+    if not id_ok:
+        reasons.append("malformed_id")
+    score = 0.6 * coverage + 0.4 * (1.0 if id_ok else 0.0)
+    return round(score, 3), reasons
+
+
+def score_extraction(entities: dict) -> tuple[dict, dict]:
+    """Per-entity confidence + reasons for a full extraction result.
+
+    ``entities`` is the extractor's ``{label: {id: props}}`` shape; returns
+    ``({label: {id: score}}, {label: {id: [reasons]}})``.
+    """
+    confidence: dict = {}
+    reasons: dict = {}
+    for label, ents in entities.items():
+        for eid, props in ents.items():
+            score, why = score_entity(label, eid, props)
+            confidence.setdefault(label, {})[eid] = score
+            if why:
+                reasons.setdefault(label, {})[eid] = why
+    return confidence, reasons
+
+
+def extract_entities_with_confidence(text: str, doc_id_hint: str | None = None,
+                                     mode: str | None = None) -> dict:
+    """Extract entities AND score them (v2 review-queue input).
+
+    Same contract as ``extract_entities`` plus ``confidence`` /
+    ``reasons`` maps (both ``{label: {id: ...}}``).
+    """
+    result = dict(extract_entities(text, doc_id_hint, mode))
+    confidence, reasons = score_extraction(result.get("entities", {}))
+    result["confidence"] = confidence
+    result["reasons"] = reasons
+    return result
+
 
 # ---------------------------------------------------------------------------
 # value normalization
@@ -99,6 +221,32 @@ def _match_key(line: str) -> str | None:
     return None
 
 
+def _canonical_key(line: str) -> tuple[str | None, str]:
+    """Resolve a line to its canonical key + normalized value.
+
+    "Key: value" lines resolve FIRST (case-insensitively against the
+    canonical keys — "Deductible: $500" → "Deductible $500" — and against
+    the real-world alias spellings — "Policy No: X" → "Policy Number X").
+    Bare "Key value" lines then go through ``_match_key`` (the synthetic
+    document format). This ordering matters: "Policy No:" must not be
+    consumed by the short canonical key "Policy".
+    """
+    match = re.match(r"^([^:：]{2,40})\s*[:：]\s*(.*)$", line)
+    if match:
+        key_part = match.group(1).strip()
+        for canonical in _KEYS:
+            if key_part.lower() == canonical.lower():
+                return canonical, f"{canonical} {match.group(2).strip()}"
+        aliased = _KEY_ALIASES.get(key_part.lower())
+        if aliased:
+            return aliased, f"{aliased} {match.group(2).strip()}"
+        return None, line
+    key = _match_key(line)
+    if key:
+        return key, line
+    return None, line
+
+
 def _parse(text: str) -> tuple[str | None, dict, list[dict], list[dict], str]:
     lines = [ln.strip() for ln in text.splitlines() if ln.strip()]
     doc_type = _detect_type(lines)
@@ -134,9 +282,9 @@ def _parse(text: str) -> tuple[str | None, dict, list[dict], list[dict], str]:
                 }
             )
             continue
-        key = _match_key(ln)
+        key, normalized = _canonical_key(ln)
         if key:
-            kv[key] = ln[len(key):].strip()
+            kv[key] = normalized[len(key):].strip()
             continue
         if doc_type == "claim" and "Cause" in kv:
             description_parts.append(ln)

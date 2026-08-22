@@ -32,6 +32,8 @@ data/custom/
 data/benchmarks/.auto_pipeline_state.json
 data/jobs.db
 data/jobs.db-*
+data/extraction_review.db
+data/extraction_review.db-*
 *.log
 
 # ---- OS / editor ----

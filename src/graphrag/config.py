@@ -140,5 +140,15 @@ class Settings(BaseSettings):
     # sessions stay bounded; the store is cached per dataset revision)
     VECTOR_INDEX_MAX_NODES: int = 25000
 
+    # ------------------------------------------------------------------
+    # v2 — extraction review queue (WS-C, G17)
+    # ------------------------------------------------------------------
+    # When enabled, extracted entities scoring below the confidence threshold
+    # are HELD for human review instead of written to the graph — CDC only
+    # ever applies confirmed changes. Off = v1 behavior (apply everything).
+    EXTRACTION_REVIEW_ENABLED: bool = False
+    EXTRACTION_CONFIDENCE_THRESHOLD: float = 0.7
+    REVIEW_DB_PATH: str = "data/extraction_review.db"
+
 
 settings = Settings()

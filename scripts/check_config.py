@@ -154,6 +154,11 @@ def main(argv: list[str] | None = None) -> int:
     if settings.TENANT_MODE == "column" and not settings.DEFAULT_TENANT:
         print("  [FAIL] TENANT_MODE=column but DEFAULT_TENANT is empty")
         critical += 1
+    _ok("Extraction review", "enabled (threshold %.2f)" % settings.EXTRACTION_CONFIDENCE_THRESHOLD
+        if settings.EXTRACTION_REVIEW_ENABLED else "off",
+        None if settings.EXTRACTION_REVIEW_ENABLED else
+        "set EXTRACTION_REVIEW_ENABLED=true to hold low-confidence extractions "
+        "for human review before they touch the graph")
 
     print("\n[API & retrieval]")
     _ok("API host/port", f"{settings.API_HOST}:{settings.API_PORT}")

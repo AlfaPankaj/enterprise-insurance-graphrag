@@ -368,6 +368,35 @@ python scripts/benchmark_answer_quality.py --llm-judge --answer-mode auto
 * The golden set includes paraphrases (no id quoted) and negative probes
   (non-existent ids that must be refused, never hallucinated).
 
+## 6i. Extraction review queue (human-in-the-loop)
+
+```dotenv
+EXTRACTION_REVIEW_ENABLED=true
+EXTRACTION_CONFIDENCE_THRESHOLD=0.7
+```
+
+1. Upload a PDF via `/api/v1/upload` (or the Datasets page). Every extracted
+   entity is confidence-scored (required-field coverage + id form); entities
+   below the threshold are **held** instead of written to the graph. The
+   response reports `review.held` + `review.review_ids` and the applied
+   count.
+2. Open the **Review Queue** page in the app (or
+   `curl http://localhost:8000/api/v1/review`): each pending item shows the
+   entity, props, confidence, and reasons (`missing_required_fields`,
+   `malformed_id`).
+3. **Approve** → the entity is applied via the normal CDC path (entity add +
+   document snapshot merge + cache-revision bump, one transaction).
+   **Reject** → discarded, no graph write. Decided items keep their decision
+   (409 on re-decide).
+4. Re-uploading the same document **updates** the pending item instead of
+   duplicating it — iterate on the document until extraction is clean.
+5. Try a real-world document: with `EXTRACTION_MODE=auto` and a provider up,
+   the LLM extracts; the deterministic parser also gained real-world key
+   spellings ("Policy No:", "Loss Date:", "Annual Premium:") as fallback.
+
+> Guarantee this gives auditors: **CDC only ever applies confirmed changes** —
+> nothing low-confidence reaches the graph without a human decision.
+
 ## 7. Trial-account caveats (set expectations before the demo)
 
 * **AuraDB Free** — limited instance size/memory; fine for the demo graph and

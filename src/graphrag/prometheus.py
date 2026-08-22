@@ -130,6 +130,12 @@ audit_records_total = counter("graphrag_audit_records_total", "Audit trail recor
 jobs_running = gauge("graphrag_jobs_running", "Background jobs currently running.")
 jobs_completed_total = counter("graphrag_jobs_completed_total",
                                "Jobs that reached a terminal state, by status.")
+review_pending = gauge("graphrag_review_pending",
+                       "Extraction review items awaiting a decision.")
+review_held_total = counter("graphrag_review_held_total",
+                            "Entities held for review.")
+review_decisions_total = counter("graphrag_review_decisions_total",
+                                 "Review decisions by outcome (approved/rejected).")
 
 
 # ---------------------------------------------------------------------------

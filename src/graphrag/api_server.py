@@ -8,6 +8,9 @@ Endpoints
 * ``GET  /api/v1/session`` / ``POST /api/v1/session`` — switch datasets (Phase 6)
 * ``GET  /api/v1/metrics`` — rolling latency / token-savings stats
 * ``GET  /api/v1/audit`` / ``GET /api/v1/audit/verify`` — explainability records
+* ``GET  /api/v1/review`` / ``POST /api/v1/review/{id}/approve|reject`` —
+  extraction review queue (v2, WS-C): low-confidence entities are held for
+  human decision before they ever touch the graph
 * ``GET  /metrics`` — Prometheus exposition (v2)
 * ``GET  /health/live`` / ``GET /health/ready`` — orchestrator probes
 
@@ -33,8 +36,10 @@ from pydantic import BaseModel, Field
 
 from graphrag.change_detector import detect_changes
 from graphrag.config import settings
-from graphrag.entity_extractor import extract_entities
+from graphrag.entity_extractor import extract_entities_with_confidence
 from graphrag.exception_handlers import register_exception_handlers
+from graphrag.extraction_review import (STATUS_PENDING, apply_review_item,
+                                        get_review_store, partition_entities)
 from graphrag.graph_store import get_existing_entities
 from graphrag.graph_updater import update_graph_surgically
 from graphrag.health_check import register_health_endpoints
@@ -159,9 +164,13 @@ async def upload_pdf(
 
     def _process_upload() -> dict:
         """Sync ingestion work — run in a worker thread (G3: the event loop
-        must never block on extraction/LLM/Neo4j)."""
+        must never block on extraction/LLM/Neo4j).
+
+        v2 review queue: low-confidence entities are HELD for human review
+        instead of written to the graph — CDC only ever applies confirmed
+        changes (EXTRACTION_REVIEW_ENABLED)."""
         text = extract_text_from_pdf(contents)
-        extracted = extract_entities(text, doc_id_hint=file.filename)
+        extracted = extract_entities_with_confidence(text, doc_id_hint=file.filename)
         entities = extracted["entities"]
         if not entities:
             raise HTTPException(
@@ -171,13 +180,40 @@ async def upload_pdf(
             )
         doc_id = extracted["doc_id"] or file.filename
 
+        held_ids: list[str] = []
+        if settings.EXTRACTION_REVIEW_ENABLED:
+            to_apply, held = partition_entities(
+                entities, extracted.get("confidence", {}),
+                settings.EXTRACTION_CONFIDENCE_THRESHOLD)
+            store = get_review_store()
+            for item in held:
+                rid, _created = store.submit(
+                    doc_id, file.filename, item["label"], item["entity_id"],
+                    item["props"], item["confidence"],
+                    extracted.get("reasons", {}).get(item["label"], {}).get(item["entity_id"]))
+                held_ids.append(rid)
+        else:
+            to_apply = entities
+        applied_count = sum(len(ents) for ents in to_apply.values())
+
+        if not to_apply:
+            # everything held for review — nothing applied, no snapshot, no CDC
+            return {
+                "doc_id": doc_id,
+                "mode": extracted["mode"],
+                "stats": None,
+                "changes": {"added": 0, "modified": 0, "deleted": 0},
+                "held_ids": held_ids,
+                "applied_count": 0,
+            }
+
         with app.state.driver.session() as session:
             old = get_existing_entities(session, doc_id)
-            changes = detect_changes(old, entities)
+            changes = detect_changes(old, to_apply)
             # graph update + snapshot save run in one transaction (atomic CDC);
             # v2: nodes are stamped with the caller's tenant (TENANT_MODE=column)
             stats = update_graph_surgically(
-                app.state.driver, doc_id, changes, new_entities=entities,
+                app.state.driver, doc_id, changes, new_entities=to_apply,
                 tenant_id=user.tenant_id,
             )
         return {
@@ -189,6 +225,8 @@ async def upload_pdf(
                 "modified": len(changes["modified"]),
                 "deleted": len(changes["deleted"]),
             },
+            "held_ids": held_ids,
+            "applied_count": applied_count,
         }
 
     try:
@@ -197,18 +235,24 @@ async def upload_pdf(
             processed["doc_id"], processed["mode"], processed["stats"],
             processed["changes"],
         )
+        held_ids = processed["held_ids"]
+        applied_count = processed["applied_count"]
 
-        stats["execution_time_ms"] = round((time.perf_counter() - start) * 1000, 2)
+        elapsed_ms = round((time.perf_counter() - start) * 1000, 2)
         prom.requests_total.inc(kind="upload")
-        prom.upload_latency.observe(stats["execution_time_ms"] / 1000.0)
+        if stats is not None:
+            stats["execution_time_ms"] = elapsed_ms
+            prom.upload_latency.observe(elapsed_ms / 1000.0)
         monitor.record(kind="upload", file=file.filename, doc_id=doc_id,
                        user=user.subject, tenant_id=user.tenant_id,
-                       latency_ms=stats["execution_time_ms"])
-        logger.info("upload ok file=%s doc=%s user=%s tenant=%s", file.filename,
-                    doc_id, user.subject, user.tenant_id,
+                       latency_ms=elapsed_ms)
+        logger.info("upload ok file=%s doc=%s user=%s tenant=%s applied=%d held=%d",
+                    file.filename, doc_id, user.subject, user.tenant_id,
+                    applied_count, len(held_ids),
                     extra={"doc_id": doc_id, "user": user.subject,
                            "tenant_id": user.tenant_id,
-                           "latency_ms": stats["execution_time_ms"]})
+                           "latency_ms": elapsed_ms,
+                           "held_for_review": len(held_ids)})
 
         return {
             "status": "success",
@@ -217,6 +261,11 @@ async def upload_pdf(
             "extraction_mode": extracted_mode,
             "changes": changes,
             "update_stats": stats,
+            "review": {
+                "held": len(held_ids),
+                "review_ids": held_ids,
+                "applied_entities": applied_count,
+            },
         }
     except HTTPException:
         raise
@@ -445,6 +494,74 @@ async def cancel_job(job_id: str,
         raise HTTPException(status_code=409,
                             detail="job not found or already finished")
     return {"status": "success", "job_id": job_id}
+
+
+# ---------------------------------------------------------------------------
+# v2 extraction review queue (WS-C, G17)
+# ---------------------------------------------------------------------------
+
+@app.get("/api/v1/review")
+async def list_review(status_filter: str | None = None, limit: int = 100,
+                      user: UserIdentity = Depends(require_user(*QUERY_ROLES))):
+    """Extraction review items (default: all statuses, newest first).
+
+    ``status_filter`` in pending | approved | rejected. All roles may read;
+    decisions are analyst/admin (approve/reject endpoints).
+    """
+    status_filter = status_filter if status_filter in \
+        ("pending", "approved", "rejected") else None
+    store = get_review_store()
+    return {
+        "status": "success",
+        "summary": store.summary(),
+        "items": await asyncio.to_thread(store.list, status_filter,
+                                         min(limit, 500)),
+    }
+
+
+@app.post("/api/v1/review/{review_id}/approve")
+async def approve_review(review_id: str,
+                         user: UserIdentity = Depends(require_user(*UPLOAD_ROLES)),
+                         _rl=Depends(rate_limit())):
+    """Approve a pending extraction — applies it to the graph via CDC
+    (entity add + snapshot merge + cache-revision bump, one transaction)."""
+    store = get_review_store()
+    item = await asyncio.to_thread(store.get, review_id)
+    if item is None:
+        raise HTTPException(status_code=404,
+                            detail=f"unknown review item '{review_id}'")
+    if item["status"] != STATUS_PENDING:
+        raise HTTPException(status_code=409,
+                            detail=f"review item already {item['status']}")
+    try:
+        stats = await asyncio.to_thread(apply_review_item, app.state.driver, item)
+    except Exception:  # noqa: BLE001 - report and wrap; never leak internals
+        logger.exception("review approve failed %s", review_id)
+        raise HTTPException(status_code=500,
+                            detail="Failed to apply review item (see logs)") from None
+    store.decide(review_id, "approved", user.subject)
+    prom.requests_total.inc(kind="review")
+    return {"status": "success", "review_id": review_id,
+            "update_stats": stats, "item": store.get(review_id)}
+
+
+@app.post("/api/v1/review/{review_id}/reject")
+async def reject_review(review_id: str,
+                        user: UserIdentity = Depends(require_user(*UPLOAD_ROLES)),
+                        _rl=Depends(rate_limit())):
+    """Reject a pending extraction — discarded, no graph write."""
+    store = get_review_store()
+    item = await asyncio.to_thread(store.get, review_id)
+    if item is None:
+        raise HTTPException(status_code=404,
+                            detail=f"unknown review item '{review_id}'")
+    if item["status"] != STATUS_PENDING:
+        raise HTTPException(status_code=409,
+                            detail=f"review item already {item['status']}")
+    store.decide(review_id, "rejected", user.subject)
+    prom.requests_total.inc(kind="review")
+    return {"status": "success", "review_id": review_id,
+            "item": store.get(review_id)}
 
 
 @app.get("/metrics")

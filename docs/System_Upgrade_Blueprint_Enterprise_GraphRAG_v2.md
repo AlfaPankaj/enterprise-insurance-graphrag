@@ -342,5 +342,35 @@ criteria. Order reflects dependency, not necessarily priority — see §6.
 * **Tests** — 173 new tests across the v2 slices: **441 passed, 12 skipped**
   (skips = DB-dependent, unchanged baseline).
 
-**Next slices:** WS-C remainder (real-document extraction + review queue)
-→ WS-E (banking domain, Aura topology).
+**Done — WS-C remainder (v2 slice 7): extraction review queue + real-document**
+**extraction hardening (G17)**
+
+* **Extraction confidence scoring** — `entity_extractor.score_entity` /
+  `score_extraction`: deterministic confidence = 0.6 × required-field
+  coverage (per label, mirrors `docs/graph_schema.md`) + 0.4 × id
+  well-formedness (strict demo scheme or a generic real-world pattern);
+  `extract_entities_with_confidence()` adds `confidence`/`reasons` maps
+  (additive — `extract_entities` contract unchanged).
+* **Review queue** — `extraction_review.py`: SQLite store
+  (`data/extraction_review.db`, zero new deps) with
+  `pending → approved | rejected`, dedupe-by-(doc, entity) so re-uploads
+  iterate one entry, `partition_entities` confidence split, and
+  `apply_review_item` (approve → CDC add + snapshot merge + revision bump,
+  one transaction). **CDC only ever applies confirmed changes**: the upload
+  path (`EXTRACTION_REVIEW_ENABLED=true`) applies high-confidence entities
+  immediately and HOLDS the rest; the held count/review ids come back in the
+  response. API: `GET /api/v1/review` (all roles), `POST
+  /api/v1/review/{id}/approve|reject` (analyst/admin). UI: **Review Queue**
+  page (pending/approved/rejected KPIs, per-item approve/reject). Prometheus:
+  `graphrag_review_pending` / `_held_total` / `_decisions_total`.
+* **Real-document parsing** — `_canonical_key`: "Key: value" lines resolve
+  first (case-insensitive canonical keys + alias spellings: "Policy No",
+  "Loss Date", "Claim Number", "Annual Premium", …) — fixes the
+  "Policy No" vs "Policy" prefix collision and makes the deterministic
+  parser survive real-world layouts. Real documents still prefer
+  `EXTRACTION_MODE=auto|llm` (the review queue catches low-confidence
+  output of either path).
+* **Tests** — 187 new tests across the v2 slices: **455 passed, 12 skipped**
+  (skips = DB-dependent, unchanged baseline).
+
+**Next slice:** WS-E (banking domain, Aura topology).

@@ -280,7 +280,8 @@ st.markdown("""
 
 with st.sidebar:
     st.markdown("#### Navigate")
-    page = st.radio("Pages", ["Home", "Dashboard", "Audit Trail", "Datasets"], label_visibility="collapsed")
+    page = st.radio("Pages", ["Home", "Dashboard", "Audit Trail", "Datasets",
+                              "Review Queue"], label_visibility="collapsed")
     st.markdown("---")
     st.markdown("### 🔗 GraphRAG")
     st.caption("Insurance Claims System")
@@ -772,3 +773,66 @@ elif page == "Datasets":
     st.markdown("1. **Create** — upload a CSV or PDF, type a unique session name, hit *Create & load*.\n"
                 "2. **Watch** — the sidebar shows the ingest log streaming live; when it finishes the session is active.\n"
                 "3. **Query** — open the *Dashboard* and ask anything about your dataset. The graph responds to keyword and id queries (CSVs with claim/fraud columns get Claim + FraudFlag nodes; anything else becomes generic Record nodes).")
+
+# =========================================================================
+# REVIEW QUEUE PAGE (v2 — extraction review, WS-C G17)
+# =========================================================================
+
+elif page == "Review Queue":
+    from src.graphrag.extraction_review import (STATUS_PENDING,
+                                                apply_review_item,
+                                                get_review_store)
+
+    st.markdown("### Extraction Review Queue")
+    st.caption("Low-confidence extractions are held here instead of being written "
+               "to the graph (`EXTRACTION_REVIEW_ENABLED=true`). Approve to apply "
+               "via CDC, reject to discard. Re-uploading a document updates its "
+               "pending item instead of duplicating it.")
+
+    store = get_review_store()
+    summary = store.summary()
+    c1, c2, c3 = st.columns(3)
+    c1.markdown(f"<div class='grag-kpi orange'><div class='kpi-value'>{summary['pending']}</div><div class='kpi-label'>Pending</div></div>", unsafe_allow_html=True)
+    c2.markdown(f"<div class='grag-kpi green'><div class='kpi-value'>{summary['approved']}</div><div class='kpi-label'>Approved</div></div>", unsafe_allow_html=True)
+    c3.markdown(f"<div class='grag-kpi'><div class='kpi-value'>{summary['rejected']}</div><div class='kpi-label'>Rejected</div></div>", unsafe_allow_html=True)
+
+    if not settings.EXTRACTION_REVIEW_ENABLED:
+        st.info("The review queue is disabled — set `EXTRACTION_REVIEW_ENABLED=true` "
+                "in `.env` to hold low-confidence extractions here instead of "
+                "applying them directly.")
+
+    st.markdown("---")
+    status_filter = st.selectbox("Status", ["pending", "approved", "rejected"])
+    items = store.list(status=status_filter, limit=50)
+    if not items:
+        st.info(f"No {status_filter} items.")
+    for item in items:
+        props_preview = ", ".join(
+            f"{k}={str(v)[:28]}" for k, v in list(item["props"].items())[:8])
+        st.markdown(
+            f"**`{item['entity_id']}`** · `{item['label']}` · doc `{item['doc_id']}` · "
+            f"confidence **{item['confidence']:.2f}** · {item['status']}"
+        )
+        if item.get("reasons"):
+            st.caption("reasons: " + ", ".join(item["reasons"]))
+        st.caption(f"props: {props_preview} · source: {item.get('source_file') or '—'}")
+        if item["status"] == STATUS_PENDING:
+            b1, b2, _ = st.columns([1, 1, 4])
+            if b1.button("Approve", key=f"appr_{item['id']}"):
+                try:
+                    stats = apply_review_item(get_driver(), item)
+                    store.decide(item["id"], "approved",
+                                 identity.subject if identity else "anonymous")
+                    st.success(f"Applied {item['entity_id']} "
+                               f"in {stats['update_time_ms']:.0f}ms")
+                    st.rerun()
+                except Exception as exc:
+                    st.error(f"Approve failed: {exc}")
+            if b2.button("Reject", key=f"rej_{item['id']}"):
+                store.decide(item["id"], "rejected",
+                             identity.subject if identity else "anonymous")
+                st.rerun()
+        elif item.get("decided_at"):
+            st.caption(f"decided {item['decided_at']} "
+                       f"by {item.get('decided_by') or '—'}")
+        st.markdown("---")

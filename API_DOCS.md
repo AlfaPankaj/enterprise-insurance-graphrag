@@ -147,11 +147,27 @@ curl -N -X POST http://localhost:8000/api/v1/query/stream \
 Verifies the SHA-256 hash chain across all audit segments:
 `{status, valid, records_checked, legacy_records, broken_at}`.
 
+### `GET /api/v1/review` · `POST /api/v1/review/{id}/approve|reject`
+
+Extraction review queue (v2, WS-C). With `EXTRACTION_REVIEW_ENABLED=true`,
+uploaded entities below the confidence threshold are held (`pending`) instead
+of written to the graph; the upload response reports `review.held` +
+`review.review_ids`. `GET /api/v1/review?status_filter=pending` (all roles);
+approve/reject (analyst/admin). Approve applies via CDC (entity add +
+snapshot merge + revision bump, one transaction); reject discards. Re-uploads
+update the pending item in place.
+
+```bash
+curl http://localhost:8000/api/v1/review -H "X-API-Key: $API_KEY"
+curl -X POST http://localhost:8000/api/v1/review/1a2b3c4d5e6f/approve \
+     -H "X-API-Key: $API_KEY"
+```
+
 ### `GET /metrics` — Prometheus exposition (admin/auditor)
 
 Scrape target for Grafana/Datadog agents: request/error/rate-limit counters,
 query+upload latency histograms, token-savings histogram, LLM cost USD,
-fallbacks, cache hits/misses, audit records, job counts.
+fallbacks, cache hits/misses, audit records, job counts, review queue stats.
 
 ### `POST /api/v1/jobs` · `GET /api/v1/jobs` · `GET /api/v1/jobs/{id}` · `POST /api/v1/jobs/{id}/cancel`
 
