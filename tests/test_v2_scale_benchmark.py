@@ -13,6 +13,12 @@ Where it runs
 * The existing CI job (``ci.yml``) provides exactly what V1 used: Neo4j
   5.26-community at bolt://localhost:7687 + full requirements.txt.
 
+Visibility
+----------
+The driving sandbox cannot read Actions logs, so progress + results are
+mirrored into a PR comment (runners have network). The comment is updated
+as each chain step completes.
+
 Chain (identical commands/shapes to the V1 run)
 -----------------------------------------------
 seed demo graph -> synthetic 100 q + fraud (42 labels)
@@ -28,21 +34,25 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import subprocess
 import sys
+import urllib.request
 from pathlib import Path
 
 import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
 BENCH = ROOT / "data" / "benchmarks"
+REPO = "AlfaPankaj/enterprise-insurance-graphrag"
 
 # ---- CI-only gate ----------------------------------------------------------
 
 _HEAD_REF = os.environ.get("GITHUB_HEAD_REF", "")
 _REF = os.environ.get("GITHUB_REF", "")
 _IN_CI = os.environ.get("GITHUB_ACTIONS") == "true"
-_ON_ARENA = _HEAD_REF.startswith("arena/") or "/arena/" in _REF or _REF.startswith("arena/")
+_ON_ARENA = _HEAD_REF.startswith("arena/") or "/arena/" in _REF \
+    or _REF.startswith("arena/")
 
 
 def _neo4j_up() -> bool:
@@ -66,89 +76,152 @@ pytestmark = pytest.mark.skipif(
 
 PY = sys.executable
 
-CHAIN: list[str] = [
-    # 1. PDF demo graph (synthetic session): 100 q + fraud
-    f"{PY} scripts/seed_graph.py --reset --apply-schema",
-    f"{PY} scripts/benchmark_real_dataset.py synthetic --queries 100",
-    f"{PY} scripts/benchmark_fraud_detection.py --dataset synthetic",
-    # 2. fraud_oracle: 5,500 q + fraud (923 fraud + 1,500 clean)
-    f"{PY} scripts/ingest_real_dataset.py fraud_oracle --reset",
-    f"{PY} scripts/benchmark_real_dataset.py fraud_oracle --queries 5500",
-    f"{PY} scripts/benchmark_fraud_detection.py --dataset fraud_oracle",
-    # 3. insurance_claims: 600 q + fraud (247 fraud + 753 clean)
-    f"{PY} scripts/ingest_real_dataset.py insurance_claims --reset",
-    f"{PY} scripts/benchmark_real_dataset.py insurance_claims --queries 600",
-    f"{PY} scripts/benchmark_fraud_detection.py --dataset insurance_claims",
-    # 4. insurance_dataset: 3,900 q
-    f"{PY} scripts/ingest_real_dataset.py insurance_dataset --reset",
-    f"{PY} scripts/benchmark_real_dataset.py insurance_dataset --queries 3900",
-    # 5. data_synthetic: full 53,503-row ingest, 100 q
-    f"{PY} scripts/ingest_real_dataset.py data_synthetic --reset",
-    f"{PY} scripts/benchmark_real_dataset.py data_synthetic --queries 100",
-    # 6. edge cases (all datasets, head/middle/tail) + generalization probes
-    f"{PY} scripts/benchmark_edge_cases.py",
-    f"{PY} scripts/benchmark_generalization.py insurance_claims",
-    # 7. restore the demo graph + consolidate the proof
-    f"{PY} scripts/seed_graph.py --reset --apply-schema",
-    f"{PY} scripts/export_benchmark_proof.py",
+CHAIN: list[tuple[str, str]] = [
+    ("seed demo graph", f"{PY} scripts/seed_graph.py --reset --apply-schema"),
+    ("synthetic 100 q", f"{PY} scripts/benchmark_real_dataset.py synthetic --queries 100"),
+    ("fraud benchmark — synthetic (42 labels)",
+     f"{PY} scripts/benchmark_fraud_detection.py --dataset synthetic"),
+    ("fraud_oracle — ingest 15,420 claims",
+     f"{PY} scripts/ingest_real_dataset.py fraud_oracle --reset"),
+    ("fraud_oracle — 5,500 ground-truth queries",
+     f"{PY} scripts/benchmark_real_dataset.py fraud_oracle --queries 5500"),
+    ("fraud benchmark — fraud_oracle (923 + 1,500)",
+     f"{PY} scripts/benchmark_fraud_detection.py --dataset fraud_oracle"),
+    ("insurance_claims — ingest 1,000 claims",
+     f"{PY} scripts/ingest_real_dataset.py insurance_claims --reset"),
+    ("insurance_claims — 600 ground-truth queries",
+     f"{PY} scripts/benchmark_real_dataset.py insurance_claims --queries 600"),
+    ("fraud benchmark — insurance_claims (247 + 753)",
+     f"{PY} scripts/benchmark_fraud_detection.py --dataset insurance_claims"),
+    ("insurance_dataset — ingest 13,000 customers",
+     f"{PY} scripts/ingest_real_dataset.py insurance_dataset --reset"),
+    ("insurance_dataset — 3,900 ground-truth queries",
+     f"{PY} scripts/benchmark_real_dataset.py insurance_dataset --queries 3900"),
+    ("data_synthetic — full 53,503-row ingest",
+     f"{PY} scripts/ingest_real_dataset.py data_synthetic --reset"),
+    ("data_synthetic — 100 ground-truth queries",
+     f"{PY} scripts/benchmark_real_dataset.py data_synthetic --queries 100"),
+    ("edge cases (all datasets)", f"{PY} scripts/benchmark_edge_cases.py"),
+    ("generalization probes", f"{PY} scripts/benchmark_generalization.py insurance_claims"),
+    ("restore demo graph", f"{PY} scripts/seed_graph.py --reset --apply-schema"),
+    ("export consolidated proof", f"{PY} scripts/export_benchmark_proof.py"),
 ]
 
 
-def _sh(cmd: str) -> None:
+# ---- PR-comment progress mirror (runners have network; the driver sandbox
+#      cannot read Actions logs, so this is the log pipeline) ----------------
+
+_MARKER = f"<!-- v2-bench:{os.environ.get('GITHUB_RUN_ID', 'local')} -->"
+
+
+def _api(path: str, token: str, method: str = "GET", payload: dict | None = None):
+    req = urllib.request.Request(
+        f"https://api.github.com/repos/{REPO}/{path}",
+        data=json.dumps(payload).encode("utf-8") if payload else None,
+        headers={"Authorization": f"Bearer {token}",
+                 "Accept": "application/vnd.github+json"},
+        method=method)
+    with urllib.request.urlopen(req, timeout=20) as r:
+        raw = r.read()
+    return json.loads(raw) if raw else {}
+
+
+def _pr(token: str) -> str | None:
+    m = re.match(r"refs/pull/(\d+)/", os.environ.get("GITHUB_REF", "") or "")
+    return m.group(1) if m else None
+
+
+class _Progress:
+    """One comment per run; edited as the chain advances."""
+
+    def __init__(self):
+        self.lines: list[str] = ["**V2 full-scale benchmark** — chain starting…", ""]
+        self.done = 0
+        self.comment_id: int | None = None
+        self.token = os.environ.get("GITHUB_TOKEN", "")
+        self.pr = _pr(self.token) if self.token else None
+
+    def _flush(self):
+        if not (self.token and self.pr):
+            return
+        body = _MARKER + "\n" + "\n".join(self.lines)
+        try:
+            if self.comment_id is None:
+                # find or create this run's comment
+                comments = _api(f"issues/{self.pr}/comments", self.token)
+                for c in comments:
+                    if _MARKER in c.get("body", ""):
+                        self.comment_id = c["id"]
+                        break
+                if self.comment_id is None:
+                    self.comment_id = _api(
+                        f"issues/{self.pr}/comments", self.token, "POST",
+                        {"body": body}).get("id")
+                return
+            _api(f"issues/comments/{self.comment_id}", self.token,
+                 "PATCH", {"body": body})
+        except Exception as exc:  # noqa: BLE001 - mirror must never fail CI
+            print(f"[bench-mirror] {exc}")
+
+    def step_done(self, label: str, tail: str = ""):
+        self.done += 1
+        self.lines.append(f"✅ {label}" + (f" — `{tail}`" if tail else ""))
+        self._flush()
+
+    def step_failed(self, label: str, out: str):
+        self.lines.append(f"❌ **{label}** failed — last output:")
+        self.lines.append("```\n" + "\n".join(out.splitlines()[-60:]) + "\n```")
+        self._flush()
+
+    def raw(self, text: str):
+        self.lines.append(text)
+        self._flush()
+
+
+def _run_step(cmd: str, label: str, progress: _Progress) -> None:
     print(f"\n=== $ {cmd}", flush=True)
     proc = subprocess.run(cmd, cwd=ROOT, shell=True,
                           stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
                           text=True)
-    # stream trimmed output into the test log (full stdout is huge)
-    lines = proc.stdout.splitlines()
-    for line in lines[:40]:
+    out = proc.stdout or ""
+    lines = out.splitlines()
+    for line in lines[:30]:
         print("   ", line)
-    if len(lines) > 80:
-        print(f"    [... {len(lines) - 80} lines ...]")
-    for line in lines[-40:]:
+    if len(lines) > 60:
+        print(f"    [... {len(lines) - 60} lines ...]")
+    for line in lines[-30:]:
         print("   ", line)
-    assert proc.returncode == 0, f"benchmark step failed ({proc.returncode}): {cmd}"
+    if proc.returncode != 0:
+        progress.step_failed(label, out)
+        raise AssertionError(f"benchmark step failed ({proc.returncode}): {cmd}")
+    progress.step_done(label)
 
 
-def _digest() -> None:
-    """Print every regenerated JSON's summary (CI-log = recovery fallback)."""
+def _digest_lines() -> list[str]:
     proof = json.loads((BENCH / "benchmark_results.json").read_text())
     agg = proof["aggregate_metrics"]
-    print("\n===== V2 BENCHMARK DIGEST (10,200 ground-truth queries) =====")
-    print(json.dumps(agg, indent=2))
-    print("--- fraud_detection ---")
-    print(json.dumps(proof["fraud_detection"], indent=2))
-    print("--- backend_performance ---")
-    print(json.dumps(proof["backend_performance"], indent=2))
-    print("--- query_mix ---")
-    print(json.dumps(proof["query_mix"], indent=2))
-    print("--- per_dataset ---")
-    print(json.dumps(proof["per_dataset"], indent=2))
-    for name in sorted(p.name for p in BENCH.glob("real_*.json")):
-        d = json.loads((BENCH / name).read_text())
-        d.pop("results", None)
-        print(f"--- {name} ---")
-        print(json.dumps(d, indent=2))
-    for name in ("edge_cases.json", "generalization_insurance_claims.json"):
-        p = BENCH / name
-        if p.exists():
-            d = json.loads(p.read_text())
-            if isinstance(d, dict):
-                for k in list(d):
-                    if isinstance(d[k], list) and len(d[k]) > 20:
-                        d[k] = f"<{len(d[k])} entries>"
-            print(f"--- {name} ---")
-            print(json.dumps(d, indent=2)[:4000])
+    out = ["", "===== V2 BENCHMARK DIGEST (10,200 ground-truth queries) ====="]
+    out.append("```json")
+    out.append(json.dumps(agg, indent=2))
+    out.append("--- fraud ---")
+    out.append(json.dumps(proof["fraud_detection"], indent=2))
+    out.append("--- backend_performance ---")
+    out.append(json.dumps(proof["backend_performance"], indent=2))
+    out.append("--- per_dataset ---")
+    out.append(json.dumps(proof["per_dataset"], indent=2))
+    out.append("--- query_mix ---")
+    out.append(json.dumps(proof["query_mix"], indent=2))
+    out.append("```")
+    return out
 
 
-def _push_back() -> None:
+def _push_back(progress: _Progress) -> None:
     """Commit the regenerated JSONs to the branch (GITHUB_TOKEN push never
     re-triggers workflows, so no CI loop)."""
     if os.environ.get("GITHUB_ACTIONS") != "true":
         return
     token = os.environ.get("GITHUB_TOKEN", "")
     branch = _HEAD_REF or _REF.rsplit("/", 1)[-1]
-    repo = "AlfaPankaj/enterprise-insurance-graphrag"
     steps = [
         "git config user.name 'arena-ai-coding-agent[bot]'",
         "git config user.email 'noreply@github.com'",
@@ -160,21 +233,23 @@ def _push_back() -> None:
     for s in steps:
         r = subprocess.run(s, cwd=ROOT, shell=True, capture_output=True, text=True)
         if r.returncode != 0:
-            print(f"push-back step failed: {s}\n{r.stdout}\n{r.stderr}")
+            progress.raw(f"⚠️ push-back prep failed: `{s}` — {r.stderr[-200:]}")
             return
     if token:
-        url = f"https://x-access-token:{token}@github.com/{repo}.git"
+        url = f"https://x-access-token:{token}@github.com/{REPO}.git"
         r = subprocess.run(f"git push {url} HEAD:{branch}", cwd=ROOT, shell=True,
                            capture_output=True, text=True)
-        print("push-back:", "ok" if r.returncode == 0
-              else f"FAILED (use the digest above)\n{r.stderr[-500:]}")
+        progress.raw("📤 results pushed back to the branch ✅" if r.returncode == 0
+                     else f"⚠️ push-back FAILED: {r.stderr[-400:]} (digest above)")
     else:
-        print("no GITHUB_TOKEN — results only in this log (digest above)")
+        progress.raw("⚠️ no GITHUB_TOKEN — results only in this comment")
 
 
 def test_v2_full_scale_benchmark_10_200_queries():
-    for cmd in CHAIN:
-        _sh(cmd)
+    progress = _Progress()
+    progress.raw(f"chain: {len(CHAIN)} steps")
+    for label, cmd in CHAIN:
+        _run_step(cmd, label, progress)
 
     proof = json.loads((BENCH / "benchmark_results.json").read_text())
     agg = proof["aggregate_metrics"]
@@ -194,5 +269,7 @@ def test_v2_full_scale_benchmark_10_200_queries():
     assert fraud["precision"] == 1.0 and fraud["recall"] == 1.0
     assert fraud["f1"] == 1.0
 
-    _digest()
-    _push_back()
+    progress.raw("🎯 **all assertions passed — 10,200/10,200, fraud 100%**")
+    for line in _digest_lines():
+        progress.raw(line)
+    _push_back(progress)
