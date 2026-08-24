@@ -31,11 +31,11 @@ from contextlib import asynccontextmanager
 
 from fastapi import Depends, FastAPI, File, HTTPException, UploadFile
 from fastapi.responses import PlainTextResponse, StreamingResponse
-from neo4j import GraphDatabase
 from pydantic import BaseModel, Field
 
 from graphrag.change_detector import detect_changes
 from graphrag.config import settings
+from graphrag.db import open_driver
 from graphrag.entity_extractor import extract_entities_with_confidence
 from graphrag.exception_handlers import register_exception_handlers
 from graphrag.extraction_review import (STATUS_PENDING, apply_review_item,
@@ -96,15 +96,12 @@ class JobSubmitRequest(BaseModel):
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    app.state.driver = GraphDatabase.driver(
-        settings.NEO4J_URI, auth=(settings.NEO4J_USER, settings.NEO4J_PASSWORD)
-    )
-    logger.info("Neo4j driver connected: %s", settings.NEO4J_URI)
+    app.state.driver = open_driver()
     configure_tracing()
     register_default_handlers(lambda: app.state.driver)
     yield
     app.state.driver.close()
-    logger.info("Neo4j driver closed")
+    logger.info("graph driver closed")
 
 
 app = FastAPI(

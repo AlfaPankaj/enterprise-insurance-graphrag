@@ -13,6 +13,21 @@ class Settings(BaseSettings):
     NEO4J_USER: str = "neo4j"
     NEO4J_PASSWORD: str = "graphrag-demo"
 
+    # ------------------------------------------------------------------
+    # v2 — Option A: unified PostgreSQL data stack (Apache AGE + pgvector)
+    # ------------------------------------------------------------------
+    # neo4j (default) = reference implementation, zero behavior change;
+    # age = route all graph reads/writes through Apache AGE inside
+    # PostgreSQL (docs/DEPLOYMENT_SCALE_OPTIONS.md). Optional dep:
+    #   pip install -r requirements-postgres.txt
+    GRAPH_BACKEND: str = "neo4j"
+    POSTGRES_DSN: str = ""    # postgresql://graphrag:graphrag@localhost:5432/graphrag
+    AGE_GRAPH_NAME: str = "graphrag"
+    AGE_AUTO_CREATE: bool = True          # create the AGE graph on first use
+    # memory (default) = in-process vector index (v2 behavior);
+    # pgvector = semantic index in pgvector (needs GRAPH_BACKEND data source)
+    VECTOR_BACKEND: str = "memory"
+
     # Llama (Ollama) — optional; the extractor falls back to deterministic parsing
     LLAMA_API_URL: str = "http://localhost:11434"
     LLAMA_MODEL: str = "llama3.2:3b"     # installed on the demo machine

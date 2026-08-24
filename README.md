@@ -76,6 +76,18 @@ exactly), adds **no new hard dependencies**, and is covered by the test suite
 | **Aura topology** — `docker-compose.aura.yml` | App tier wired to **Neo4j AuraDB** (managed, native TLS) + a runbook for tenancy, backup/restore RPO/RTO and restore drills | Production-grade deployment with zero graph-DB operations burden — see [`docs/AURA_TOPOLOGY.md`](docs/AURA_TOPOLOGY.md) |
 | **Config checker** — `scripts/check_config.py` | One-command validation of a trial/production setup (Neo4j, providers, auth, trust controls) with exit codes | Misconfiguration is caught before a demo or deploy, not during it |
 
+### Production deployment options (scale paths)
+
+The Neo4j stack above stays the **reference implementation** — every
+benchmark number in this README was produced on it. For scale, two expansion
+paths are designed (full details:
+[`docs/DEPLOYMENT_SCALE_OPTIONS.md`](docs/DEPLOYMENT_SCALE_OPTIONS.md)):
+
+| Path | What it is | Status |
+|---|---|---|
+| **Option A — Unified data stack** — `GRAPH_BACKEND=age` | One PostgreSQL instance serves the property graph (**Apache AGE**, openCypher), semantic vectors (**pgvector**), and relational tables; CDC commits as a **single ACID transaction**; zero multi-DB sync | **Implemented, opt-in** — `docker compose -f docker-compose.age.yml up -d`, `pip install -r requirements-postgres.txt`, `python scripts/migrate_to_age.py`, flip two `.env` flags; defaults unchanged |
+| **Option B — Rust microservice tier** | Hot-path retrieval service (tokio + in-memory graph + tantivy BM25) fed by CDC events; sub-millisecond p99 design target | **Designed, deferred** — architecture + decision record in the doc |
+
 **Start exploring:** copy `.env.example` → `.env`, run `python scripts/check_config.py`,
 then follow the free-trial walkthrough in
 [`docs/TESTING_WITH_FREE_TRIALS.md`](docs/TESTING_WITH_FREE_TRIALS.md). The full
@@ -232,6 +244,7 @@ dashboard's validation table. See the report for usage.
 * [`docs/System_Upgrade_Blueprint_Enterprise_GraphRAG_v2.md`](docs/System_Upgrade_Blueprint_Enterprise_GraphRAG_v2.md) — **the v2 blueprint**: gap analysis, workstreams, acceptance criteria, slice-by-slice status
 * [`docs/TESTING_WITH_FREE_TRIALS.md`](docs/TESTING_WITH_FREE_TRIALS.md) — free-trial walkthrough (Aura / Ollama / OpenAI / Azure) + a demo script for every v2 feature
 * [`docs/AURA_TOPOLOGY.md`](docs/AURA_TOPOLOGY.md) — managed Neo4j Aura topology: tenancy, backup/restore, hardening
+* [`docs/DEPLOYMENT_SCALE_OPTIONS.md`](docs/DEPLOYMENT_SCALE_OPTIONS.md) — production deployment options: Option A (PostgreSQL + AGE + pgvector, implemented) & Option B (Rust tier, designed)
 * [`API_DOCS.md`](API_DOCS.md) — REST endpoint reference (v1 + all v2 endpoints)
 * [`docs/graph_schema.md`](docs/graph_schema.md) — insurance ontology (banking ontology: [`src/graphrag/domains/banking.py`](src/graphrag/domains/banking.py))
 * [`how_to_run.md`](how_to_run.md) — run commands
@@ -244,7 +257,8 @@ dashboard's validation table. See the report for usage.
 ├── app.py            # main Streamlit app (Home / Dashboard / Audit Trail / Datasets / Review Queue)
 ├── dashboard.py                # Shot 2: standalone cost-optimization dashboard
 ├── Dockerfile · Dockerfile.dashboard · docker-compose.yml · docker-compose.e2e.yml · docker-compose.aura.yml
-├── pyproject.toml · requirements.txt · requirements-api.txt · requirements-otel.txt
+├── docker-compose.age.yml · docker/age/     # Option A: PostgreSQL + AGE + pgvector, one instance
+├── pyproject.toml · requirements.txt · requirements-api.txt · requirements-otel.txt · requirements-postgres.txt
 ├── .env.example                # every v2 knob documented (copy to .env — never committed)
 ├── README.md
 ├── How_to_run.md

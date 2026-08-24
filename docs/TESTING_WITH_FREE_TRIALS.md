@@ -441,6 +441,32 @@ Full runbook — provisioning, tenancy models (instance-per-tenant vs
 production hardening checklist — lives in
 [`docs/AURA_TOPOLOGY.md`](AURA_TOPOLOGY.md).
 
+## 6f. Option A — unified PostgreSQL stack (AGE + pgvector)
+
+Everything local and free (no trial accounts needed):
+
+```bash
+# one instance: PostgreSQL + Apache AGE (graph) + pgvector (vectors)
+docker compose -f docker-compose.age.yml up -d
+pip install -r requirements-postgres.txt          # optional backend dep
+
+# copy the demo graph in, validate, then flip the backend
+python scripts/migrate_to_age.py --reset
+python scripts/check_config.py                    # [Graph backend] section
+
+# .env:  GRAPH_BACKEND=age
+#        POSTGRES_DSN=postgresql://graphrag:graphrag-demo@localhost:5432/graphrag
+#        VECTOR_BACKEND=pgvector   (optional)
+
+# parity proof against your live instance
+TEST_AGE_DSN=postgresql://graphrag:graphrag-demo@localhost:5432/graphrag \
+  python -m pytest tests/test_age_backend.py -k live -v
+```
+
+Demo story: *"same answers, same audit trail — now from ONE database, with
+CDC committing as a single ACID transaction."* Full walkthrough:
+[`docs/DEPLOYMENT_SCALE_OPTIONS.md`](DEPLOYMENT_SCALE_OPTIONS.md).
+
 ## 7. Trial-account caveats (set expectations before the demo)
 
 * **AuraDB Free** — limited instance size/memory; fine for the demo graph and

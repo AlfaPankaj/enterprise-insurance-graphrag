@@ -68,6 +68,22 @@ def clear_vector_cache() -> None:
         _STORE_CACHE.clear()
 
 
+def _build_pgvector_store(revision: tuple, nodes, vectors):
+    """Option A: index the same embeddings into pgvector (same interface,
+    same revision cache, same fallback semantics as the memory store)."""
+    from graphrag.postgres_backend import PgVectorStore  # optional dep
+
+    dim = len(vectors[0]) if vectors else 384
+    store = PgVectorStore(dataset=revision[0], dim=dim)
+    store.rebuild([(nid, label, text, vec)
+                   for (nid, label, text), vec in zip(nodes, vectors)])
+    with _CACHE_LOCK:
+        _STORE_CACHE[revision] = store
+        while len(_STORE_CACHE) > 4:
+            _STORE_CACHE.pop(next(iter(_STORE_CACHE)))
+    return store
+
+
 def _scan_nodes(driver, limit: int):
     """Stream every node id/label/serialized text (tenant-scoped)."""
     with driver.session() as session:
@@ -121,6 +137,13 @@ def build_vector_store(driver, revision: tuple | None = None,
     if not texts:
         return None
     vectors = embed_texts(texts)
+    if (settings.VECTOR_BACKEND or "memory").strip().lower() == "pgvector":
+        try:
+            return _build_pgvector_store(revision, nodes, vectors)
+        except Exception as exc:  # noqa: BLE001 - fall back, never break queries
+            import logging
+            logging.getLogger("graphrag.vector").warning(
+                "pgvector store unavailable (%s) — using in-memory index", exc)
     for (node_id, label, text), vector in zip(nodes, vectors):
         store.add(node_id, label, text, vector)
     with _CACHE_LOCK:

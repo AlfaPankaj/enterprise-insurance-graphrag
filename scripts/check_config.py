@@ -91,6 +91,43 @@ def main(argv: list[str] | None = None) -> int:
         _ok("Probe", reach, None if reach == "reachable" else
             "start Neo4j (docker compose up -d neo4j) or fix the Aura URI")
 
+    print("\n[Graph backend]")
+    backend = (settings.GRAPH_BACKEND or "neo4j").strip().lower()
+    _ok("GRAPH_BACKEND", backend)
+    if backend == "age":
+        _ok("PostgreSQL DSN", settings.POSTGRES_DSN or "NOT set",
+            None if settings.POSTGRES_DSN else
+            "GRAPH_BACKEND=age requires POSTGRES_DSN (see .env.example)")
+        if not settings.POSTGRES_DSN:
+            critical += 1
+        _ok("AGE graph", settings.AGE_GRAPH_NAME)
+        if not importlib_available("psycopg2"):
+            print("  [FAIL] psycopg2 not installed — "
+                  "run: pip install -r requirements-postgres.txt")
+            critical += 1
+        if not args.no_probe and settings.POSTGRES_DSN:
+            try:
+                from graphrag.postgres_backend import AgeDriver
+                report = AgeDriver().verify()
+                _ok("Probe", "reachable", None)
+                _ok("AGE graph present", str(report["graph"]),
+                    None if report["graph"] else
+                    f"graph {settings.AGE_GRAPH_NAME!r} will be created on first use")
+                _ok("pgvector", "available" if report["pgvector"] else "missing",
+                    None if report["pgvector"] else
+                    "VECTOR_BACKEND=pgvector needs the vector extension "
+                    "(docker compose -f docker-compose.age.yml up -d)")
+            except Exception as exc:  # noqa: BLE001 - probe must never raise
+                _ok("Probe", f"NOT reachable ({type(exc).__name__})",
+                    "start the Option-A stack: "
+                    "docker compose -f docker-compose.age.yml up -d")
+                critical += 1
+        _ok("VECTOR_BACKEND", settings.VECTOR_BACKEND)
+    else:
+        _ok("Option A (PostgreSQL/AGE)",
+            "not active — set GRAPH_BACKEND=age to switch "
+            "(docs/DEPLOYMENT_SCALE_OPTIONS.md)")
+
     print("\n[LLM providers]  (LLM_PROVIDER=auto → first configured+reachable wins)")
     _ok("Mode", settings.LLM_PROVIDER)
     if settings.OPENAI_BASE_URL:

@@ -149,6 +149,11 @@ criteria. Order reflects dependency, not necessarily priority — see §6.
 3. **Repo hygiene (G13)** — add `.gitignore` (CSVs/zips/audit exports/`.env`), move datasets to LFS or external storage, add `.env.example` with no secrets, remove default password from `config.py`.
 4. **Prompt & model governance** — prompts move to versioned registry with per-version eval snapshots; model changes require eval re-run. *Files:* `prompts/` → `src/graphrag/prompts/*.yaml` + loader.
 
+### WS-F — Production deployment options (post-v2 scale paths)
+
+1. **Option A — unified data stack (PostgreSQL + pgvector + Apache AGE)** — `GRAPH_BACKEND=age` routes the whole graph surface through AGE behind a neo4j-driver-shaped shim (`src/graphrag/postgres_backend.py`); `VECTOR_BACKEND=pgvector` moves the semantic index into pgvector; one `docker-compose.age.yml` stack + `scripts/migrate_to_age.py` + parity tests. Opt-in, no new hard dependencies, defaults unchanged. *Doc:* [`docs/DEPLOYMENT_SCALE_OPTIONS.md`](DEPLOYMENT_SCALE_OPTIONS.md). **Implemented.**
+2. **Option B — Rust microservice tier** — in-memory graph hot path (tokio/slotmap/tantivy) fed by CDC events; design + deferral decision recorded. **Designed, deferred.**
+
 ---
 
 ## 5. Proposed v2 acceptance targets (draft — to confirm)
@@ -414,6 +419,7 @@ All five workstreams are implemented on this branch across 8 slices:
 | WS-C Retrieval & document intelligence | ✅ hybrid retrieval (RRF + vector store), answer-quality evals + golden set + CI gate script, extraction confidence + review queue, real-document key parsing |
 | WS-D Observability & CI gates | ✅ Prometheus, OTel (tracing optional-dep), benchmark+eval gate scripts (CI workflow edit awaits a push with `workflows` permission) |
 | WS-E Domain, deployment & governance | ✅ pluggable ontology + banking domain + benchmarks, Aura topology + compose, repo hygiene |
+| WS-F Production deployment options | ✅ Option A (PostgreSQL + AGE + pgvector) implemented opt-in; Option B (Rust tier) designed + deferred |
 
 What remains intentionally open (production-only items, documented in the
 blueprint): KMS envelope encryption, Redis-backed rate limiting, shared

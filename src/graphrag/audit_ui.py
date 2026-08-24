@@ -14,8 +14,6 @@ import streamlit as st
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "src"))
 
-from neo4j import GraphDatabase  # noqa: E402
-
 from graphrag.audit_reporter import render_html, render_json, render_pdf  # noqa: E402
 from graphrag.config import settings  # noqa: E402
 from graphrag.fraud_ground_truth import (  # noqa: E402
@@ -286,9 +284,8 @@ st.markdown("""
 
 @st.cache_resource
 def get_driver():
-    return GraphDatabase.driver(
-        settings.NEO4J_URI, auth=(settings.NEO4J_USER, settings.NEO4J_PASSWORD)
-    )
+    from graphrag.db import open_driver  # Neo4j or Option-A AGE backend
+    return open_driver()
 
 
 def loaded_dataset() -> str | None:
