@@ -42,6 +42,8 @@ from pathlib import Path
 
 import pytest
 
+from tests.conftest import annotate
+
 ROOT = Path(__file__).resolve().parents[1]
 BENCH = ROOT / "data" / "benchmarks"
 REPO = "AlfaPankaj/enterprise-insurance-graphrag"
@@ -167,11 +169,15 @@ class _Progress:
         self.done += 1
         self.lines.append(f"✅ {label}" + (f" — `{tail}`" if tail else ""))
         self._flush()
+        annotate("notice", f"bench {self.done}/{len(CHAIN)} ok", label)
 
     def step_failed(self, label: str, out: str):
         self.lines.append(f"❌ **{label}** failed — last output:")
         self.lines.append("```\n" + "\n".join(out.splitlines()[-60:]) + "\n```")
         self._flush()
+        annotate("error", f"BENCH STEP FAILED: {label}",
+                 "$ " + next(c for l, c in CHAIN if l == label) +
+                 "\n--- last output ---\n" + "\n".join(out.splitlines()[-40:]))
 
     def raw(self, text: str):
         self.lines.append(text)
@@ -239,8 +245,11 @@ def _push_back(progress: _Progress) -> None:
         url = f"https://x-access-token:{token}@github.com/{REPO}.git"
         r = subprocess.run(f"git push {url} HEAD:{branch}", cwd=ROOT, shell=True,
                            capture_output=True, text=True)
-        progress.raw("📤 results pushed back to the branch ✅" if r.returncode == 0
-                     else f"⚠️ push-back FAILED: {r.stderr[-400:]} (digest above)")
+        if r.returncode == 0:
+            progress.raw("📤 results pushed back to the branch ✅")
+        else:
+            annotate("error", "push-back failed", r.stderr[-1500:])
+            progress.raw("⚠️ push-back FAILED (see annotations) — digest follows")
     else:
         progress.raw("⚠️ no GITHUB_TOKEN — results only in this comment")
 
@@ -270,6 +279,9 @@ def test_v2_full_scale_benchmark_10_200_queries():
     assert fraud["f1"] == 1.0
 
     progress.raw("🎯 **all assertions passed — 10,200/10,200, fraud 100%**")
+    annotate("notice", "V2 BENCHMARK PASSED",
+             json.dumps({"aggregate": agg, "fraud": fraud,
+                         "backend": proof["backend_performance"]}, indent=1))
     for line in _digest_lines():
         progress.raw(line)
     _push_back(progress)
