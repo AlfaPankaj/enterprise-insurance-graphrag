@@ -95,6 +95,7 @@ CHAIN: list[tuple[str, str]] = [
      f"{PY} scripts/benchmark_real_dataset.py insurance_claims --queries 600"),
     ("fraud benchmark — insurance_claims (247 + 753)",
      f"{PY} scripts/benchmark_fraud_detection.py --dataset insurance_claims"),
+    ("generalization probes", f"{PY} scripts/benchmark_generalization.py insurance_claims"),
     ("insurance_dataset — ingest 13,000 customers",
      f"{PY} scripts/ingest_real_dataset.py insurance_dataset --reset"),
     ("insurance_dataset — 3,900 ground-truth queries",
@@ -104,7 +105,6 @@ CHAIN: list[tuple[str, str]] = [
     ("data_synthetic — 100 ground-truth queries",
      f"{PY} scripts/benchmark_real_dataset.py data_synthetic --queries 100"),
     ("edge cases (all datasets)", f"{PY} scripts/benchmark_edge_cases.py"),
-    ("generalization probes", f"{PY} scripts/benchmark_generalization.py insurance_claims"),
     ("restore demo graph", f"{PY} scripts/seed_graph.py --reset --apply-schema"),
     ("export consolidated proof", f"{PY} scripts/export_benchmark_proof.py"),
 ]
@@ -169,7 +169,8 @@ class _Progress:
         self.done += 1
         self.lines.append(f"✅ {label}" + (f" — `{tail}`" if tail else ""))
         self._flush()
-        annotate("notice", f"bench {self.done}/{len(CHAIN)} ok", label)
+        if self.done % 5 == 0 or self.done == len(CHAIN):
+            annotate("notice", f"bench progress {self.done}/{len(CHAIN)}", label)
 
     def step_failed(self, label: str, out: str):
         self.lines.append(f"❌ **{label}** failed — last output:")
@@ -219,6 +220,20 @@ def _digest_lines() -> list[str]:
     out.append(json.dumps(proof["query_mix"], indent=2))
     out.append("```")
     return out
+
+
+def _annotate_digest(proof: dict) -> None:
+    """Headline numbers via annotations so results survive a read-only token
+    (payload 1: aggregate+fraud+backend, payload 2+: per_dataset/query_mix)."""
+    parts = [
+        json.dumps({"aggregate_metrics": proof["aggregate_metrics"],
+                    "fraud_detection": proof["fraud_detection"],
+                    "backend_performance": proof["backend_performance"]}),
+        json.dumps({"per_dataset": proof["per_dataset"],
+                    "query_mix": proof["query_mix"]}),
+    ]
+    for i, payload in enumerate(parts, 1):
+        annotate("notice", f"V2 RESULTS PAYLOAD {i}/{len(parts)}", payload)
 
 
 def _push_back(progress: _Progress) -> None:
@@ -284,4 +299,5 @@ def test_v2_full_scale_benchmark_10_200_queries():
                          "backend": proof["backend_performance"]}, indent=1))
     for line in _digest_lines():
         progress.raw(line)
+    _annotate_digest(proof)
     _push_back(progress)

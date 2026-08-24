@@ -34,3 +34,7 @@ cryptography>=42            # PII field encryption (Fernet) + RS256 support
 # --- tests (Phase 2/3) ---
 pytest>=8.0
 httpx>=0.27        # FastAPI TestClient
+
+# --- v2 optional extras exercised by CI ---
+# (tracing tests need the OTel SDK; the app itself still runs without it)
+-r requirements-otel.txt
