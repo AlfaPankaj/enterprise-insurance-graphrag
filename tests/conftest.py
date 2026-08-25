@@ -35,15 +35,21 @@ def annotate(kind: str, title: str, message: str) -> None:
     """Emit a GitHub workflow command (works with a read-only token).
 
     ``kind``: "error" | "notice" | "warning". Newlines are %0A-encoded;
-    message is trimmed to keep the command line valid.
+    message is trimmed to keep the command line valid. Written to the REAL
+    stdout file descriptor — pytest captures sys.stdout during tests and a
+    passing test's captured output never reaches the runner's parser.
     """
     if not _ci_active():
         return
     msg = message.replace("%", "%25").replace("\n", "%0A").replace("\r", "")
     msg = msg[:_MAX_ANNOTATION_CHARS]
-    # write directly to the step's stdout: runner parses every line
-    sys.stdout.write(f"::{kind} title={title}::{msg}\n")
-    sys.stdout.flush()
+    safe_title = title.replace(":", " ").replace(",", " ")[:100]
+    line = f"::{kind} title={safe_title}::{msg}\n"
+    try:  # fd 1 = the step's actual log stream (bypasses pytest capture)
+        os.write(1, line.encode("utf-8", "replace"))
+    except Exception:  # noqa: BLE001 - fall back to the captured stream
+        sys.stdout.write(line)
+        sys.stdout.flush()
 
 
 def _ci_target() -> tuple[str, str] | None:

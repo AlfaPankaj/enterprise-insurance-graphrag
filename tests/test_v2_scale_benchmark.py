@@ -237,17 +237,59 @@ def _digest_lines() -> list[str]:
 
 
 def _annotate_digest(proof: dict) -> None:
-    """Headline numbers via annotations so results survive a read-only token
-    (payload 1: aggregate+fraud+backend, payload 2+: per_dataset/query_mix)."""
+    """Deliver the headline numbers via annotations (read-only-token safe).
+
+    The step's notice budget is 10 — one notice per payload, single-line,
+    compact JSON. These payloads are what updates README/app/dashboard and
+    the data/benchmarks/*.json summaries, so they must always survive.
+    """
+    def compact(obj) -> str:
+        return json.dumps(obj, separators=(",", ":"))
+
+    per_file = {}
+    for f in sorted(BENCH.glob("real_*.json")):
+        b = json.loads(f.read_text())
+        per_file[f.stem] = {k: b.get(k) for k in
+                            ("queries", "retrieval_accuracy", "pruning_accuracy",
+                             "avg_savings_pct", "avg_latency_ms", "timestamp",
+                             "dataset")}
+    fraud_files = {}
+    for f in sorted(BENCH.glob("fraud_detection_*.json")):
+        b = json.loads(f.read_text())
+        fraud_files[f.stem] = {k: b.get(k) for k in
+                               ("fraud_evaluated", "clean_evaluated",
+                                "confusion", "precision", "recall", "f1")}
+    gen = json.loads((BENCH / "generalization_insurance_claims.json").read_text())
+    gen_summary = {k: gen.get(k) for k in
+                   ("probes_total", "retrieval_prune_passed",
+                    "retrieval_prune_accuracy", "answer_level_passed",
+                    "answer_level_accuracy", "by_kind")}
+    edge = {}
+    ep = BENCH / "edge_cases.json"
+    if ep.exists():
+        eb = json.loads(ep.read_text())
+        edge = {k: eb.get(k) for k in
+                ("total_queries", "retrieval_accuracy", "avg_savings_pct",
+                 "avg_latency_ms", "timestamp")}
+
     parts = [
-        json.dumps({"aggregate_metrics": proof["aggregate_metrics"],
-                    "fraud_detection": proof["fraud_detection"],
-                    "backend_performance": proof["backend_performance"]}),
-        json.dumps({"per_dataset": proof["per_dataset"],
-                    "query_mix": proof["query_mix"]}),
+        ("V2R aggregate+fraud",
+         compact({"aggregate_metrics": proof["aggregate_metrics"],
+                  "fraud_detection": proof["fraud_detection"]})),
+        ("V2R backend+mix",
+         compact({"backend_performance": proof["backend_performance"],
+                  "query_mix": proof["query_mix"]})),
+        ("V2R per_dataset",
+         compact({"per_dataset": proof["per_dataset"]})),
+        ("V2R per-file real",
+         compact(per_file)),
+        ("V2R fraud files",
+         compact(fraud_files)),
+        ("V2R gen+edge",
+         compact({"generalization": gen_summary, "edge_cases": edge})),
     ]
-    for i, payload in enumerate(parts, 1):
-        annotate("notice", f"V2 RESULTS PAYLOAD {i}/{len(parts)}", payload)
+    for i, (title, payload) in enumerate(parts, 1):
+        annotate("notice", f"V2R {i}/{len(parts)} {title}", payload[:2000])
 
 
 def _push_back(progress: _Progress) -> None:
