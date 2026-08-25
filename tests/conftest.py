@@ -22,6 +22,11 @@ import urllib.request
 REPO = "AlfaPankaj/enterprise-insurance-graphrag"
 _MAX_ANNOTATION_CHARS = 2200
 
+# annotations queued during tests are flushed in pytest_terminal_summary —
+# pytest captures output at the fd level during the run, so anything written
+# mid-test (even via os.write(1)) never reaches the runner's parser.
+_PENDING: list[str] = []
+
 
 def _ci_active() -> bool:
     if os.environ.get("GITHUB_ACTIONS") != "true":
@@ -32,24 +37,19 @@ def _ci_active() -> bool:
 
 
 def annotate(kind: str, title: str, message: str) -> None:
-    """Emit a GitHub workflow command (works with a read-only token).
+    """Queue a GitHub workflow command (works with a read-only token).
 
     ``kind``: "error" | "notice" | "warning". Newlines are %0A-encoded;
-    message is trimmed to keep the command line valid. Written to the REAL
-    stdout file descriptor — pytest captures sys.stdout during tests and a
-    passing test's captured output never reaches the runner's parser.
+    message is trimmed to keep the command line valid. Commands are flushed
+    from pytest_terminal_summary — by then pytest has released its fd-level
+    capture, so the runner actually sees them (mid-test writes never do).
     """
     if not _ci_active():
         return
     msg = message.replace("%", "%25").replace("\n", "%0A").replace("\r", "")
     msg = msg[:_MAX_ANNOTATION_CHARS]
     safe_title = title.replace(":", " ").replace(",", " ")[:100]
-    line = f"::{kind} title={safe_title}::{msg}\n"
-    try:  # fd 1 = the step's actual log stream (bypasses pytest capture)
-        os.write(1, line.encode("utf-8", "replace"))
-    except Exception:  # noqa: BLE001 - fall back to the captured stream
-        sys.stdout.write(line)
-        sys.stdout.flush()
+    _PENDING.append(f"::{kind} title={safe_title}::{msg}\n")
 
 
 def _ci_target() -> tuple[str, str] | None:
