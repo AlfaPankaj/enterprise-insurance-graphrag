@@ -297,16 +297,28 @@ def _annotate_digest(proof: dict) -> None:
     annotate("error", "canary", "V2R-CANARY-ERROR-OK")
 
 
-def _push_back(progress: _Progress) -> None:
-    """Commit the regenerated JSONs to the branch (GITHUB_TOKEN push never
-    re-triggers workflows, so no CI loop)."""
+def _push_back(progress) -> None:
+    """Commit the regenerated JSONs onto the branch tip.
+
+    PR-event checkouts sit on a MERGE commit; committing and pushing HEAD
+    directly can be rejected. Rebuild the commit on the real branch tip
+    instead (fast-forward, and GITHUB_TOKEN pushes never re-trigger CI).
+    """
     if os.environ.get("GITHUB_ACTIONS") != "true":
         return
     token = os.environ.get("GITHUB_TOKEN", "")
     branch = _HEAD_REF or _REF.rsplit("/", 1)[-1]
+    import shutil
+    import tempfile
+    tmp = Path(tempfile.mkdtemp()) / "benchmarks"
+    shutil.copytree(BENCH, tmp)
     steps = [
         "git config user.name 'arena-ai-coding-agent[bot]'",
         "git config user.email 'noreply@github.com'",
+        f"git fetch origin {branch}",
+        "git reset --hard FETCH_HEAD",           # move to the branch tip
+        "rm -rf data/benchmarks",
+        f"cp -r {tmp} data/benchmarks",
         "git add data/benchmarks",
         "git diff --cached --quiet || git commit -q -m "
         "'benchmark(v2): regenerate 10,200-query ground-truth results on V2 "
@@ -315,24 +327,22 @@ def _push_back(progress: _Progress) -> None:
     for s in steps:
         r = subprocess.run(s, cwd=ROOT, shell=True, capture_output=True, text=True)
         if r.returncode != 0:
-            progress.raw(f"⚠️ push-back prep failed: `{s}` — {r.stderr[-200:]}")
+            progress.raw(f"push-back prep failed: `{s}` — {r.stderr[-300:]}")
             return
     if token:
         url = f"https://x-access-token:{token}@github.com/{REPO}.git"
         r = subprocess.run(f"git push {url} HEAD:{branch}", cwd=ROOT, shell=True,
                            capture_output=True, text=True)
-        if r.returncode == 0:
-            progress.raw("📤 results pushed back to the branch ✅")
-        else:
-            annotate("error", "push-back failed", r.stderr[-1500:])
-            progress.raw("⚠️ push-back FAILED (see annotations) — digest follows")
+        progress.raw("results pushed back to the branch" if r.returncode == 0
+                     else f"push-back FAILED: {r.stderr[-400:]}")
     else:
-        progress.raw("⚠️ no GITHUB_TOKEN — results only in this comment")
+        progress.raw("no GITHUB_TOKEN — results only in run output")
 
 
 def test_v2_full_scale_benchmark_10_200_queries():
+    _ping()
     progress = _Progress()
-    progress.raw(f"chain: {len(CHAIN)} steps")
+    print(f"[bench] chain: {len(CHAIN)} steps", flush=True)
     for label, cmd in CHAIN:
         _run_step(cmd, label, progress)
 
