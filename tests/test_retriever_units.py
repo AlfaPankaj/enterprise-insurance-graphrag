@@ -30,3 +30,20 @@ def test_numeric_prop_focus():
     assert _numeric_prop_focus("Show me all claims over $100,000") == [("amount", "Claim")]
     assert _numeric_prop_focus("coverage limit above 5,000,000") == [("limit", "Coverage")]
     assert _numeric_prop_focus("show me everything") is None
+
+
+def test_threshold_numbers_exclude_id_digits():
+    """Id digits are anchors, not amounts (negative-probe fix, v2 re-run).
+
+    A nonexistent-id query must not degrade into "amount >= 99999" and
+    return real high-amount claims — it must refuse (empty seeding).
+    """
+    from graphrag.graph_retriever import _threshold_numbers
+    assert _threshold_numbers("What is the status of claim CLM-99999?") == []
+    assert _threshold_numbers("Is claim CLM-99999 flagged as fraud?") == []
+    assert _threshold_numbers("Show me claims under policy POL-99999") == []
+    # genuine thresholds keep working, beside ids or standalone
+    assert _threshold_numbers("claims over $100,000") == [100000]
+    assert _threshold_numbers("claim CLM-0003 with amount 5000") == [5000]
+    assert _threshold_numbers(
+        "paid claims under policy POL-0084 over $50,000") == [50000]

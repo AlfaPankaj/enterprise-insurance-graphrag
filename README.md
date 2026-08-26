@@ -8,10 +8,13 @@ A **production-grade, incrementally-updating GraphRAG system** for commercial
 insurance processing. Unstructured insurance PDFs → Neo4j knowledge graph →
 multi-hop questions with full explainability — built around three production
 bottlenecks EXL faces. A **dual-engine (BM25 + Cross-Encoder) hybrid reranker**
-and adaptive context pruner cut LLM token cost by **~8%** (measured:
-2,044,311 → 1,857,621 tokens) while holding **100% retrieval & pruning accuracy
+and adaptive context pruner cut LLM token cost by **~8%** (measured on v2:
+2,044,316 → 1,857,626 tokens) while holding **100% retrieval & pruning accuracy
 across a 10,200-query benchmark** (Wilson 95% CI: 99.96–100%), with fraud
-detection at **P/R/F1 = 100%** over 1,212 real fraud labels.
+detection at **P/R/F1 = 100%** over 1,212 real fraud labels. The full V1
+benchmark chain was **re-run end-to-end on v2 in CI** (real Neo4j 5.26,
+all 5 sessions + fraud + edge + generalization suites) with identical
+accuracy — see [real_dataset_results.md](real_dataset_results.md).
 
 ![Description of PNG](image/Home_page_2.png)
 

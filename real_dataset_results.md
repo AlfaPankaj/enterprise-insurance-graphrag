@@ -238,3 +238,49 @@ all 4 CSVs (3 datasets, including all 1,212 fraud labels across the real files
 
 *Auto-pipeline run 2026-08-13 00:29:47 (95.3s): data_synthetic, fraud_oracle, insurance_claims, insurance_dataset — results refreshed in `data/benchmarks/`.*
 
+---
+
+## V2 re-validation — the same 10,200-query chain, re-run on the v2 codebase (2026-08-26)
+
+The complete V1 chain above was re-executed **end-to-end inside CI** (GitHub
+Actions, ubuntu-24.04, Neo4j 5.26.30, Python 3.12.14, 8 workers, all v2
+features default-off = v1 behavior) to prove the v2 platform preserves v1
+fidelity. Every accuracy number held; latencies are the CI runner's.
+
+| Session | Queries | Retrieval | Pruning | Token savings | Avg latency | Wall |
+|---|---|---|---|---|---|---|
+| `fraud_oracle` (15,420 claims) | 5,500 | **5,500/5,500 = 100%** | **100%** | 7.49% | 321.9 ms | 453 s |
+| `insurance_claims` (1,000 claims) | 600 | **600/600 = 100%** | **100%** | 6.35% | 110.1 ms | 18 s |
+| `insurance_dataset` (13,000 customers) | 3,900 | **3,900/3,900 = 100%** | **100%** | 8.39% | 254.5 ms | 256 s |
+| `data_synthetic` (53,503 rows → 160,509 nodes) | 100 | **100/100 = 100%** | **100%** | 6.27% | 961.0 ms | 24 s |
+| PDF demo graph (synthetic) | 100 | **100/100 = 100%** | **100%** | 15.53% | 161.6 ms | 4 s |
+| **TOTAL** | **10,200** | **10,200/10,200 = 100%** | **100%** | **7.83%** | — | — |
+
+**Fraud benchmarks (full pipeline, extractive, 8 workers):**
+
+```
+fraud_oracle:     923 fraud + 1,500 clean  TP=923 FP=0 TN=1500 FN=0  P/R/F1 = 100%  (312.2 ms/claim)
+insurance_claims: 247 fraud + 753 clean    TP=247 FP=0 TN=753  FN=0  P/R/F1 = 100%  (75.5 ms/claim)
+pdf demo graph:   42 fraud + 158 clean     TP=42  FP=0 TN=158  FN=0  P/R/F1 = 100%  (124.8 ms/claim)
+COMBINED: 1,212 fraud labels -> TP=1,212 FP=0 FN=0 TN=2,411 — FraudFlag survived pruning on 100%
+```
+
+**Tokens:** 2,044,316 → 1,857,626 (**7.83% saved**, 18.3/query) — within 5 tokens
+of the V1 measurement (2,044,311 → 1,857,621): the v2 pipeline is
+token-accounting-identical to v1. Edge cases: 20/20 (7.28%, 104 ms).
+Rerank latency on this runner: lexical **0.2 ms** warm · cross-encoder **84.5 ms**
+warm (6.8 s cold).
+
+**Generalization probes — and one real finding.** The 24 anti-circularity
+probes came back 21/24 retrieval+prune (19/24 answer-level). All 3 misses were
+`negative` probes: *"What is the status of claim CLM-99999?"* returned
+high-amount claims because the id's digits leaked into numeric threshold
+seeding (`amount >= 99999`). Root cause: the committed v1 code has the same
+behavior — the V1 JSON for these probes simply predates global numeric
+seeding. Fixed after the run by `_threshold_numbers()` (id digits are anchors,
+not thresholds); nonexistent-id queries now refuse cleanly and 24/24 is
+expected on the next run.
+
+**Validation:** 523 tests passed in the same CI job (16 m 21 s for the suite
+including the whole benchmark chain). Results live in `data/benchmarks/*.json`
+(each file carries a `provenance` block pointing at the CI run).

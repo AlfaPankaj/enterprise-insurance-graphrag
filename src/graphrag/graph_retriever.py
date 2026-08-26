@@ -262,6 +262,17 @@ def _numeric_tokens(query: str) -> list[int]:
     return out
 
 
+def _threshold_numbers(query: str) -> list[int]:
+    """Numbers eligible as numeric-threshold seeds.
+
+    Digits that belong to an entity-id token (``CLM-99999``) are anchors,
+    not amounts: without this, a nonexistent-id query silently turns into
+    "amount >= 99999" and returns rich claims instead of refusing (caught
+    by the negative generalization probes in the 10,200-query CI run).
+    """
+    return _numeric_tokens(ENTITY_ID_RE.sub(" ", query))
+
+
 def _threshold_direction(query: str) -> int:
     """+1 for "over/above/more than", -1 for "under/below/less", else 0."""
     q = query.lower()
@@ -404,7 +415,7 @@ def retrieve_subgraph(driver, query: str, max_hops: int | None = None,
     with driver.session() as session:
         id_seeds = _id_seeds(session, query, tenant_id=tenant_id)
         tokens = _value_tokens(query)
-        numbers = _numeric_tokens(query)
+        numbers = _threshold_numbers(query)
         direction = _threshold_direction(query)
         prop_focus = _numeric_prop_focus(query)
         if id_seeds:

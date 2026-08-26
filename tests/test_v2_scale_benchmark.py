@@ -394,8 +394,8 @@ def test_v2_full_scale_benchmark_10_200_queries():
                  f"{gen['retrieval_prune_passed']}/{gen['probes_total']}, "
                  f"answer-level {gen['answer_level_passed']}/"
                  f"{gen['probes_total']} (V1 accepted: 21/24)")
-    # floor while the V1→V2 delta is root-caused from the details above;
-    # raise back to == probes_total once the delta is explained/fixed
-    assert gen["retrieval_prune_passed"] >= 20, gen["retrieval_prune_passed"]
+    # strict again: the id-digit numeric-seed leak that failed the three
+    # negative probes is fixed (_threshold_numbers) — 24/24 is expected
+    assert gen["retrieval_prune_passed"] == gen["probes_total"], gen
 
     progress.raw("benchmarks delivered; 10,200/10,200 + fraud 100% asserted")
