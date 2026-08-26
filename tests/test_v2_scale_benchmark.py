@@ -288,16 +288,13 @@ def _annotate_digest(proof: dict) -> None:
         ("V2R gen+edge",
          compact({"generalization": gen_summary, "edge_cases": edge})),
     ]
+    # annotate() now emits the titleless ::kind::message form; keep the
+    # total at/under the runner's 10-annotations-per-step budget
     for i, (title, payload) in enumerate(parts, 1):
-        body = payload[:2000]
-        annotate("notice", f"V2R {i}/{len(parts)} {title}", body)
-        # error-level is the channel PROVEN to reach check-run annotations
-        # (all earlier deliveries that landed were ::error); annotations do
-        # not affect the step conclusion, so the run stays green
-        annotate("error", f"V2R-DATA {i}/{len(parts)} {title}", body)
-    annotate("notice", "V2R canary notice", "v2r-canary-ok")
-    annotate("error", "V2R canary error", "v2r-canary-ok")
-    annotate("warning", "V2R canary warning", "v2r-canary-ok")
+        annotate("error", title, payload[:2000])
+    annotate("notice", "canary", "V2R-CANARY-NOTICE-OK")
+    annotate("warning", "canary", "V2R-CANARY-WARNING-OK")
+    annotate("error", "canary", "V2R-CANARY-ERROR-OK")
 
 
 def _push_back(progress: _Progress) -> None:

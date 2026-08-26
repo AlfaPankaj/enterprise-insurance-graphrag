@@ -48,8 +48,10 @@ def annotate(kind: str, title: str, message: str) -> None:
         return
     msg = message.replace("%", "%25").replace("\n", "%0A").replace("\r", "")
     msg = msg[:_MAX_ANNOTATION_CHARS]
-    safe_title = title.replace(":", " ").replace(",", " ")[:100]
-    _PENDING.append(f"::{kind} title={safe_title}::{msg}\n")
+    # titleless form: `key=value` properties (titles with spaces) have never
+    # produced annotations on this runner; the bare ::kind::message form is
+    # the documented default syntax
+    _PENDING.append(f"::{kind}::{msg}\n")
 
 
 def _ci_target() -> tuple[str, str] | None:
