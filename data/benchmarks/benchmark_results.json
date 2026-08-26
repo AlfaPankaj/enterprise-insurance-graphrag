@@ -41,9 +41,9 @@
   },
   "generalization_probes": {
     "probes_total": 24,
-    "retrieval_prune_passed": 21,
-    "answer_level_passed": 19,
-    "note": "3 negative-probe failures traced to id-digit numeric-seed leak (nonexistent CLM-99999 degraded to 'amount >= 99999'); fixed by graphrag.graph_retriever._threshold_numbers after this run \u2014 post-fix expectation 24/24"
+    "retrieval_prune_passed": 24,
+    "answer_level_passed": 22,
+    "note": "confirmed on the post-fix green run (32930212547): negative probes 4/4 after _threshold_numbers fix; answer-level 22/24 (91.67%) exceeds the documented V1 baseline (21/24)"
   },
   "fraud_detection": {
     "fraud_evaluated": 1212,

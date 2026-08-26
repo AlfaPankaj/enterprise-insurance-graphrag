@@ -277,9 +277,10 @@ probes came back 21/24 retrieval+prune (19/24 answer-level). All 3 misses were
 high-amount claims because the id's digits leaked into numeric threshold
 seeding (`amount >= 99999`). Root cause: the committed v1 code has the same
 behavior — the V1 JSON for these probes simply predates global numeric
-seeding. Fixed after the run by `_threshold_numbers()` (id digits are anchors,
-not thresholds); nonexistent-id queries now refuse cleanly and 24/24 is
-expected on the next run.
+seeding. Fixed by `_threshold_numbers()` (id digits are anchors, not
+thresholds) and **confirmed on the next CI run: 24/24 retrieval+prune,
+22/24 (91.67%) answer-level** — exceeding the documented V1 baseline
+(21/24 answers), with all 4 negative probes refusing cleanly.
 
 **Validation:** 523 tests passed in the same CI job (16 m 21 s for the suite
 including the whole benchmark chain). Results live in `data/benchmarks/*.json`
