@@ -289,7 +289,15 @@ def _annotate_digest(proof: dict) -> None:
          compact({"generalization": gen_summary, "edge_cases": edge})),
     ]
     for i, (title, payload) in enumerate(parts, 1):
-        annotate("notice", f"V2R {i}/{len(parts)} {title}", payload[:2000])
+        body = payload[:2000]
+        annotate("notice", f"V2R {i}/{len(parts)} {title}", body)
+        # error-level is the channel PROVEN to reach check-run annotations
+        # (all earlier deliveries that landed were ::error); annotations do
+        # not affect the step conclusion, so the run stays green
+        annotate("error", f"V2R-DATA {i}/{len(parts)} {title}", body)
+    annotate("notice", "V2R canary notice", "v2r-canary-ok")
+    annotate("error", "V2R canary error", "v2r-canary-ok")
+    annotate("warning", "V2R canary warning", "v2r-canary-ok")
 
 
 def _push_back(progress: _Progress) -> None:
