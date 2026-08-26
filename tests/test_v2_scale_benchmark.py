@@ -340,7 +340,6 @@ def _push_back(progress) -> None:
 
 
 def test_v2_full_scale_benchmark_10_200_queries():
-    _ping()
     progress = _Progress()
     print(f"[bench] chain: {len(CHAIN)} steps", flush=True)
     for label, cmd in CHAIN:
