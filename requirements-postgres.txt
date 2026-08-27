@@ -1,0 +1,4 @@
+# Option A — unified PostgreSQL data stack (GRAPH_BACKEND=age).
+# Optional by design: install only when running the AGE backend; the default
+# Neo4j reference implementation needs nothing from this file.
+psycopg2-binary>=2.9

@@ -1,0 +1,38 @@
+# Option A — unified PostgreSQL data stack (Apache AGE + pgvector).
+#
+#   docker compose -f docker-compose.age.yml up -d
+#
+# Then point the app at it (.env):
+#   GRAPH_BACKEND=age
+#   POSTGRES_DSN=postgresql://graphrag:graphrag@localhost:5432/graphrag
+#   VECTOR_BACKEND=pgvector        # optional; in-memory index otherwise
+#
+# Full walkthrough: docs/DEPLOYMENT_SCALE_OPTIONS.md
+#
+# No Docker BuildKit-friendly PGDG access? The stock AGE image works too
+# (vectors then stay in the built-in in-memory index):
+#   image: apache/age:PG16_latest   # instead of the build: block below
+
+services:
+  postgres-age:
+    build:
+      context: docker/age
+    image: graphrag/age-pgvector:local
+    container_name: graphrag-age
+    environment:
+      POSTGRES_USER: graphrag
+      POSTGRES_PASSWORD: graphrag-demo          # change for anything shared
+      POSTGRES_DB: graphrag
+    ports:
+      - "5432:5432"
+    volumes:
+      - age_data:/var/lib/postgresql/data
+      - ./docker/age/init.sql:/docker-entrypoint-initdb.d/10-graphrag.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U graphrag -d graphrag"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+volumes:
+  age_data:

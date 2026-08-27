@@ -19,7 +19,10 @@ import json
 import time
 from datetime import datetime, timezone
 
+from graphrag.cache import bump_revision
+from graphrag.config import settings
 from graphrag.graph_store import SNAPSHOT_LABEL, save_existing_entities
+from graphrag.pii import classify, encryption_enabled, encrypt_value
 
 # Join fields are used to derive edges and are not stored as node properties.
 JOIN_FIELDS = {"policy_id", "claim_id", "investigator_id", "policyholder_id", "doc_id"}
@@ -116,13 +119,20 @@ def _referenced_elsewhere(tx, eid: str, doc_id: str) -> bool:
 
 
 def update_graph_surgically(driver, doc_id: str, changes: dict,
-                            new_entities: dict | None = None) -> dict:
+                            new_entities: dict | None = None,
+                            tenant_id: str | None = None) -> dict:
     """Apply CDC changes to Neo4j. Returns timing + count stats.
 
     If ``new_entities`` is given, the document snapshot is saved in the SAME
     transaction as the graph update — the graph and the CDC baseline can never
     diverge (a crash mid-flight rolls both back).
+
+    ``tenant_id`` (with ``settings.TENANT_MODE="column"``) stamps new/updated
+    nodes with ``tenant_id = coalesce(tenant_id, $tenant)`` — **first owner
+    wins**, so a CDC write can never hijack a node that already belongs to
+    another tenant.
     """
+    stamp_tenant = bool(tenant_id) and settings.TENANT_MODE == "column"
     start = time.perf_counter()
     stats = {
         "timestamp": datetime.now(timezone.utc).isoformat(),
@@ -154,14 +164,35 @@ def update_graph_surgically(driver, doc_id: str, changes: dict,
                 # NOTE: don't use .get(key, entity["props"]) — the default is
                 # evaluated eagerly and raises for modified entities.
                 full_props = entity["new_props"] if "new_props" in entity else entity["props"]
-                tx.run(
-                    f"MERGE (n:{entity['label']} {{id: $id}}) SET n += $props",
-                    id=entity["id"],
-                    props={k: v for k, v in full_props.items() if k not in JOIN_FIELDS},
-                )
+                stored = {k: v for k, v in full_props.items() if k not in JOIN_FIELDS}
+                # v2 PII at rest: classified fields are Fernet-encrypted before
+                # they touch the database (non-PII fields stay plaintext so
+                # graph queries/filters keep working)
+                if encryption_enabled():
+                    stored = {k: (encrypt_value(v) if classify(entity["label"], k) else v)
+                              for k, v in stored.items()}
+                if stamp_tenant:
+                    tx.run(
+                        f"MERGE (n:{entity['label']} {{id: $id}}) SET n += $props "
+                        "SET n.tenant_id = coalesce(n.tenant_id, $tenant)",
+                        id=entity["id"],
+                        props=stored,
+                        tenant=tenant_id,
+                    )
+                else:
+                    tx.run(
+                        f"MERGE (n:{entity['label']} {{id: $id}}) SET n += $props",
+                        id=entity["id"],
+                        props=stored,
+                    )
                 if "new_props" in entity:
                     _prune_derived_edges(tx, entity["label"], entity["id"])
                 _derive_edges(tx, entity["label"], entity["id"], full_props)
+            # v2 cache invalidation: any effective write bumps the graph
+            # revision so cached answers can never survive a mutation
+            effective_deletes = len(changes["deleted"]) - stats["deleted_skipped"]
+            if upserts or effective_deletes > 0:
+                bump_revision(tx)
             rels_after = _count_rels(tx, kept_ids) if kept_ids else 0
             if new_entities is not None:
                 save_existing_entities(tx, doc_id, new_entities)

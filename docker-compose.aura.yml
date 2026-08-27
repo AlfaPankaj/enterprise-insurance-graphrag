@@ -1,0 +1,73 @@
+# GraphRAG v2 — Aura topology (WS-E): app tier + Neo4j AuraDB (managed)
+#
+#   cp .env.example .env      # set NEO4J_URI to your Aura instance
+#   docker compose -f docker-compose.aura.yml up -d --build
+#
+# There is NO neo4j service: the graph runs on Neo4j AuraDB (free tier for
+# trials). The API and dashboard containers need zero code changes — the
+# driver speaks neo4j+s:// (native TLS) from NEO4J_URI.
+#
+# Tenancy note: for production isolation run one AuraDB instance PER tenant
+# (strongest guarantee, no shared storage). For trials, a single instance
+# with TENANT_MODE=column (tenant_id predicates) is the lightweight option.
+# See docs/AURA_TOPOLOGY.md for backups, restore, and RPO/RTO.
+
+services:
+  api:
+    build: .
+    container_name: graphrag-aura-api
+    environment:
+      NEO4J_URI: "${NEO4J_URI:?set NEO4J_URI to your Aura connection string}"
+      NEO4J_USER: "${NEO4J_USER:-neo4j}"
+      NEO4J_PASSWORD: "${NEO4J_PASSWORD:?set NEO4J_PASSWORD to your Aura password}"
+      API_KEY: "${API_KEY:-}"
+      AUTH_MODE: "${AUTH_MODE:-none}"
+      CORS_ORIGINS: "http://localhost:8501,http://localhost:8502"
+      LLAMA_API_URL: "${LLAMA_API_URL:-http://host.docker.internal:11434}"
+      LLM_PROVIDER: "${LLM_PROVIDER:-auto}"
+      OPENAI_BASE_URL: "${OPENAI_BASE_URL:-}"
+      OPENAI_API_KEY: "${OPENAI_API_KEY:-}"
+      OPENAI_MODEL: "${OPENAI_MODEL:-gpt-4o-mini}"
+      PII_MODE: "${PII_MODE:-off}"
+      PII_ENCRYPTION_KEY: "${PII_ENCRYPTION_KEY:-}"
+      GUARDRAILS_ENABLED: "${GUARDRAILS_ENABLED:-false}"
+      TENANT_MODE: "${TENANT_MODE:-off}"
+      DEFAULT_TENANT: "${DEFAULT_TENANT:-demo}"
+      CACHE_ENABLED: "${CACHE_ENABLED:-false}"
+      AUDIT_ENABLED: "${AUDIT_ENABLED:-true}"
+    ports:
+      - "8000:8000"
+    volumes:
+      - audit_data:/app/data/audit_trail
+      - jobs_data:/app/data
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request;urllib.request.urlopen('http://localhost:8000/health/live')\""]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
+  dashboard:
+    build:
+      context: .
+      dockerfile: Dockerfile.dashboard
+    container_name: graphrag-aura-dashboard
+    environment:
+      NEO4J_URI: "${NEO4J_URI:?set NEO4J_URI to your Aura connection string}"
+      NEO4J_USER: "${NEO4J_USER:-neo4j}"
+      NEO4J_PASSWORD: "${NEO4J_PASSWORD:?set NEO4J_PASSWORD to your Aura password}"
+      LLAMA_API_URL: "${LLAMA_API_URL:-http://host.docker.internal:11434}"
+      LLM_PROVIDER: "${LLM_PROVIDER:-auto}"
+      OPENAI_BASE_URL: "${OPENAI_BASE_URL:-}"
+      OPENAI_API_KEY: "${OPENAI_API_KEY:-}"
+      PII_MODE: "${PII_MODE:-off}"
+      TENANT_MODE: "${TENANT_MODE:-off}"
+      DEFAULT_TENANT: "${DEFAULT_TENANT:-demo}"
+    ports:
+      - "8501:8501"
+    depends_on:
+      api:
+        condition: service_healthy
+
+volumes:
+  audit_data:
+  jobs_data:

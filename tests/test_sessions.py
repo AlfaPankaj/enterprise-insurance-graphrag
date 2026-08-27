@@ -31,11 +31,12 @@ def _fake_proc(returncode: int = 0, stdout: str = "", stderr: str = ""):
                           "stderr": stderr})()
 
 
-def test_sessions_registry_has_four_sessions():
+def test_sessions_registry_has_all_sessions():
     assert [s["id"] for s in SESSIONS] == [
         "fraud_oracle", "insurance_claims", "insurance_dataset", "pdf_demo",
+        "banking_demo",
     ]
-    assert {s["kind"] for s in SESSIONS} == {"excel", "pdf"}
+    assert {s["kind"] for s in SESSIONS} == {"excel", "pdf", "banking"}
     assert all(s["id"] in SESSION_BY_ID for s in SESSIONS)
     # each excel session names a real CSV-backed dataset
     for s in SESSIONS:

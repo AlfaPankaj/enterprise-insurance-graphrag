@@ -34,6 +34,12 @@ from neo4j.exceptions import ConstraintError, Neo4jError
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 
+# graphrag.* imports (pii, config) must work when the script is run
+# standalone (`python scripts/seed_graph.py`) — not only via the app
+SRC = PROJECT_ROOT / "src"
+if str(SRC) not in sys.path:
+    sys.path.insert(0, str(SRC))
+
 BATCH_SIZE = 500
 
 
@@ -56,6 +62,9 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
                         help="Assert that duplicate entity ids are rejected by the constraints")
     parser.add_argument("--snapshots", action="store_true",
                         help="Create per-document CDC snapshots by extracting data/pdfs/*.pdf")
+    parser.add_argument("--tenant", default=None,
+                        help="v2: stamp this tenant_id on every seeded node "
+                             "(use with TENANT_MODE=column)")
     return parser.parse_args(argv)
 
 
@@ -127,16 +136,47 @@ def apply_schema(session, schema_path: Path) -> None:
     print("  schema (constraints + indexes) applied")
 
 
-def load_nodes(runner, nodes_by_label: dict[str, list[dict]]) -> None:
-    """runner is a Session or an explicit Transaction (both expose .run)."""
+def _pii_encrypt_props(label: str, props: dict) -> dict:
+    """v2 PII at rest: encrypt classified fields (no-op when not configured)."""
+    try:
+        from graphrag.pii import classify, encryption_enabled, encrypt_value
+    except ImportError:  # pragma: no cover - graphrag package unavailable
+        return props
+    if not encryption_enabled():
+        return props
+    return {k: (encrypt_value(v) if classify(label, k) else v)
+            for k, v in props.items()}
+
+
+def load_nodes(runner, nodes_by_label: dict[str, list[dict]],
+               tenant_id: str | None = None) -> None:
+    """runner is a Session or an explicit Transaction (both expose .run).
+
+    ``tenant_id`` (v2) stamps every node with
+    ``tenant_id = coalesce(tenant_id, $tenant)`` — first owner wins, so a
+    re-seed without ``--reset`` can never hijack another tenant's nodes.
+
+    PII-classified props are Fernet-encrypted before write when
+    ``PII_ENCRYPTION_KEY`` is set (at-rest encryption; decrypted on read by
+    the retriever).
+    """
     for label, rows in nodes_by_label.items():
         if not rows:
             continue
         for batch in batches(rows):
-            runner.run(
-                f"UNWIND $rows AS r MERGE (n:{label} {{id: r.id}}) SET n += r.props",
-                rows=batch,
-            )
+            safe = [{"id": r["id"], "props": _pii_encrypt_props(label, r["props"])}
+                    for r in batch]
+            if tenant_id:
+                runner.run(
+                    f"UNWIND $rows AS r MERGE (n:{label} {{id: r.id}}) SET n += r.props "
+                    "SET n.tenant_id = coalesce(n.tenant_id, $tenant)",
+                    rows=safe, tenant=tenant_id,
+                )
+            else:
+                runner.run(
+                    f"UNWIND $rows AS r MERGE (n:{label} {{id: r.id}}) SET n += r.props",
+                    rows=safe,
+                )
 
 
 def load_relationships(runner, rels: list[tuple[str, str, str, str, str]]) -> None:
@@ -155,7 +195,7 @@ def load_relationships(runner, rels: list[tuple[str, str, str, str, str]]) -> No
             )
 
 
-def seed(session, samples_dir: Path) -> None:
+def seed(session, samples_dir: Path, tenant_id: str | None = None) -> None:
     policies = load_json(samples_dir, "policies.json")
     claims = load_json(samples_dir, "claims.json")
     endorsements = load_json(samples_dir, "endorsements.json")
@@ -209,7 +249,7 @@ def seed(session, samples_dir: Path) -> None:
     # Whole load in one transaction: a failure rolls back everything (idempotent
     # MERGEs make re-running the recovery path either way).
     with session.begin_transaction() as tx:
-        load_nodes(tx, nodes)
+        load_nodes(tx, nodes, tenant_id=tenant_id)
         load_relationships(tx, rels)
 
     # Queued counts are pre-dedupe (endorsements appear in policies.json AND
@@ -304,7 +344,7 @@ def main(argv: list[str] | None = None) -> int:
             if args.reset:
                 clear_graph_batched(session)
                 print("  graph cleared (--reset)")
-            seed(session, args.samples_dir)
+            seed(session, args.samples_dir, tenant_id=args.tenant)
             # stamp the demo dataset so the dashboard picks the right fraud
             # ground-truth table (samples/claims.json labels) — but never
             # overwrite a real-dataset marker (e.g. when adding snapshots to a
@@ -312,7 +352,13 @@ def main(argv: list[str] | None = None) -> int:
             if args.reset or not session.run(
                 "MATCH (d:Dataset) RETURN d LIMIT 1"
             ).single():
-                session.run("MERGE (d:Dataset {name: 'synthetic'})")
+                # v2: bump the dataset revision on (re)stamp so the answer
+                # cache invalidates across processes
+                session.run(
+                    "MERGE (d:Dataset {name: 'synthetic'}) "
+                    "ON CREATE SET d.rev = 0 "
+                    "ON MATCH SET d.rev = coalesce(d.rev, 0) + 1"
+                )
             report_counts(session)
             if args.snapshots:
                 create_snapshots(driver, PROJECT_ROOT / "data" / "pdfs", args.samples_dir)

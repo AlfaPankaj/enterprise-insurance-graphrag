@@ -28,6 +28,11 @@ from pathlib import Path
 import httpx
 
 from graphrag.config import settings
+from graphrag.llm import ModelNotFoundError as ProviderModelNotFoundError
+from graphrag.llm.base import ProviderError
+from graphrag.llm.factory import get_provider
+from graphrag.llm.ollama import OllamaProvider
+from graphrag.llm.openai_compat import OpenAICompatProvider
 
 logger = logging.getLogger("graphrag.answer_generator")
 
@@ -192,6 +197,150 @@ def _generate_with_llm(query: str, pruned: dict, timeout: float = 90.0) -> dict:
 
 
 # ---------------------------------------------------------------------------
+# OpenAI-compatible path (v2 multi-provider layer)
+# ---------------------------------------------------------------------------
+
+def _generate_with_openai(query: str, pruned: dict) -> dict:
+    """Answer via the OpenAI-compatible Chat Completions provider.
+
+    Raises on failure (the caller decides the fallback policy). Retries
+    transient provider errors up to ``settings.LLM_MAX_RETRIES``.
+    """
+    provider = OpenAICompatProvider()
+    prompt = _render_prompt(query, pruned["text"])
+    last_exc: Exception | None = None
+    for attempt in range(settings.LLM_MAX_RETRIES + 1):
+        try:
+            result = provider.generate(
+                prompt,
+                model=settings.ANSWER_MODEL or settings.OPENAI_MODEL,
+                max_tokens=settings.ANSWER_MAX_TOKENS,
+                temperature=0.2,
+            )
+            return {
+                "answer": result.text,
+                "mode": "llm",
+                "model": result.model,
+                "llm_ms": result.latency_ms,
+                "provider": result.provider,
+                "usage": {
+                    "input_tokens": result.input_tokens,
+                    "output_tokens": result.output_tokens,
+                },
+                "cost_usd": result.cost_usd,
+            }
+        except (ProviderError, ProviderModelNotFoundError) as exc:
+            last_exc = exc
+            if attempt >= settings.LLM_MAX_RETRIES:
+                break
+            logger.warning("provider retry %d/%d after: %s", attempt + 1,
+                           settings.LLM_MAX_RETRIES, exc)
+    assert last_exc is not None
+    raise last_exc
+
+
+def _openai_answer_path() -> bool:
+    """True when the OpenAI-compatible provider should answer this query.
+
+    ``LLM_PROVIDER=openai`` forces it; ``auto`` prefers it only when
+    configured (a configured-but-dead gateway falls through to Ollama —
+    the probe is cached, so the dead gateway costs one failed probe per TTL).
+    """
+    if settings.LLM_PROVIDER == "openai":
+        return True
+    if settings.LLM_PROVIDER == "auto" and settings.OPENAI_BASE_URL:
+        provider = get_provider("auto")
+        return provider is not None and provider.name == "openai"
+    return False
+
+
+# ---------------------------------------------------------------------------
+# streaming entry point (v2 — WS-A)
+# ---------------------------------------------------------------------------
+
+def stream_answer(query: str, pruned: dict, mode: str | None = None):
+    """Generate the answer as a token stream.
+
+    Yields ``{"type": "delta", "text": ...}`` events followed by exactly one
+    ``{"type": "done", "answer", "mode", "model", "provider", "usage",
+    "cost_usd", "fallback_reason"}`` event.
+
+    Fallback policy mirrors ``generate_answer``:
+
+    * ``auto`` — provider stream when one is up; if the stream fails before
+      the first token, degrade cleanly to the deterministic extractor (with
+      ``fallback_reason``); a mid-stream failure after tokens yields a done
+      event carrying the partial text + reason.
+    * ``llm`` — require a provider; failures raise.
+    * ``extractive`` — deterministic single-shot (one delta + done).
+    """
+    mode = mode or settings.ANSWER_MODE
+    if mode not in VALID_MODES:
+        raise ValueError(f"unknown answer mode: {mode!r} (expected one of {VALID_MODES})")
+
+    provider = None
+    if mode in ("llm", "auto") and _openai_answer_path():
+        provider = OpenAICompatProvider()
+    elif mode in ("llm", "auto") and ollama_available():
+        provider = OllamaProvider()
+    if mode == "llm" and provider is None:
+        raise RuntimeError(
+            f"answer mode 'llm' requires a provider (Ollama at "
+            f"{settings.LLAMA_API_URL} or OPENAI_BASE_URL)"
+        )
+
+    if provider is not None:
+        prompt = _render_prompt(query, pruned["text"])
+        emitted = False
+        full: list[str] = []
+        done_ev: dict | None = None
+        try:
+            for ev in provider.stream(
+                prompt,
+                model=settings.ANSWER_MODEL or None,
+                max_tokens=settings.ANSWER_MAX_TOKENS,
+                temperature=0.2,
+            ):
+                if ev["type"] == "delta":
+                    emitted = True
+                    full.append(ev["text"])
+                    yield ev
+                else:
+                    done_ev = ev
+        except Exception as exc:  # noqa: BLE001 - fallback policy below
+            if not emitted and mode == "auto":
+                logger.warning("stream unavailable, extractive fallback: %s", exc)
+                out = extractive_answer(query, pruned)
+                out["fallback_reason"] = str(exc)[:200]
+                yield {"type": "delta", "text": out["answer"]}
+                yield {"type": "done", "answer": out["answer"], "mode": "extractive",
+                       "model": None, "provider": None, "usage": None,
+                       "cost_usd": None, "fallback_reason": out.get("fallback_reason")}
+                return
+            if mode == "llm":
+                raise
+            logger.warning("stream interrupted mid-answer: %s", exc)
+            yield {"type": "done", "answer": "".join(full), "mode": "llm",
+                   "model": None, "provider": None, "usage": None, "cost_usd": None,
+                   "fallback_reason": f"stream interrupted: {exc}"[:200]}
+            return
+        if done_ev is None:
+            raise ProviderError("stream ended without a done event")
+        yield {"type": "done", "answer": done_ev["text"], "mode": "llm",
+               "model": done_ev.get("model"), "provider": done_ev.get("provider"),
+               "usage": done_ev.get("usage"), "cost_usd": done_ev.get("cost_usd"),
+               "fallback_reason": None}
+        return
+
+    # no provider up (or extractive mode): deterministic single-shot
+    out = extractive_answer(query, pruned)
+    yield {"type": "delta", "text": out["answer"]}
+    yield {"type": "done", "answer": out["answer"], "mode": "extractive",
+           "model": None, "provider": None, "usage": None, "cost_usd": None,
+           "fallback_reason": None}
+
+
+# ---------------------------------------------------------------------------
 # entry point
 # ---------------------------------------------------------------------------
 
@@ -199,31 +348,44 @@ def generate_answer(query: str, pruned: dict, mode: str | None = None) -> dict:
     """Answer the query — LLM when requested/available, extractive otherwise.
 
     ``mode`` in {"extractive", "auto", "llm"}; defaults to
-    ``settings.ANSWER_MODE``. ``auto`` attaches ``fallback_reason`` to the
-    result when it degraded to extractive, so callers can explain the fallback.
+    ``settings.ANSWER_MODE``. The LLM path resolves through the v2
+    multi-provider layer: OpenAI-compatible gateway first (when configured),
+    Ollama second, deterministic extractive last. ``auto`` attaches
+    ``fallback_reason`` to the result when it degraded to extractive, so
+    callers can explain the fallback.
     """
     mode = mode or settings.ANSWER_MODE
     if mode not in VALID_MODES:
         raise ValueError(f"unknown answer mode: {mode!r} (expected one of {VALID_MODES})")
 
     if mode == "llm":
-        # hard requirement: Ollama must be reachable AND reply — any failure
-        # propagates to the caller (the pipeline/API surface reports it)
+        # hard requirement: a provider must be reachable AND reply — any
+        # failure propagates to the caller (the pipeline/API surface reports it)
+        if _openai_answer_path():
+            return _generate_with_openai(query, pruned)
         if not ollama_available():
             raise RuntimeError(
                 f"answer mode 'llm' requires Ollama at {settings.LLAMA_API_URL}"
             )
         return _generate_with_llm(query, pruned)
 
-    if mode == "auto" and ollama_available():
-        try:
-            return _generate_with_llm(query, pruned)
-        except Exception as exc:  # noqa: BLE001 - auto must never crash the query
-            # auto -> fall back to the deterministic extractor, but say why so
-            # the UI/API can show "why is this extractive?" instead of guessing
-            logger.warning("LLM answer unavailable, using extractive: %s", exc)
-            out = extractive_answer(query, pruned)
-            out["fallback_reason"] = str(exc)[:200]
-            return out
+    if mode == "auto":
+        # v2 provider chain: OpenAI-compatible (configured) → Ollama → extractive
+        if _openai_answer_path():
+            try:
+                return _generate_with_openai(query, pruned)
+            except Exception as exc:  # noqa: BLE001 - auto must never crash the query
+                logger.warning("OpenAI-compatible answer unavailable (%s), "
+                               "trying Ollama", exc)
+        if ollama_available():
+            try:
+                return _generate_with_llm(query, pruned)
+            except Exception as exc:  # noqa: BLE001 - auto must never crash the query
+                # auto -> fall back to the deterministic extractor, but say why so
+                # the UI/API can show "why is this extractive?" instead of guessing
+                logger.warning("LLM answer unavailable, using extractive: %s", exc)
+                out = extractive_answer(query, pruned)
+                out["fallback_reason"] = str(exc)[:200]
+                return out
 
     return extractive_answer(query, pruned)

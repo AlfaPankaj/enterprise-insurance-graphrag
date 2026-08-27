@@ -21,9 +21,32 @@ from __future__ import annotations
 import re
 
 from graphrag.config import settings
+from graphrag.domains import (merged_entity_id_re, merged_keyword_props,
+                              merged_node_kinds, merged_numeric_props,
+                              merged_prop_focus, merged_stopwords,
+                              merged_text_props)
 
-# Entity ids used across the synthetic dataset (matches docs/graph_schema.md).
-ENTITY_ID_RE = re.compile(r"\b((?:POL|CLM|PH|END|FRD|INV)-\d{3,})\b")
+# ---------------------------------------------------------------------------
+# v2 tenant isolation (WS-B, G4)
+# ---------------------------------------------------------------------------
+
+def tenant_predicate(node_var: str = "n", param: str = "$tenant") -> str:
+    """Cypher predicate scoping ``node_var`` to one tenant.
+
+    ``$tenant IS NULL`` keeps unscoped behaviour bit-identical (v1 tests and
+    benchmarks); when a tenant id is passed, only nodes carrying that
+    ``tenant_id`` property are visible.
+    """
+    return f"({param} IS NULL OR coalesce({node_var}.tenant_id, '') = {param})"
+
+
+def tenant_active(tenant_id: str | None) -> bool:
+    """True when scoping should be applied (mode on AND a tenant is known)."""
+    return bool(tenant_id) and settings.TENANT_MODE == "column"
+
+# Entity ids across all registered domains (insurance + banking; matches
+# docs/graph_schema.md and src/graphrag/domains/*.py).
+ENTITY_ID_RE = merged_entity_id_re()
 # Schema nouns are stopwords for KEYWORD seeding: they match generic prop
 # values everywhere ("claim" hits every fraud reason, "clm" hits every claim
 # number). Entity ids and value tokens (names, causes, statuses) do the real
@@ -58,38 +81,24 @@ STOPWORDS = {
     "investigator", "investigators", "policyholder", "holder", "status",
     "type", "premium", "deductible", "amount", "annual", "risk", "score",
     "number", "numbers", "id", "ids",
-}
+} | merged_stopwords()  # v2: banking schema nouns (account, dispute, …)
 
-# Text properties searched for query keywords (all labels flattened).
-# occupation is included for the real datasets (insurance_dataset.csv has no
-# name column — "claims from doctors" must still seed).
-_KEYWORD_PROPS = sorted({
-    "name", "address", "email", "policy_number", "type", "status",
-    "claim_number", "cause", "reason", "severity", "endorsement_number",
-    "role", "category", "occupation",
-})
+# Text properties searched for query keywords (all labels flattened, merged
+# across domains). occupation is included for the real datasets
+# (insurance_dataset.csv has no name column — "claims from doctors" must
+# still seed).
+_KEYWORD_PROPS = merged_keyword_props()
 
 # Numeric props + the label that owns them, for amount/threshold keywords
 # ("claims over $100,000" -> Claim.amount >= 100000).
-_NUMERIC_PROPS: list[tuple[str, str]] = [
-    ("amount", "Claim"), ("limit", "Coverage"), ("premium", "Policy"),
-    ("deductible", "Policy"), ("risk_score", "Policyholder"),
-    ("confidence", "FraudFlag"),
-]
+_NUMERIC_PROPS: list[tuple[str, str]] = merged_numeric_props()
 
 # When the query NAMES a numeric schema noun ("premium", "deductible", ...),
 # the threshold scan must be restricted to that prop's label — otherwise
 # "premium over $5,000" would seed any Coverage whose *limit* exceeds $5k.
 # Keys are query words (checked whole-word, lowercase); the schema nouns are
 # stopwords for keyword seeding, so this is the only place they signal intent.
-_PROP_FOCUS: dict[str, list[tuple[str, str]]] = {
-    "premium": [("premium", "Policy")],
-    "deductible": [("deductible", "Policy"), ("deductible", "Coverage")],
-    "amount": [("amount", "Claim")],
-    "limit": [("limit", "Coverage")],
-    "risk": [("risk_score", "Policyholder")],
-    "confidence": [("confidence", "FraudFlag")],
-}
+_PROP_FOCUS: dict[str, list[tuple[str, str]]] = merged_prop_focus()
 
 
 def _numeric_prop_focus(query: str) -> list[tuple[str, str]] | None:
@@ -103,6 +112,9 @@ def _numeric_prop_focus(query: str) -> list[tuple[str, str]] | None:
         return [("amount", "Claim")]
     if "coverage" in words or "coverages" in words:
         return [("limit", "Coverage")]
+    # v2 banking: "accounts with a balance over $X" -> Account.balance
+    if "balance" in words or "account" in words or "accounts" in words:
+        return [("balance", "Account")]
     return None
 
 
@@ -120,29 +132,10 @@ def _singular(tok: str) -> str:
 _THRESHOLD_ABOVE = ("over", "above", "more", "exceeds", "exceeding", "greater", "higher")
 _THRESHOLD_BELOW = ("under", "below", "less", "lower")
 
-_NODE_TEXT_PROPS = {
-    "Policyholder": ["name", "risk_score"],
-    "Policy": ["policy_number", "type", "status", "premium", "deductible",
-               "start_date", "end_date"],
-    "Claim": ["claim_number", "status", "amount", "date", "cause"],
-    "FraudFlag": ["severity", "confidence", "reason", "created_by"],
-    "Endorsement": ["endorsement_number", "type", "effective_date",
-                    "premium_adjustment"],
-    "Investigator": ["name", "role", "email"],
-    "Coverage": ["code", "category", "limit", "deductible"],
-}
-
-# Natural-language descriptor per label — helps neural AND lexical scorers
-# connect query words ("coverage", "fraud flag") to the node text.
-_NODE_KIND = {
-    "Policyholder": "policyholder",
-    "Policy": "insurance policy",
-    "Claim": "insurance claim",
-    "FraudFlag": "fraud flag",
-    "Endorsement": "policy endorsement",
-    "Investigator": "claims investigator",
-    "Coverage": "coverage",
-}
+# Serialized text properties per label + natural-language descriptors —
+# merged across domains (v2 banking adds its own surfaces).
+_NODE_TEXT_PROPS: dict[str, list[str]] = merged_text_props()
+_NODE_KIND: dict[str, str] = merged_node_kinds()
 
 
 def query_tokens(query: str) -> list[str]:
@@ -160,18 +153,21 @@ def extract_seed_ids(query: str) -> list[str]:
 # seed detection
 # ---------------------------------------------------------------------------
 
-def _keyword_seeds(session, tokens: list[str], limit: int = 5) -> list[dict]:
+def _keyword_seeds(session, tokens: list[str], limit: int = 5,
+                   tenant_id: str | None = None) -> list[dict]:
     """Global keyword scan — used when the query names no entity id."""
     if not tokens:
         return []
     tokens = [_singular(t) for t in tokens]  # "doctors" must hit occupation "Doctor"
+    tp = tenant_predicate("n")
     rows = session.run(
-        """
+        f"""
         UNWIND $tokens AS tok
         UNWIND $props AS prop
         MATCH (n)
         // the (:Dataset) metadata marker must never be keyword-seeded
         WHERE NOT 'Dataset' IN labels(n)
+          AND {tp}
           AND n[prop] IS NOT NULL AND toLower(toString(n[prop])) CONTAINS toLower(tok)
         WITH n, labels(n) AS labels, count(*) AS hits
         ORDER BY hits DESC
@@ -179,12 +175,14 @@ def _keyword_seeds(session, tokens: list[str], limit: int = 5) -> list[dict]:
         LIMIT $limit
         """,
         tokens=tokens, props=_KEYWORD_PROPS, limit=limit,
+        tenant=tenant_id if tenant_active(tenant_id) else None,
     ).data()
     return [{"id": r["id"], "label": r["labels"][0], "kind": "keyword"} for r in rows]
 
 
 def _numeric_seeds_global(session, numbers: list[int], direction: int, limit: int = 5,
-                          pairs: list[tuple[str, str]] | None = None) -> list[dict]:
+                          pairs: list[tuple[str, str]] | None = None,
+                          tenant_id: str | None = None) -> list[dict]:
     """Global scan for amount/threshold keywords ("claims over $100,000"),
     restricted to the label that owns each numeric prop (or the focused
     prop when the query names one — e.g. "premium over $5,000")."""
@@ -193,16 +191,19 @@ def _numeric_seeds_global(session, numbers: list[int], direction: int, limit: in
     op = ">=" if direction >= 0 else "<="
     threshold = float(max(numbers)) if direction >= 0 else float(min(numbers))
     pairs = pairs or [(prop, label) for prop, label in _NUMERIC_PROPS]
+    tp = tenant_predicate("n")
     rows = session.run(
         f"""
         UNWIND $pairs AS pair
         MATCH (n)
         WHERE pair[1] IN labels(n) AND n[pair[0]] IS NOT NULL
           AND toFloat(n[pair[0]]) {op} $threshold
+          AND {tp}
         RETURN labels(n) AS labels, n.id AS id
         LIMIT $limit
         """,
         pairs=pairs, threshold=threshold, limit=limit,
+        tenant=tenant_id if tenant_active(tenant_id) else None,
     ).data()
     return [{"id": r["id"], "label": r["labels"][0], "kind": "keyword"} for r in rows]
 
@@ -229,11 +230,15 @@ def _neighborhood_keyword_seeds(nodes: dict[str, dict], tokens: list[str],
             for n, _ in scored[:limit]]
 
 
-def _id_seeds(session, query: str) -> list[dict]:
+def _id_seeds(session, query: str, tenant_id: str | None = None) -> list[dict]:
     seeds: list[dict] = []
+    tp = tenant_predicate("n")
     for eid in extract_seed_ids(query):
         row = session.run(
-            "MATCH (n {id: $id}) RETURN labels(n) AS labels, n.id AS id", id=eid
+            f"MATCH (n {{id: $id}}) WHERE {tp} "
+            "RETURN labels(n) AS labels, n.id AS id",
+            id=eid,
+            tenant=tenant_id if tenant_active(tenant_id) else None,
         ).single()
         if row:
             seeds.append({"id": eid, "label": row["labels"][0], "kind": "id"})
@@ -255,6 +260,17 @@ def _numeric_tokens(query: str) -> list[int]:
         if digits.isdigit():
             out.append(int(digits))
     return out
+
+
+def _threshold_numbers(query: str) -> list[int]:
+    """Numbers eligible as numeric-threshold seeds.
+
+    Digits that belong to an entity-id token (``CLM-99999``) are anchors,
+    not amounts: without this, a nonexistent-id query silently turns into
+    "amount >= 99999" and returns rich claims instead of refusing (caught
+    by the negative generalization probes in the 10,200-query CI run).
+    """
+    return _numeric_tokens(ENTITY_ID_RE.sub(" ", query))
 
 
 def _threshold_direction(query: str) -> int:
@@ -292,28 +308,31 @@ def _numeric_hits(props: dict, numbers: list[int], direction: int,
 # BFS expansion
 # ---------------------------------------------------------------------------
 
-def _expand_both(session, frontier: list[str]) -> tuple[list[str], list[dict]]:
+def _expand_both(session, frontier: list[str],
+                 tenant_id: str | None = None) -> tuple[list[str], list[dict]]:
     """One hop in both directions: (new neighbor ids, deduped edges)."""
     edges: list[dict] = []
     neighbors: list[str] = []
+    tn = tenant_id if tenant_active(tenant_id) else None
+    tpn, tpm = tenant_predicate("n"), tenant_predicate("m")
     rows = session.run(
-        """
+        f"""
         MATCH (n)-[r]->(m)
-        WHERE n.id IN $frontier
+        WHERE n.id IN $frontier AND {tpn} AND {tpm}
         RETURN n.id AS src, type(r) AS type, m.id AS dst
         """,
-        frontier=frontier,
+        frontier=frontier, tenant=tn,
     )
     for r in rows:
         edges.append({"source": r["src"], "type": r["type"], "target": r["dst"]})
         neighbors.append(r["dst"])
     rows = session.run(
-        """
+        f"""
         MATCH (n)<-[r]-(m)
-        WHERE n.id IN $frontier
+        WHERE n.id IN $frontier AND {tpn} AND {tpm}
         RETURN m.id AS src, type(r) AS type, n.id AS dst
         """,
-        frontier=frontier,
+        frontier=frontier, tenant=tn,
     )
     for r in rows:
         edges.append({"source": r["src"], "type": r["type"], "target": r["dst"]})
@@ -321,21 +340,38 @@ def _expand_both(session, frontier: list[str]) -> tuple[list[str], list[dict]]:
     return neighbors, edges
 
 
-def _fetch_nodes(session, ids: list[str]) -> dict[str, dict]:
-    """id -> {id, label, props} for every requested node id."""
+def _fetch_nodes(session, ids: list[str],
+                 tenant_id: str | None = None) -> dict[str, dict]:
+    """id -> {id, label, props} for every requested node id.
+
+    PII-classified props stored encrypted (``PII_ENCRYPTION_KEY``) are
+    decrypted here — the read path of the at-rest encryption scheme.
+    """
+    try:
+        from graphrag.pii import decrypt_node, encryption_enabled
+    except ImportError:  # pragma: no cover - graphrag package always present
+        encryption_enabled = lambda: False  # noqa: E731
+        decrypt_node = lambda n: n  # noqa: E731
     nodes: dict[str, dict] = {}
+    tp = tenant_predicate("n")
     for row in session.run(
-        "MATCH (n) WHERE n.id IN $ids RETURN labels(n) AS labels, n", ids=ids
+        f"MATCH (n) WHERE n.id IN $ids AND {tp} RETURN labels(n) AS labels, n",
+        ids=ids,
+        tenant=tenant_id if tenant_active(tenant_id) else None,
     ):
         node = row["n"]
         nid = node["id"]
         props = {k: v for k, v in dict(node).items()
                  if k != "id" and not isinstance(v, (dict, list))}
-        nodes[nid] = {"id": nid, "label": row["labels"][0], "props": props}
+        fetched = {"id": nid, "label": row["labels"][0], "props": props}
+        if encryption_enabled():
+            fetched = decrypt_node(fetched)
+        nodes[nid] = fetched
     return nodes
 
 
-def _expand_graph(session, seed_ids: list[str], max_hops: int) -> tuple[set[str], list[dict]]:
+def _expand_graph(session, seed_ids: list[str], max_hops: int,
+                  tenant_id: str | None = None) -> tuple[set[str], list[dict]]:
     """BFS from seed ids: (visited node ids, deduped edges)."""
     frontier = list(seed_ids)
     visited: set[str] = set(frontier)
@@ -344,7 +380,7 @@ def _expand_graph(session, seed_ids: list[str], max_hops: int) -> tuple[set[str]
     for _ in range(max_hops):
         if not frontier:
             break
-        neighbors, hop_edges = _expand_both(session, frontier)
+        neighbors, hop_edges = _expand_both(session, frontier, tenant_id=tenant_id)
         for e in hop_edges:
             key = (e["source"], e["type"], e["target"])
             if key not in seen_edges:
@@ -356,40 +392,59 @@ def _expand_graph(session, seed_ids: list[str], max_hops: int) -> tuple[set[str]
     return visited, edges
 
 
-def retrieve_subgraph(driver, query: str, max_hops: int | None = None) -> dict:
+def retrieve_subgraph(driver, query: str, max_hops: int | None = None,
+                      tenant_id: str | None = None,
+                      vector_store=None) -> dict:
     """Retrieve the multi-hop sub-graph reachable from the query's seed nodes.
 
     If the query names an entity id (precise anchor), keyword filters are
     restricted to that anchor's neighborhood — e.g. "paid claims under policy
     POL-0084" matches only POL-0084's paid claims. Pure keyword queries scan
     the graph globally.
+
+    ``tenant_id`` (with ``settings.TENANT_MODE="column"``) scopes every
+    Cypher statement to nodes carrying that ``tenant_id`` — the v2 tenant
+    isolation guard. ``None`` = unscoped (v1 behavior).
+
+    ``vector_store`` (v2 hybrid retrieval): when id/keyword/numeric seeding
+    finds NOTHING, the query is embedded and the store supplies semantic
+    seeds (``kind="semantic"``) — the paraphrase fallback. Omit for pure
+    v1 behavior.
     """
     max_hops = max_hops or settings.MAX_HOPS
     with driver.session() as session:
-        id_seeds = _id_seeds(session, query)
+        id_seeds = _id_seeds(session, query, tenant_id=tenant_id)
         tokens = _value_tokens(query)
-        numbers = _numeric_tokens(query)
+        numbers = _threshold_numbers(query)
         direction = _threshold_direction(query)
         prop_focus = _numeric_prop_focus(query)
         if id_seeds:
             seeds = list(id_seeds)
             seed_ids = {s["id"] for s in seeds}
-            visited, edges = _expand_graph(session, [s["id"] for s in seeds], max_hops)
-            nodes = _fetch_nodes(session, list(visited))
+            visited, edges = _expand_graph(session, [s["id"] for s in seeds],
+                                           max_hops, tenant_id=tenant_id)
+            nodes = _fetch_nodes(session, list(visited), tenant_id=tenant_id)
             for kw in _neighborhood_keyword_seeds(nodes, tokens, numbers, direction,
                                                   pairs=prop_focus):
                 if kw["id"] not in visited or kw["id"] in seed_ids:
                     continue  # already inside the neighborhood / already an id seed
                 seeds.append(kw)  # flagged as keyword seed for provenance
         else:
-            seeds = _keyword_seeds(session, tokens)
+            seeds = _keyword_seeds(session, tokens, tenant_id=tenant_id)
             if direction == 0:
-                seeds += _numeric_seeds_global(session, numbers, 0, pairs=prop_focus)
+                seeds += _numeric_seeds_global(session, numbers, 0, pairs=prop_focus,
+                                               tenant_id=tenant_id)
             else:
-                seeds += _numeric_seeds_global(session, numbers, direction, pairs=prop_focus)
+                seeds += _numeric_seeds_global(session, numbers, direction, pairs=prop_focus,
+                                               tenant_id=tenant_id)
             seeds = list({s["id"]: s for s in seeds}.values())  # dedup by id
-            visited, edges = _expand_graph(session, [s["id"] for s in seeds], max_hops)
-            nodes = _fetch_nodes(session, list(visited))
+            # v2 semantic fallback: paraphrase queries with no lexical signal
+            if not seeds and vector_store is not None:
+                from graphrag.vector_store import semantic_seeds
+                seeds = semantic_seeds(session, query, vector_store, k=3)
+            visited, edges = _expand_graph(session, [s["id"] for s in seeds],
+                                           max_hops, tenant_id=tenant_id)
+            nodes = _fetch_nodes(session, list(visited), tenant_id=tenant_id)
 
         node_list = [nodes[nid] for nid in sorted(visited)]
 

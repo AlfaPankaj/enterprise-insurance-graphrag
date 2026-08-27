@@ -347,13 +347,24 @@ def main(argv: list[str] | None = None) -> int:
             # timeout on the 53k-row data_synthetic load. MERGEs are idempotent,
             # so a partial failure is safe to re-run.
             t1 = time.perf_counter()
-            load_nodes(session, nodes)
+            # v2 tenant stamping: when TENANT_MODE=column, every node carries
+            # the configured DEFAULT_TENANT so tenant-scoped queries work
+            tenant = settings.DEFAULT_TENANT if settings.TENANT_MODE == "column" else None
+            if tenant:
+                print(f"  stamping tenant_id={tenant} on all nodes (TENANT_MODE=column)")
+            load_nodes(session, nodes, tenant_id=tenant)
             load_relationships(session, rels)
             load_s = time.perf_counter() - t1
             print(f"  loaded in {load_s:.1f}s (total {load_s + parse_s:.1f}s)")
             # stamp which dataset is loaded so the dashboard can pick the right
-            # fraud ground-truth table (labels live in the CSVs, not the graph)
-            session.run("MERGE (d:Dataset {name: $name})", name=args.dataset)
+            # fraud ground-truth table (labels live in the CSVs, not the graph);
+            # v2: the rev bump invalidates the answer cache on every (re)seed
+            session.run(
+                "MERGE (d:Dataset {name: $name}) "
+                "ON CREATE SET d.rev = 0 "
+                "ON MATCH SET d.rev = coalesce(d.rev, 0) + 1",
+                name=args.dataset,
+            )
             counts = session.run(
                 "MATCH (n) RETURN labels(n)[0] AS label, count(*) AS c ORDER BY label"
             ).data()

@@ -19,8 +19,10 @@ sys.path.insert(0, str(ROOT / "src"))
 
 from neo4j import GraphDatabase
 from src.graphrag.config import settings
+from src.graphrag.identity import (effective_auth_mode, identity_from_api_key,
+                                   identity_from_token)
 from src.graphrag.fraud_ground_truth import build_comparison, detect_dataset, load_ground_truth
-from src.graphrag.query_pipeline import run_query
+from src.graphrag.query_pipeline import run_query, stream_query
 from src.graphrag.reranker import make_reranker
 from src.graphrag.audit_reporter import render_html, render_json, render_pdf
 from src.graphrag.lineage_visualizer import render_lineage_html
@@ -177,6 +179,9 @@ def validation_entries(loaded: str | None) -> list[dict]:
         {"label": "pdf_demo (PDF pipeline)", "files": ["synthetic"],
          "desc": "Synthetic demo graph — policies, claims, endorsements",
          "kind": "pdf", "fraud_name": "synthetic"},
+        {"label": "banking_demo (banking pipeline)", "files": ["banking"],
+         "desc": "60 customers · 80 accounts · 400 transactions · 30 disputes · 18 AML alerts",
+         "kind": "real"},
     ]
     for rec in list_custom_sessions():
         entries.append({
@@ -278,7 +283,8 @@ st.markdown("""
 
 with st.sidebar:
     st.markdown("#### Navigate")
-    page = st.radio("Pages", ["Home", "Dashboard", "Audit Trail", "Datasets"], label_visibility="collapsed")
+    page = st.radio("Pages", ["Home", "Dashboard", "Audit Trail", "Datasets",
+                              "Review Queue"], label_visibility="collapsed")
     st.markdown("---")
     st.markdown("### 🔗 GraphRAG")
     st.caption("Insurance Claims System")
@@ -292,6 +298,45 @@ with st.sidebar:
     if gt:
         fraud = sum(1 for v in gt.values() if v)
         st.markdown(f"**Fraud labels:** {fraud:,} / {len(gt):,}")
+
+    # ---- v2 login gate (WS-B): API key / JWT when auth is configured ----
+    identity = None
+    if effective_auth_mode() != "none":
+        st.markdown("---")
+        st.markdown("#### Sign in")
+        if st.session_state.get("identity") is None:
+            if effective_auth_mode() == "static":
+                cred = st.text_input("API key", type="password", key="login_api_key",
+                                     label_visibility="collapsed")
+                if st.button("Sign in", key="login_btn", use_container_width=True):
+                    ident = identity_from_api_key(cred)
+                    if ident:
+                        st.session_state["identity"] = ident
+                        st.rerun()
+                    else:
+                        st.error("Invalid API key")
+            else:  # jwt
+                cred = st.text_input("Bearer token", type="password", key="login_token",
+                                     label_visibility="collapsed")
+                if st.button("Sign in", key="login_btn", use_container_width=True):
+                    try:
+                        ident = identity_from_token(cred.strip())
+                    except Exception:
+                        ident = None
+                    if ident:
+                        st.session_state["identity"] = ident
+                        st.rerun()
+                    else:
+                        st.error("Invalid or expired token")
+            st.stop()  # pages are gated until signed in
+        else:
+            ident = st.session_state["identity"]
+            st.markdown(f"**User:** `{ident.subject}` · "
+                        f"{', '.join(sorted(ident.roles))}")
+            if st.button("Sign out", key="logout_btn", use_container_width=True):
+                st.session_state["identity"] = None
+                st.rerun()
+        identity = st.session_state.get("identity")
 
     # ---- session switcher (Phase 6): re-seeds the graph from the web UI ----
     st.markdown("---")
@@ -312,7 +357,8 @@ with st.sidebar:
     sess = get_session_meta(sel_session) or {}
     kind_note = ("📊 Excel / real CSV" if sess.get("kind") == "excel"
                  else ("📤 Custom upload" if sess.get("kind") == "custom"
-                       else "📄 PDF / synthetic demo"))
+                       else ("🏦 Banking demo" if sess.get("kind") == "banking"
+                             else "📄 PDF / synthetic demo")))
     st.caption(f"Pipeline: {kind_note} — {sess.get('desc', '')}")
     if switch_in_progress():
         render_switch_progress()
@@ -420,13 +466,17 @@ elif page == "Dashboard":
         c1, c2, c3, c4 = st.columns(4)
         max_hops = c1.slider("Max hops", 1, 4, settings.MAX_HOPS)
         token_budget = c2.slider("Token budget", 256, 8192, settings.MAX_TOKENS, step=256)
-        reranker_mode = c3.selectbox("Reranker", ["auto", "cross-encoder", "lexical"])
+        reranker_mode = c3.selectbox("Reranker", ["auto", "cross-encoder", "lexical", "hybrid"])
         answer_mode = c4.selectbox("Answer mode", ["extractive", "auto", "llm"],
                                    index=["extractive", "auto", "llm"].index(settings.ANSWER_MODE) if settings.ANSWER_MODE in ("extractive", "auto", "llm") else 0)
+        stream_answers = st.checkbox(
+            "Stream answer tokens live (LLM answers; buffered when PII masking is on)",
+            value=False,
+        )
 
     st.markdown("---")
     st.markdown("#### Pipeline Validation (all sessions)")
-    st.caption("Benchmarks per session — **10,200 ground-truth queries total** (10,000 on the 3 real Excel sessions: fraud_oracle 5,500 · insurance_dataset 3,900 · insurance_claims 600, plus the synthetic variant + PDF demo graph at 100 each), **100% retrieval & pruning accuracy**, token savings, latency and fraud P/R/F1 per row. The ● marks the currently loaded session; it updates automatically when you switch or upload. CSV uploads are benchmarked automatically in the background — this table refreshes until they land. Regenerate with `scripts/benchmark_real_dataset.py <dataset> --queries N --workers 8` + `scripts/benchmark_fraud_detection.py --dataset <dataset>` (JSONs saved to `data/benchmarks/`).")
+    st.caption("Benchmarks per session — **10,200 ground-truth queries total** (10,000 on the 3 real Excel sessions: fraud_oracle 5,500 · insurance_dataset 3,900 · insurance_claims 600, plus the synthetic variant + PDF demo graph at 100 each), **100% retrieval & pruning accuracy**, token savings, latency and fraud P/R/F1 per row. The ● marks the currently loaded session; it updates automatically when you switch or upload. CSV uploads are benchmarked automatically in the background — this table refreshes until they land. Regenerate with `scripts/benchmark_real_dataset.py <dataset> --queries N --workers 8` + `scripts/benchmark_fraud_detection.py --dataset <dataset>` (JSONs saved to `data/benchmarks/`). **Re-validated end-to-end on v2 (2026-08-26, CI: Neo4j 5.26): 10,200/10,200 retrieval+pruning, fraud P/R/F1 100%, tokens 2,044,316 → 1,857,626 (7.83% saved).**")
     # while any auto-benchmark is in flight, refresh this table every 5s so the
     # new row fills in without a manual reload (fragment keeps the live query
     # runner below undisturbed)
@@ -470,6 +520,24 @@ elif page == "Dashboard":
     _render_validation_table(ds)
 
     st.markdown("---")
+    with st.expander("Background Jobs (v2 job runner)", expanded=False):
+        try:
+            from src.graphrag.jobs import get_store
+            jobs = get_store().list(10)
+            if not jobs:
+                st.caption("No jobs yet — enqueue via POST /api/v1/jobs "
+                           "(session_switch / benchmark / fraud_benchmark).")
+            else:
+                st.dataframe(pd.DataFrame([
+                    {"id": j["id"], "kind": j["kind"], "status": j["status"],
+                     "created": j["created_at"],
+                     "result": str(j["result"])[:48] if j["result"] else ""}
+                    for j in jobs
+                ]), width="stretch", hide_index=True)
+        except Exception as exc:  # the jobs view must never break the dashboard
+            st.caption(f"Job store unavailable: {exc}")
+
+    st.markdown("---")
     st.markdown("#### Live Query Runner")
     query = st.text_input("Ask a question", placeholder="e.g. Does claim CLM-0003 have a fraud flag?", label_visibility="collapsed")
     run = st.button("Run query", type="primary")
@@ -479,13 +547,32 @@ elif page == "Dashboard":
             st.error("Neo4j is not reachable.")
         else:
             try:
-                with st.spinner("Retrieving, re-ranking, pruning and answering..."):
-                    res = run_query(get_driver(), query.strip(), max_hops=max_hops, token_budget=token_budget, reranker_mode=reranker_mode, answer_mode=answer_mode)
+                if stream_answers:
+                    live = st.empty()
+                    buffer: list[str] = []
+                    res = None
+                    for ev in stream_query(get_driver(), query.strip(),
+                                            max_hops=max_hops,
+                                            token_budget=token_budget,
+                                            reranker_mode=reranker_mode,
+                                            answer_mode=answer_mode,
+                                            identity=identity):
+                        if ev["type"] == "delta":
+                            buffer.append(ev["text"])
+                            live.markdown("".join(buffer))
+                        elif ev["type"] in ("done", "blocked"):
+                            res = ev["result"]
+                    if res is None:
+                        st.error("Streaming failed — no result event received.")
+                        st.stop()
+                else:
+                    with st.spinner("Retrieving, re-ranking, pruning and answering..."):
+                        res = run_query(get_driver(), query.strip(), max_hops=max_hops, token_budget=token_budget, reranker_mode=reranker_mode, answer_mode=answer_mode, identity=identity)
             except Exception as exc:
                 st.error(f"Query failed: {exc}"); st.stop()
 
             st.markdown(f"<div class='grag-answer'><div class='label'>Answer</div><div class='text'>{res['answer']}</div></div>", unsafe_allow_html=True)
-            st.caption(f"answer mode: {res['answer_mode']}" + (f" ({res['answer_model']})" if res.get("answer_model") else "") + f" · reranker: {res['reranker']}")
+            st.caption(f"answer mode: {res['answer_mode']}" + (f" ({res['answer_model']})" if res.get("answer_model") else "") + f" · reranker: {res['reranker']}" + (" · ⚡ served from cache" if res.get("cached") else "") + (f" · provider: {res['answer_provider']}" if res.get("answer_provider") else ""))
             if res.get("answer_fallback"):
                 st.warning(f"LLM unavailable — extractive fallback. Reason: {res['answer_fallback']}")
 
@@ -690,3 +777,66 @@ elif page == "Datasets":
     st.markdown("1. **Create** — upload a CSV or PDF, type a unique session name, hit *Create & load*.\n"
                 "2. **Watch** — the sidebar shows the ingest log streaming live; when it finishes the session is active.\n"
                 "3. **Query** — open the *Dashboard* and ask anything about your dataset. The graph responds to keyword and id queries (CSVs with claim/fraud columns get Claim + FraudFlag nodes; anything else becomes generic Record nodes).")
+
+# =========================================================================
+# REVIEW QUEUE PAGE (v2 — extraction review, WS-C G17)
+# =========================================================================
+
+elif page == "Review Queue":
+    from src.graphrag.extraction_review import (STATUS_PENDING,
+                                                apply_review_item,
+                                                get_review_store)
+
+    st.markdown("### Extraction Review Queue")
+    st.caption("Low-confidence extractions are held here instead of being written "
+               "to the graph (`EXTRACTION_REVIEW_ENABLED=true`). Approve to apply "
+               "via CDC, reject to discard. Re-uploading a document updates its "
+               "pending item instead of duplicating it.")
+
+    store = get_review_store()
+    summary = store.summary()
+    c1, c2, c3 = st.columns(3)
+    c1.markdown(f"<div class='grag-kpi orange'><div class='kpi-value'>{summary['pending']}</div><div class='kpi-label'>Pending</div></div>", unsafe_allow_html=True)
+    c2.markdown(f"<div class='grag-kpi green'><div class='kpi-value'>{summary['approved']}</div><div class='kpi-label'>Approved</div></div>", unsafe_allow_html=True)
+    c3.markdown(f"<div class='grag-kpi'><div class='kpi-value'>{summary['rejected']}</div><div class='kpi-label'>Rejected</div></div>", unsafe_allow_html=True)
+
+    if not settings.EXTRACTION_REVIEW_ENABLED:
+        st.info("The review queue is disabled — set `EXTRACTION_REVIEW_ENABLED=true` "
+                "in `.env` to hold low-confidence extractions here instead of "
+                "applying them directly.")
+
+    st.markdown("---")
+    status_filter = st.selectbox("Status", ["pending", "approved", "rejected"])
+    items = store.list(status=status_filter, limit=50)
+    if not items:
+        st.info(f"No {status_filter} items.")
+    for item in items:
+        props_preview = ", ".join(
+            f"{k}={str(v)[:28]}" for k, v in list(item["props"].items())[:8])
+        st.markdown(
+            f"**`{item['entity_id']}`** · `{item['label']}` · doc `{item['doc_id']}` · "
+            f"confidence **{item['confidence']:.2f}** · {item['status']}"
+        )
+        if item.get("reasons"):
+            st.caption("reasons: " + ", ".join(item["reasons"]))
+        st.caption(f"props: {props_preview} · source: {item.get('source_file') or '—'}")
+        if item["status"] == STATUS_PENDING:
+            b1, b2, _ = st.columns([1, 1, 4])
+            if b1.button("Approve", key=f"appr_{item['id']}"):
+                try:
+                    stats = apply_review_item(get_driver(), item)
+                    store.decide(item["id"], "approved",
+                                 identity.subject if identity else "anonymous")
+                    st.success(f"Applied {item['entity_id']} "
+                               f"in {stats['update_time_ms']:.0f}ms")
+                    st.rerun()
+                except Exception as exc:
+                    st.error(f"Approve failed: {exc}")
+            if b2.button("Reject", key=f"rej_{item['id']}"):
+                store.decide(item["id"], "rejected",
+                             identity.subject if identity else "anonymous")
+                st.rerun()
+        elif item.get("decided_at"):
+            st.caption(f"decided {item['decided_at']} "
+                       f"by {item.get('decided_by') or '—'}")
+        st.markdown("---")

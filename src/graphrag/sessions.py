@@ -1,6 +1,6 @@
 """Session management — which dataset/pipeline is loaded in Neo4j (Phase 6).
 
-The app can switch between **4 sessions** from the web UI — no terminal needed:
+The app can switch between **5 sessions** from the web UI — no terminal needed:
 
   * **Excel sessions** — real CSVs from ``data/Real_datasets/``, ingested by
     ``scripts/ingest_real_dataset.py``:
@@ -35,6 +35,7 @@ import sys
 import threading
 from pathlib import Path
 
+from graphrag.config import settings
 from src.graphrag.fraud_ground_truth import detect_dataset
 
 # Serialize the actual (re)seed: two concurrent switches (e.g. API + web UI)
@@ -83,6 +84,13 @@ SESSIONS: list[dict] = [
         "dataset": "synthetic",
         "desc": "Demo graph from the PDF pipeline (policies, claims, endorsements)",
     },
+    {
+        "id": "banking_demo",
+        "label": "Banking demo — transactions, disputes, AML",
+        "kind": "banking",
+        "dataset": "banking",
+        "desc": "60 customers · 80 accounts · 400 transactions · 30 disputes · 18 AML alerts",
+    },
 ]
 
 SESSION_BY_ID = {s["id"]: s for s in SESSIONS}
@@ -94,6 +102,7 @@ _MARKER_TO_SESSION = {
     "insurance_dataset": "insurance_dataset",
     "data_synthetic": "insurance_dataset",  # same Kaggle source, synthetic variant
     "synthetic": "pdf_demo",
+    "banking": "banking_demo",
 }
 
 
@@ -172,11 +181,20 @@ def _seed_command(session: dict) -> list[str]:
             session["dataset"],
             "--reset",
         ]
+    if session["kind"] == "banking":
+        # v2 banking domain demo (WS-E)
+        return [
+            sys.executable, "-u",
+            str(ROOT / "scripts" / "ingest_banking_dataset.py"),
+            "--reset",
+        ]
     return [
         sys.executable, "-u",
         str(ROOT / "scripts" / "seed_graph.py"),
         "--reset",
         "--apply-schema",
+        *(["--tenant", settings.DEFAULT_TENANT]
+          if settings.TENANT_MODE == "column" else []),
     ]
 
 
@@ -328,14 +346,17 @@ def _run_blocking(driver, session_id: str, force: bool, timeout: int,
 
 
 def switch_session(driver, session_id: str, force: bool = False,
-                   timeout: int = 900) -> dict:
+                   timeout: int = 900, line_cb=None) -> dict:
     """Seed the graph for the requested session; **blocking** (REST API path).
 
     Returns ``{"status": "already_loaded"|"seeded", "session": id,
     "output": tail-of-log}``. Raises ``ValueError`` for unknown sessions and
     ``RuntimeError`` when the seeding command fails.
+
+    ``line_cb(line)`` (v2, jobs) streams every subprocess stdout line as it
+    arrives — the job runner uses it to record live progress.
     """
-    return _run_blocking(driver, session_id, force, timeout)
+    return _run_blocking(driver, session_id, force, timeout, line_cb=line_cb)
 
 
 # ---------------------------------------------------------------------------

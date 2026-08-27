@@ -234,7 +234,13 @@ def remove_custom_session(name: str) -> bool:
 # ---------------------------------------------------------------------------
 
 def _stamp_marker(session, name: str) -> None:
-    session.run("MERGE (d:Dataset {name: $name})", name=name)
+    # v2: the rev bump invalidates the answer cache on every (re)seed
+    session.run(
+        "MERGE (d:Dataset {name: $name}) "
+        "ON CREATE SET d.rev = 0 "
+        "ON MATCH SET d.rev = coalesce(d.rev, 0) + 1",
+        name=name,
+    )
 
 
 def build_from_csv(driver, csv_path: Path, session_name: str,
@@ -250,11 +256,13 @@ def build_from_csv(driver, csv_path: Path, session_name: str,
     nodes, rels = adapt_csv_to_graph(csv_path)
     log(f"  parsed {sum(len(v) for v in nodes.values()):,} nodes / "
         f"{len(rels):,} fraud edges from {csv_path.name}")
+    # v2 tenant stamping (TENANT_MODE=column -> DEFAULT_TENANT)
+    tenant = settings.DEFAULT_TENANT if settings.TENANT_MODE == "column" else None
     with driver.session() as session:
         if reset:
             session.run("MATCH (n) DETACH DELETE n")
             log("  graph cleared (--reset)")
-        load_nodes(session, nodes)
+        load_nodes(session, nodes, tenant_id=tenant)
         load_relationships(session, rels)
         _stamp_marker(session, session_name)
         counts = session.run(
@@ -279,6 +287,7 @@ def build_from_pdfs(driver, pdf_paths: list[Path], session_name: str,
             line_cb(msg)
 
     total_entities = 0
+    tenant = settings.DEFAULT_TENANT if settings.TENANT_MODE == "column" else None
     with driver.session() as session:
         if reset:
             session.run("MATCH (n) DETACH DELETE n")
@@ -300,7 +309,8 @@ def build_from_pdfs(driver, pdf_paths: list[Path], session_name: str,
             "deleted": [],
         }
         stats = update_graph_surgically(driver, doc_id, changes,
-                                        new_entities=entities)
+                                        new_entities=entities,
+                                        tenant_id=tenant)
         n = sum(len(e) for e in entities.values())
         total_entities += n
         log(f"  {pdf.name}: {n} entities ({result['mode']}) in "

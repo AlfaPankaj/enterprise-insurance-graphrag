@@ -1,16 +1,16 @@
 {
   "dataset": "insurance_claims",
-  "timestamp": "2026-08-15T00:18:58Z",
+  "timestamp": "2026-08-26T04:40:56Z",
   "probes_total": 24,
   "retrieval_prune_passed": 24,
   "retrieval_prune_accuracy": 100.0,
-  "answer_level_passed": 21,
-  "answer_level_accuracy": 87.5,
+  "answer_level_passed": 22,
+  "answer_level_accuracy": 91.67,
   "by_kind": {
     "paraphrase": {
       "total": 17,
       "passed": 17,
-      "answer_passed": 15
+      "answer_passed": 16
     },
     "negative": {
       "total": 4,
@@ -1609,5 +1609,12 @@
       ],
       "answer_names_expected": false
     }
-  ]
+  ],
+  "provenance": {
+    "run": "GitHub Actions 32930212547 (post-fix green run, PR #1)",
+    "environment": "ubuntu-24.04 runner \u00b7 Neo4j 5.26.30 \u00b7 Python 3.12.14 \u00b7 8 workers",
+    "date": "2026-08-26T04:40:56Z",
+    "codebase": "GraphRAG v2 (all v2 features default-off = v1 behavior)",
+    "note": "post-fix run with _threshold_numbers: the 3 negative probes that failed pre-fix (id-digit numeric-seed leak) now refuse cleanly; answer-level also improved 19->22/24 vs the pre-fix run"
+  }
 }
