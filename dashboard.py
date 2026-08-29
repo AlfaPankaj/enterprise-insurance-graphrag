@@ -29,8 +29,9 @@ from src.graphrag.fraud_ground_truth import (  # noqa: E402
     detect_dataset,
     load_ground_truth,
 )
-from src.graphrag.query_pipeline import run_query  # noqa: E402
+from src.graphrag.query_pipeline import run_query, stream_query  # noqa: E402
 from src.graphrag.reranker import make_reranker  # noqa: E402
+from src.graphrag.warmup import warm_query_models  # noqa: E402
 from src.graphrag.custom_sessions import list_custom_sessions  # noqa: E402
 from src.graphrag.sessions import ensure_pdf_demo_fraud_benchmark  # noqa: E402
 
@@ -41,6 +42,14 @@ st.set_page_config(page_title="GraphRAG Token Optimization Dashboard", layout="w
 ensure_pdf_demo_fraud_benchmark()
 
 ACCENT = "#1f6feb"
+
+
+@st.cache_resource
+def _warm_query_models_once():
+    return warm_query_models()
+
+
+_warm_query_models_once()
 
 
 @st.cache_resource
@@ -242,7 +251,12 @@ with st.sidebar:
     answer_mode = st.selectbox("Answer mode", ["extractive", "auto", "llm"],
                                index=["extractive", "auto", "llm"].index(settings.ANSWER_MODE)
                                if settings.ANSWER_MODE in ("extractive", "auto", "llm") else 0)
-    st.caption("auto = Ollama LLM with extractive fallback")
+    stream_answers = st.checkbox(
+        "Stream answer tokens live",
+        value=settings.STREAM_ANSWERS_DEFAULT,
+        help="PII-masked answers remain buffered until they are safe to display.",
+    )
+    st.caption("auto = hosted provider or Ollama, with extractive fallback")
     st.divider()
     try:
         # multipage-aware link; bare mode (AppTest/CI) lacks the page manager
@@ -321,10 +335,34 @@ if run and query.strip():
         st.error("Neo4j is not reachable.")
     else:
         try:
-            with st.spinner("Retrieving, re-ranking, pruning and answering…"):
-                res = run_query(get_driver(), query.strip(), max_hops=max_hops,
-                                token_budget=token_budget, reranker_mode=reranker_mode,
-                                answer_mode=answer_mode)
+            if stream_answers:
+                status_line = st.empty()
+                live_answer = st.empty()
+                chunks: list[str] = []
+                res = None
+                for event in stream_query(
+                    get_driver(), query.strip(), max_hops=max_hops,
+                    token_budget=token_budget, reranker_mode=reranker_mode,
+                    answer_mode=answer_mode,
+                ):
+                    if event["type"] == "status":
+                        stage = event.get("stage", "pipeline").replace("_", " ").title()
+                        state = event.get("state", "running").replace("_", " ")
+                        status_line.caption(f"{stage}: {state}…")
+                    elif event["type"] == "delta":
+                        chunks.append(event["text"])
+                        live_answer.markdown("".join(chunks))
+                    elif event["type"] in ("done", "blocked"):
+                        res = event["result"]
+                status_line.empty()
+                if res is None:
+                    raise RuntimeError("stream ended without a result event")
+            else:
+                with st.spinner("Retrieving, re-ranking, pruning and answering…"):
+                    res = run_query(get_driver(), query.strip(), max_hops=max_hops,
+                                    token_budget=token_budget,
+                                    reranker_mode=reranker_mode,
+                                    answer_mode=answer_mode)
         except Exception as exc:  # noqa: BLE001 - show a clean message, not a traceback
             st.error(f"Query failed: {exc}")
             st.stop()
@@ -333,7 +371,9 @@ if run and query.strip():
         st.write(res["answer"])
         st.caption(f"answer mode: {res['answer_mode']}" +
                    (f" ({res['answer_model']})" if res.get("answer_model") else "") +
-                   f" · reranker: {res['reranker']}")
+                   f" · reranker: {res['reranker']}" +
+                   (f" · TTFT: {res['time_to_first_token_ms']:.0f} ms"
+                    if res.get("time_to_first_token_ms") is not None else ""))
         if res.get("answer_fallback"):
             st.warning(f"LLM answer unavailable — showing extractive answer. "
                        f"Reason: {res['answer_fallback']}")

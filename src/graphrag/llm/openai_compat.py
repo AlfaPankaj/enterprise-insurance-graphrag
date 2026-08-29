@@ -21,6 +21,7 @@ import time
 import httpx
 
 from graphrag.config import settings
+from graphrag.http_client import request_post, request_stream
 from graphrag.llm.base import LLMResult, ModelNotFoundError, ProviderError
 from graphrag.llm.pricing import estimate_cost
 
@@ -105,7 +106,7 @@ class OpenAICompatProvider:
 
         start = time.perf_counter()
         try:
-            response = httpx.post(
+            response = request_post(
                 _chat_url(self.base_url), json=payload, headers=headers,
                 params=params, timeout=settings.LLM_TIMEOUT_S,
             )
@@ -179,8 +180,10 @@ class OpenAICompatProvider:
 
         timeout = httpx.Timeout(settings.LLM_TIMEOUT_S, read=settings.LLM_TIMEOUT_S)
         try:
-            with httpx.stream("POST", _chat_url(self.base_url), json=payload,
-                              headers=headers, params=params, timeout=timeout) as response:
+            with request_stream(
+                "POST", _chat_url(self.base_url), json=payload,
+                headers=headers, params=params, timeout=timeout,
+            ) as response:
                 if response.status_code == 404:
                     raise ModelNotFoundError(
                         f"model '{model}' not found on {self.base_url} — check "

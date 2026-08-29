@@ -10,6 +10,7 @@ Metrics exposed:
 * ``graphrag_errors_total{kind}``
 * ``graphrag_rate_limited_total``
 * ``graphrag_query_latency_seconds``           histogram
+* ``graphrag_time_to_first_token_seconds``      histogram
 * ``graphrag_upload_latency_seconds``          histogram
 * ``graphrag_token_savings_ratio``             histogram (0..1)
 * ``graphrag_llm_cost_usd_total``
@@ -117,6 +118,11 @@ errors_total = counter("graphrag_errors_total", "Request failures by kind.")
 rate_limited_total = counter("graphrag_rate_limited_total", "Requests rejected by the rate limiter.")
 query_latency = histogram("graphrag_query_latency_seconds",
                           "End-to-end query latency (seconds).", _LATENCY_BUCKETS)
+time_to_first_token = histogram(
+    "graphrag_time_to_first_token_seconds",
+    "Time from streamed query start to first answer token (seconds).",
+    _LATENCY_BUCKETS,
+)
 upload_latency = histogram("graphrag_upload_latency_seconds",
                            "PDF upload/CDC latency (seconds).", _LATENCY_BUCKETS)
 token_savings = histogram("graphrag_token_savings_ratio",

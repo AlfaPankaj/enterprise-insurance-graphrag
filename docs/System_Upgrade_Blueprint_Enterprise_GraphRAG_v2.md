@@ -255,17 +255,19 @@ criteria. Order reflects dependency, not necessarily priority — see §6.
 
 * **Answer cache** — `src/graphrag/cache.py`: TTL + LRU in-process cache
   (`CACHE_ENABLED`/`CACHE_TTL_S`/`CACHE_MAX_ENTRIES`, off by default = v1
-  behavior). Keys bind query + pipeline params + **tenant** + **PII scope** +
-  **dataset revision**; every write path bumps `(:Dataset).rev` (ingest, seed,
-  CDC upload) so stale answers can never survive a graph write. Cache hits
-  re-audit (fresh audit id, `cached: true`) and skip retrieval entirely.
+  behavior). Keys bind query + effective provider/model/retrieval settings +
+  **tenant** + **PII scope** + **dataset revision**; every write path bumps
+  `(:Dataset).rev` (ingest, seed, CDC upload), and temporary `auto` fallbacks
+  are not retained. Cache hits re-audit (fresh audit id, `cached: true`) and
+  skip retrieval entirely.
   (G9)
 * **Streaming answers** — providers gained `stream()` (Ollama NDJSON +
   OpenAI-compatible SSE, incl. Azure); `stream_answer()` with the same
   fallback policy (auto degrades to extractive before the first token);
-  `POST /api/v1/query/stream` (SSE `meta → delta* → done/blocked/error`);
-  Streamlit Dashboard "stream tokens live" checkbox. Streaming is
-  automatically buffered when PII masking applies to the caller. (G10)
+  `POST /api/v1/query/stream` (SSE
+  `status* → meta → (status/delta)* → done/blocked/error`); Streamlit query
+  runners default to live streaming. TTFT and stage timings are recorded;
+  streaming is automatically buffered when PII masking applies. (G10)
 * **Prometheus observability** — `src/graphrag/prometheus.py`: zero-dependency
   counter/histogram registry + `GET /metrics` (admin/auditor roles):
   requests by kind, error/rate-limit counters, query+upload latency

@@ -209,17 +209,42 @@ def test_auto_model_not_found_falls_back_with_reason(monkeypatch):
     assert "FRD-CLM-0003" in out["answer"]
 
 
+def test_answer_prompt_is_cached_per_process(monkeypatch):
+    from graphrag import answer_generator as ag
+
+    class _PromptFile:
+        calls = 0
+
+        @classmethod
+        def read_text(cls, **_kwargs):
+            cls.calls += 1
+            return "Context: {context}\nQuestion: {query}"
+
+    ag._load_prompt.cache_clear()
+    monkeypatch.setattr(ag, "PROMPT_FILE", _PromptFile)
+    assert ag._render_prompt("q1", "c1") == "Context: c1\nQuestion: q1"
+    assert ag._render_prompt("q2", "c2") == "Context: c2\nQuestion: q2"
+    assert _PromptFile.calls == 1
+    ag._load_prompt.cache_clear()
+
+
 def test_unknown_mode_raises():
     with pytest.raises(ValueError):
         generate_answer("q", PRUNED, mode="bogus")
 
 
 def test_ollama_available_probe(monkeypatch):
+    from graphrag import answer_generator as ag
+
+    ag._PROBE_CACHE.clear()
     # reachable server
     monkeypatch.setattr("graphrag.answer_generator.httpx.get",
                         lambda *a, **k: _FakeResponse({}, status=200))
     assert ollama_available() is True
-    # unreachable -> probe fails closed
+    # A successful probe is cached briefly; clear it to simulate TTL expiry
+    # before changing server state.
+    assert ollama_available() is True
+    ag._PROBE_CACHE.clear()
     monkeypatch.setattr("graphrag.answer_generator.httpx.get",
                         lambda *a, **k: (_ for _ in ()).throw(OSError("refused")))
     assert ollama_available() is False

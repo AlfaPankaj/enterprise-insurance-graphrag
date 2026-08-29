@@ -24,15 +24,19 @@ import logging
 import math
 import re
 import threading
+import time
 
 import httpx
 
 from graphrag.config import settings
+from graphrag.http_client import request_get, request_post
 
 logger = logging.getLogger("graphrag.embeddings")
 
 _DIM = 256
 _TOKEN_RE = re.compile(r"[a-zA-Z0-9]+")
+_OLLAMA_PROBE_CACHE: tuple[str, bool, float] | None = None
+_OLLAMA_PROBE_LOCK = threading.Lock()
 
 
 class EmbeddingError(RuntimeError):
@@ -131,7 +135,7 @@ class OpenAICompatEmbedder:
         params = {"api-version": settings.OPENAI_API_VERSION} \
             if settings.OPENAI_API_VERSION else None
         try:
-            response = httpx.post(
+            response = request_post(
                 url, json={"model": self.model, "input": texts},
                 headers=headers, params=params, timeout=settings.LLM_TIMEOUT_S,
             )
@@ -169,16 +173,31 @@ class OllamaEmbedder:
             else (self._model or "")
 
     def available(self) -> bool:
-        try:
-            return httpx.get(f"{self.base_url}/api/tags", timeout=2).status_code == 200
-        except Exception:
-            return False
+        global _OLLAMA_PROBE_CACHE
+        now = time.monotonic()
+        ttl = max(0.0, float(settings.LLM_PROBE_TTL_S))
+        with _OLLAMA_PROBE_LOCK:
+            cached = _OLLAMA_PROBE_CACHE
+            if cached and cached[0] == self.base_url and now - cached[2] < ttl:
+                return cached[1]
+            try:
+                ok = request_get(
+                    f"{self.base_url}/api/tags", timeout=2
+                ).status_code == 200
+            except Exception:
+                ok = False
+            _OLLAMA_PROBE_CACHE = (self.base_url, ok, now)
+            return ok
 
     def embed(self, texts: list[str]) -> list[list[float]]:
         try:
-            response = httpx.post(
+            response = request_post(
                 f"{self.base_url}/api/embeddings",
-                json={"model": self.model, "prompt": texts[0] if len(texts) == 1 else texts},
+                json={
+                    "model": self.model,
+                    "prompt": texts[0] if len(texts) == 1 else texts,
+                    "keep_alive": settings.OLLAMA_KEEP_ALIVE,
+                },
                 timeout=settings.LLM_TIMEOUT_S,
             )
         except httpx.HTTPError as exc:

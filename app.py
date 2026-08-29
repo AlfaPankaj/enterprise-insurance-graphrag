@@ -27,6 +27,7 @@ from src.graphrag.reranker import make_reranker
 from src.graphrag.audit_reporter import render_html, render_json, render_pdf
 from src.graphrag.lineage_visualizer import render_lineage_html
 from src.graphrag.traversal_logger import audit_store
+from src.graphrag.warmup import warm_query_models
 from src.graphrag.custom_sessions import (add_custom_session,
                                           list_custom_sessions,
                                           remove_custom_session,
@@ -50,6 +51,14 @@ from upload import (UploadLimits, UploadValidationError,
 # ---------------------------------------------------------------------------
 # Shared helpers
 # ---------------------------------------------------------------------------
+
+@st.cache_resource
+def _warm_query_models_once():
+    return warm_query_models()
+
+
+_warm_query_models_once()
+
 
 @st.cache_resource
 def get_driver():
@@ -485,7 +494,7 @@ elif page == "Dashboard":
                                    index=["extractive", "auto", "llm"].index(settings.ANSWER_MODE) if settings.ANSWER_MODE in ("extractive", "auto", "llm") else 0)
         stream_answers = st.checkbox(
             "Stream answer tokens live (LLM answers; buffered when PII masking is on)",
-            value=False,
+            value=settings.STREAM_ANSWERS_DEFAULT,
         )
 
     st.markdown("---")
@@ -565,6 +574,7 @@ elif page == "Dashboard":
         else:
             try:
                 if stream_answers:
+                    status_line = st.empty()
                     live = st.empty()
                     buffer: list[str] = []
                     res = None
@@ -574,11 +584,16 @@ elif page == "Dashboard":
                                             reranker_mode=reranker_mode,
                                             answer_mode=answer_mode,
                                             identity=identity):
-                        if ev["type"] == "delta":
+                        if ev["type"] == "status":
+                            stage = ev.get("stage", "pipeline").replace("_", " ").title()
+                            state = ev.get("state", "running").replace("_", " ")
+                            status_line.caption(f"{stage}: {state}…")
+                        elif ev["type"] == "delta":
                             buffer.append(ev["text"])
                             live.markdown("".join(buffer))
                         elif ev["type"] in ("done", "blocked"):
                             res = ev["result"]
+                    status_line.empty()
                     if res is None:
                         st.error("Streaming failed — no result event received.")
                         st.stop()
@@ -589,7 +604,7 @@ elif page == "Dashboard":
                 st.error(f"Query failed: {exc}"); st.stop()
 
             st.markdown(f"<div class='grag-answer'><div class='label'>Answer</div><div class='text'>{res['answer']}</div></div>", unsafe_allow_html=True)
-            st.caption(f"answer mode: {res['answer_mode']}" + (f" ({res['answer_model']})" if res.get("answer_model") else "") + f" · reranker: {res['reranker']}" + (" · ⚡ served from cache" if res.get("cached") else "") + (f" · provider: {res['answer_provider']}" if res.get("answer_provider") else ""))
+            st.caption(f"answer mode: {res['answer_mode']}" + (f" ({res['answer_model']})" if res.get("answer_model") else "") + f" · reranker: {res['reranker']}" + (" · ⚡ served from cache" if res.get("cached") else "") + (f" · provider: {res['answer_provider']}" if res.get("answer_provider") else "") + (f" · TTFT: {res['time_to_first_token_ms']:.0f} ms" if res.get("time_to_first_token_ms") is not None else ""))
             if res.get("answer_fallback"):
                 st.warning(f"LLM unavailable — extractive fallback. Reason: {res['answer_fallback']}")
 

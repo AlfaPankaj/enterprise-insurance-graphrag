@@ -22,9 +22,10 @@ import json
 import re
 from pathlib import Path
 
-import httpx
-
 from graphrag.config import settings
+from graphrag.http_client import request_post
+from graphrag.llm.factory import provider_available
+from graphrag.llm.ollama import OllamaProvider
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 PROMPT_FILE = PROJECT_ROOT / "prompts" / "extraction_prompts.txt"
@@ -408,10 +409,7 @@ def extract_entities_heuristic(text: str, doc_id_hint: str | None = None) -> dic
 # ---------------------------------------------------------------------------
 
 def _ollama_available() -> bool:
-    try:
-        return httpx.get(f"{settings.LLAMA_API_URL}/api/tags", timeout=2).status_code == 200
-    except Exception:  # noqa: BLE001 - optional local service probe
-        return False
+    return provider_available(OllamaProvider())
 
 
 def _load_prompts() -> tuple[str, str]:
@@ -476,10 +474,11 @@ def _validate_llm_entities(value: object) -> dict:
 def _extract_with_llm(text: str, doc_id_hint: str | None) -> dict:
     """Ollama /api/generate extraction (v1 contract: format=json)."""
     prompt = _render_extraction_prompt(text)
-    response = httpx.post(
+    response = request_post(
         f"{settings.LLAMA_API_URL}/api/generate",
         json={"model": settings.LLAMA_MODEL, "prompt": prompt,
-              "stream": False, "format": "json"},
+              "stream": False, "format": "json",
+              "keep_alive": settings.OLLAMA_KEEP_ALIVE},
         timeout=120,
     )
     response.raise_for_status()

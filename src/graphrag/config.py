@@ -66,6 +66,13 @@ class Settings(BaseSettings):
     OPENAI_API_VERSION: str = ""         # Azure only: e.g. 2024-06-01
     LLM_TIMEOUT_S: float = 90.0
     LLM_MAX_RETRIES: int = 2             # retries on transient 5xx/timeout
+    LLM_PROBE_TTL_S: float = 15.0        # cache both successful/failed health probes
+    OLLAMA_KEEP_ALIVE: str = "10m"       # retain the selected model in memory
+    QUERY_MODEL_WARMUP_ENABLED: bool = False
+    STREAM_ANSWERS_DEFAULT: bool = True
+    HTTP_POOL_MAX_CONNECTIONS: int = 100
+    HTTP_POOL_MAX_KEEPALIVE_CONNECTIONS: int = 20
+    HTTP_POOL_KEEPALIVE_EXPIRY_S: float = 30.0
     # per-1k-token USD used to price provider usage blocks (set contracted rates)
     LLM_PRICE_PER_1K_INPUT: float = 0.0
     LLM_PRICE_PER_1K_OUTPUT: float = 0.0

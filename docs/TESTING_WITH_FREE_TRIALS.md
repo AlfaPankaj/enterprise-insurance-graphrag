@@ -201,7 +201,7 @@ curl -X POST http://localhost:8000/api/v1/query \
   -H "Content-Type: application/json" \
   -d '{"query": "Does claim CLM-0003 have a fraud flag?"}'
 
-# streaming query (SSE: meta -> delta* -> done/blocked; -N disables buffering)
+# streaming query (SSE: status* -> meta -> (status/delta)* -> done/blocked)
 curl -N -X POST http://localhost:8000/api/v1/query/stream \
   -H "Content-Type: application/json" \
   -d '{"query": "Does claim CLM-0003 have a fraud flag?", "answer_mode": "auto"}'
@@ -238,12 +238,23 @@ CACHE_MAX_ENTRIES=1000
    upload a PDF (CDC write) or re-seed a session and the same question
    recomputes (no stale answers after writes).
 3. `/metrics` exposes `graphrag_cache_hits_total` / `graphrag_cache_misses_total`.
+4. Exact keys also include effective provider/model, retrieval, embedding,
+   tokenizer, guardrail, and prompt configuration. Temporary `auto`-mode
+   extractive fallbacks are not cached, so provider recovery improves the next
+   answer immediately.
 
-### Streaming notes
+### Streaming and cold-start notes
 * Live token streaming requires `answer_mode=auto`/`llm` AND a reachable
-  provider; extractive answers arrive as a single delta.
+  provider; extractive answers and cache hits arrive as a single delta.
+* Both Streamlit query runners default to streaming (`STREAM_ANSWERS_DEFAULT`).
+  `status` events report cache/retrieval/generation progress, while the final
+  result and audit record include `time_to_first_token_ms` and stage timings.
 * When `PII_MODE=mask` applies to the caller, streaming is disabled and the
   answer arrives as one buffered delta (nothing sensitive streams).
+* Provider calls share persistent HTTP/TLS connections. For local cold starts,
+  set `QUERY_MODEL_WARMUP_ENABLED=true` and tune `OLLAMA_KEEP_ALIVE` (default
+  `10m`); this preloads only the configured answer/reranker models and does not
+  change inference settings.
 
 ## 6c. PII encryption at rest (v2)
 

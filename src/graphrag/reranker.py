@@ -194,8 +194,9 @@ class HybridReranker:
     name = "hybrid"
     _RRF_K = 60.0
 
-    def __init__(self, driver=None):
+    def __init__(self, driver=None, vector_store=None):
         self.driver = driver
+        self.vector_store = vector_store
         self._lexical = LexicalReranker()
 
     @staticmethod
@@ -218,8 +219,8 @@ class HybridReranker:
 
         # 2) semantic (optional: vector index over node texts)
         vec_ids: list[str] = []
-        store = None
-        if self.driver is not None:
+        store = self.vector_store
+        if store is None and self.driver is not None:
             try:
                 from graphrag.vector_store import build_vector_store
                 store = build_vector_store(self.driver)
@@ -282,7 +283,7 @@ def cross_encoder_available() -> bool:
 _cross_encoder_cache: CrossEncoderReranker | None = None
 
 
-def make_reranker(mode: str | None = None, driver=None):
+def make_reranker(mode: str | None = None, driver=None, vector_store=None):
     """Build the configured reranker; ``auto`` prefers cross-encoder.
 
     ``hybrid`` builds the v2 RRF fusion reranker (lexical + semantic +
@@ -291,7 +292,7 @@ def make_reranker(mode: str | None = None, driver=None):
     global _cross_encoder_cache
     mode = mode or settings.RERANKER_MODE
     if mode == "hybrid":
-        return HybridReranker(driver)
+        return HybridReranker(driver, vector_store=vector_store)
     if mode == "cross-encoder" or (mode == "auto" and cross_encoder_available()):
         if _cross_encoder_cache is None:
             try:

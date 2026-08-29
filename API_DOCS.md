@@ -169,10 +169,11 @@ RBAC, tenant scoping, and PII masking. Role policy: `upload` admin+analyst ·
 
 ### `POST /api/v1/query/stream` — SSE streaming variant of /query
 
-Same request body as `/query`. Event sequence: `meta` (retrieval stats,
-streaming flag) → `delta`* (answer tokens) → `done` (full result, audit
-written) or `blocked` (guardrail refusal) / `error`. Buffered (single delta)
-when PII masking applies to the caller.
+Same request body as `/query`. Event sequence: `status`* (cache/retrieval/
+generation progress and TTFT) → `meta` (retrieval stats, stage timings,
+streaming/cache flags) → (`status` / `delta`)* → `done` (full result, audit
+written) or `blocked` (guardrail refusal) / `error`. Cache hits use the same
+stream protocol. PII-masked answers are safely buffered into a single delta.
 
 ```bash
 curl -N -X POST http://localhost:8000/api/v1/query/stream \

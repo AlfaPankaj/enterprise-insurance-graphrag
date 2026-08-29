@@ -147,8 +147,11 @@ class JobSubmitRequest(BaseModel):
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     from graphrag.embeddings import assert_embedding_ready
+    from graphrag.warmup import warm_query_models
 
     assert_embedding_ready()  # hard failure only when APP_ENV is production + hash
+    if settings.QUERY_MODEL_WARMUP_ENABLED:
+        await asyncio.to_thread(warm_query_models)
     app.state.driver = open_driver()
     configure_tracing()
     register_default_handlers(lambda: app.state.driver)
@@ -456,6 +459,8 @@ def _record_query_metrics(result: dict, kind: str) -> None:
     prom.requests_total.inc(kind=kind)
     if result.get("execution_time_ms") is not None:
         prom.query_latency.observe(result["execution_time_ms"] / 1000.0)
+    if result.get("time_to_first_token_ms") is not None:
+        prom.time_to_first_token.observe(result["time_to_first_token_ms"] / 1000.0)
     tokens = result.get("tokens") or {}
     if tokens.get("savings_percent") is not None:
         prom.token_savings.observe(tokens["savings_percent"] / 100.0)
@@ -473,8 +478,9 @@ async def query_stream(
 ):
     """Streaming variant of /api/v1/query — server-sent events.
 
-    Event sequence: ``meta`` → ``delta``* → ``done`` (or ``blocked`` on
-    guardrail refusal / ``error`` on failure). The ``done``/``blocked`` events
+    Event sequence: ``status``* → ``meta`` → (``status`` / ``delta``)* →
+    ``done`` (or ``blocked`` on guardrail refusal / ``error`` on failure).
+    The ``done``/``blocked`` events
     carry the full result (same shape as /api/v1/query) after the audit
     record is written. When PII masking is active for the caller, live token
     streaming is disabled and the answer arrives as a single buffered delta.

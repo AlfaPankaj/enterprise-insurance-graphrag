@@ -12,10 +12,10 @@ from __future__ import annotations
 
 import logging
 
-import httpx
 from fastapi import FastAPI, HTTPException, Request
 
 from graphrag.config import settings
+from graphrag.http_client import request_get
 
 logger = logging.getLogger("graphrag.api")
 
@@ -32,7 +32,7 @@ def _neo4j_ok(driver) -> bool:
 
 def _ollama_ok() -> bool:
     try:
-        return httpx.get(f"{settings.LLAMA_API_URL}/api/tags", timeout=2).status_code == 200
+        return request_get(f"{settings.LLAMA_API_URL}/api/tags", timeout=2).status_code == 200
     except Exception as exc:  # noqa: BLE001 - probe must never raise
         logger.warning("ollama health probe failed: %s", exc)
         return False

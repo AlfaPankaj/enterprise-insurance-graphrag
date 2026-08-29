@@ -17,6 +17,7 @@ from typing import Protocol
 import httpx
 
 from graphrag.config import settings
+from graphrag.http_client import request_post
 
 
 class OcrError(RuntimeError):
@@ -108,8 +109,8 @@ class GlmOcrProvider:
             }],
         }
         try:
-            response = httpx.post(self._url(), headers=headers, json=payload,
-                                  timeout=settings.OCR_TIMEOUT_S)
+            response = request_post(self._url(), headers=headers, json=payload,
+                                    timeout=settings.OCR_TIMEOUT_S)
         except httpx.HTTPError as exc:
             raise OcrError(f"GLM-OCR endpoint unavailable: {exc}") from exc
         if response.status_code >= 400:

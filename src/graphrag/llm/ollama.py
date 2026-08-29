@@ -19,6 +19,7 @@ import time
 import httpx
 
 from graphrag.config import settings
+from graphrag.http_client import request_get, request_post, request_stream
 from graphrag.llm.base import LLMResult, ModelNotFoundError, ProviderError
 
 logger = logging.getLogger("graphrag.llm.ollama")
@@ -56,7 +57,7 @@ class OllamaProvider:
 
     def available(self) -> bool:
         try:
-            return httpx.get(f"{self.base_url}/api/tags", timeout=2).status_code == 200
+            return request_get(f"{self.base_url}/api/tags", timeout=2).status_code == 200
         except Exception:
             return False
 
@@ -69,12 +70,13 @@ class OllamaProvider:
             "prompt": prompt,
             "stream": False,
             "options": {"temperature": temperature, "num_predict": max_tokens},
+            "keep_alive": settings.OLLAMA_KEEP_ALIVE,
         }
         if json_mode:
             payload["format"] = "json"
         start = time.perf_counter()
         try:
-            response = httpx.post(
+            response = request_post(
                 f"{self.base_url}/api/generate", json=payload,
                 timeout=settings.LLM_TIMEOUT_S,
             )
@@ -110,13 +112,14 @@ class OllamaProvider:
             "prompt": prompt,
             "stream": True,
             "options": {"temperature": temperature, "num_predict": max_tokens},
+            "keep_alive": settings.OLLAMA_KEEP_ALIVE,
         }
         if json_mode:
             payload["format"] = "json"
         timeout = httpx.Timeout(settings.LLM_TIMEOUT_S, read=settings.LLM_TIMEOUT_S)
         try:
-            with httpx.stream("POST", f"{self.base_url}/api/generate",
-                              json=payload, timeout=timeout) as response:
+            with request_stream("POST", f"{self.base_url}/api/generate",
+                                json=payload, timeout=timeout) as response:
                 _raise_actionable_error(response, model)
                 full: list[str] = []
                 for line in response.iter_lines():
