@@ -299,7 +299,9 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     p = argparse.ArgumentParser(description="Ingest a real insurance CSV into the graph")
     p.add_argument("dataset", nargs="?", choices=DATASETS, help="which dataset to ingest")
     p.add_argument("--list", action="store_true", help="list available datasets")
-    p.add_argument("--reset", action="store_true", help="clear the whole graph first")
+    p.add_argument("--reset", action="store_true", help="clear this tenant's graph scope first")
+    p.add_argument("--tenant", default=settings.DEFAULT_TENANT,
+                   help="tenant to stamp when TENANT_MODE=column")
     p.add_argument("--limit", type=int, default=None, help="max rows for data_synthetic "
                                                              "(default: all 53,503)")
     p.add_argument("--uri", default=settings.NEO4J_URI)
@@ -337,37 +339,52 @@ def main(argv: list[str] | None = None) -> int:
     driver = GraphDatabase.driver(args.uri, auth=(args.user, args.password))
     try:
         with driver.session() as session:
+            tenant = args.tenant if settings.TENANT_MODE == "column" else None
             if args.reset:
                 from scripts.seed_graph import clear_graph_batched
 
-                clear_graph_batched(session)
-                print("  graph cleared (--reset)")
+                clear_graph_batched(session, tenant_id=tenant)
+                print("  graph scope cleared (--reset)")
             # autocommit batches (load_nodes/load_relationships chunk at 500):
             # one explicit transaction would risk the server's 60s transaction
             # timeout on the 53k-row data_synthetic load. MERGEs are idempotent,
             # so a partial failure is safe to re-run.
             t1 = time.perf_counter()
-            # v2 tenant stamping: when TENANT_MODE=column, every node carries
-            # the configured DEFAULT_TENANT so tenant-scoped queries work
-            tenant = settings.DEFAULT_TENANT if settings.TENANT_MODE == "column" else None
+            # In column mode every node and relationship match is tenant-owned.
             if tenant:
                 print(f"  stamping tenant_id={tenant} on all nodes (TENANT_MODE=column)")
             load_nodes(session, nodes, tenant_id=tenant)
-            load_relationships(session, rels)
+            load_relationships(session, rels, tenant_id=tenant)
             load_s = time.perf_counter() - t1
             print(f"  loaded in {load_s:.1f}s (total {load_s + parse_s:.1f}s)")
             # stamp which dataset is loaded so the dashboard can pick the right
             # fraud ground-truth table (labels live in the CSVs, not the graph);
             # v2: the rev bump invalidates the answer cache on every (re)seed
-            session.run(
-                "MERGE (d:Dataset {name: $name}) "
-                "ON CREATE SET d.rev = 0 "
-                "ON MATCH SET d.rev = coalesce(d.rev, 0) + 1",
-                name=args.dataset,
-            )
-            counts = session.run(
-                "MATCH (n) RETURN labels(n)[0] AS label, count(*) AS c ORDER BY label"
-            ).data()
+            if tenant:
+                session.run(
+                    "MERGE (d:Dataset {name:$name, tenant_id:$tenant}) "
+                    "ON CREATE SET d.rev=0 "
+                    "ON MATCH SET d.rev=coalesce(d.rev,0)+1 "
+                    "SET d.updated_at=datetime(), d.active=true",
+                    name=args.dataset, tenant=tenant,
+                )
+            else:
+                session.run(
+                    "MERGE (d:Dataset {name: $name}) "
+                    "ON CREATE SET d.rev = 0 "
+                    "ON MATCH SET d.rev = coalesce(d.rev, 0) + 1",
+                    name=args.dataset,
+                )
+            if tenant:
+                counts = session.run(
+                    "MATCH (n {tenant_id:$tenant}) "
+                    "RETURN labels(n)[0] AS label,count(*) AS c ORDER BY label",
+                    tenant=tenant,
+                ).data()
+            else:
+                counts = session.run(
+                    "MATCH (n) RETURN labels(n)[0] AS label, count(*) AS c ORDER BY label"
+                ).data()
             print("  graph nodes:", ", ".join(f"{r['label']}={r['c']}" for r in counts))
     finally:
         driver.close()

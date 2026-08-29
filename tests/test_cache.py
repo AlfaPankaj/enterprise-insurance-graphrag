@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import sys
-import time
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -15,7 +14,7 @@ import pytest
 from graphrag.cache import QueryCache, build_cache_key, graph_revision
 from graphrag.config import settings
 from graphrag.identity import UserIdentity
-from graphrag.query_pipeline import run_query
+from graphrag.query_pipeline import run_query, stream_query
 
 # ---------------------------------------------------------------------------
 # scripted graph driver (same shape as test_query_pipeline_v2's, + revision)
@@ -51,7 +50,7 @@ class _Cursor:
 
     def _resolve(self):
         q = self.query
-        if "MATCH (d:Dataset)" in q:                       # revision lookup
+        if "MATCH (d:Dataset" in q:                        # revision lookup
             return [{"name": self.driver.dataset_name, "rev": self.driver.dataset_rev}]
         if "labels(n) AS labels, n.id AS id" in q:
             eid = self.kwargs.get("id")
@@ -227,7 +226,10 @@ def test_cache_separates_tenants(monkeypatch, audit_dir):
                    identity=a, answer_mode="extractive")
     r2 = run_query(driver, "Does claim CLM-0003 have a fraud flag?",
                    identity=b, answer_mode="extractive")
+    r3 = run_query(driver, "Does claim CLM-0003 have a fraud flag?",
+                   identity=a, answer_mode="extractive")
     assert not r1.get("cached") and not r2.get("cached")  # distinct entries
+    assert r3["cached"] is True  # tenant A can only hit tenant A's entry
 
 
 def test_cache_separates_pii_scopes(monkeypatch, audit_dir):
@@ -241,6 +243,96 @@ def test_cache_separates_pii_scopes(monkeypatch, audit_dir):
     res = run_query(driver, "Who investigates claim CLM-0003?",
                     identity=auditor, answer_mode="extractive")
     assert not res.get("cached")                 # auditor must not get analyst's masked entry
+
+
+def test_cache_separates_context_payload_shape(monkeypatch, audit_dir):
+    monkeypatch.setattr(settings, "CACHE_ENABLED", True)
+    driver = _Driver()
+    query = "Does claim CLM-0003 have a fraud flag?"
+    with_context = run_query(
+        driver, query, identity=IDENTITY, answer_mode="extractive",
+        include_context=True,
+    )
+    without_context = run_query(
+        driver, query, identity=IDENTITY, answer_mode="extractive",
+        include_context=False,
+    )
+    cached_without = run_query(
+        driver, query, identity=IDENTITY, answer_mode="extractive",
+        include_context=False,
+    )
+    assert "context" in with_context
+    assert "context" not in without_context
+    assert "context" not in cached_without and cached_without["cached"] is True
+
+
+def test_auto_extractive_fallback_is_not_cached(monkeypatch, audit_dir):
+    from graphrag import query_pipeline as qp
+    from graphrag.cache import query_cache
+
+    monkeypatch.setattr(settings, "CACHE_ENABLED", True)
+    monkeypatch.setattr(
+        qp,
+        "generate_answer",
+        lambda *_args, **_kwargs: {
+            "answer": "temporary fallback",
+            "mode": "extractive",
+            "model": None,
+        },
+    )
+    driver = _Driver()
+    query = "Does claim CLM-0003 have a fraud flag?"
+    first = run_query(driver, query, identity=IDENTITY, answer_mode="auto")
+    second = run_query(driver, query, identity=IDENTITY, answer_mode="auto")
+    assert not first.get("cached") and not second.get("cached")
+    assert len(query_cache) == 0
+
+
+def test_cache_signature_invalidates_on_model_configuration(monkeypatch, audit_dir):
+    monkeypatch.setattr(settings, "CACHE_ENABLED", True)
+    driver = _Driver()
+    query = "Does claim CLM-0003 have a fraud flag?"
+    run_query(driver, query, identity=IDENTITY, answer_mode="extractive")
+    monkeypatch.setattr(settings, "ANSWER_MODEL", "different-model")
+    result = run_query(driver, query, identity=IDENTITY, answer_mode="extractive")
+    assert not result.get("cached")
+
+
+def test_streamed_cache_hit_assembles_exact_answer(monkeypatch, audit_dir):
+    monkeypatch.setattr(settings, "CACHE_ENABLED", True)
+    driver = _Driver()
+    query = "Does claim CLM-0003 have a fraud flag?"
+    original = run_query(driver, query, identity=IDENTITY, answer_mode="extractive")
+    calls_after_first = len(driver.calls)
+
+    events = list(stream_query(driver, query, identity=IDENTITY,
+                               answer_mode="extractive"))
+    chunks = [event["text"] for event in events if event["type"] == "delta"]
+    done = next(event["result"] for event in events if event["type"] == "done")
+    assert "".join(chunks) == original["answer"] == done["answer"]
+    assert done["cached"] is True
+    assert done["time_to_first_token_ms"] is not None
+    assert events[0] == {"type": "status", "stage": "cache_lookup", "state": "started"}
+    assert len(driver.calls) == calls_after_first + 1  # revision lookup only
+
+
+def test_streamed_and_buffered_outputs_match(monkeypatch, audit_dir):
+    monkeypatch.setattr(settings, "CACHE_ENABLED", False)
+    driver = _Driver()
+    query = "Does claim CLM-0003 have a fraud flag?"
+    buffered = run_query(driver, query, identity=IDENTITY, answer_mode="extractive")
+    events = list(stream_query(driver, query, identity=IDENTITY,
+                               answer_mode="extractive"))
+    streamed = next(event["result"] for event in events if event["type"] == "done")
+    assembled = "".join(event["text"] for event in events
+                        if event["type"] == "delta")
+    assert assembled == streamed["answer"] == buffered["answer"]
+    assert streamed["retrieval"] == buffered["retrieval"]
+    assert streamed["pruned"] == buffered["pruned"]
+    assert streamed["time_to_first_token_ms"] is not None
+    assert "time_to_first_token_ms" in audit_dir.recent(1)[0]["timings_ms"]
+    assert any(event.get("stage") == "retrieval" for event in events
+               if event["type"] == "status")
 
 
 def test_cache_disabled_by_default(monkeypatch, audit_dir):

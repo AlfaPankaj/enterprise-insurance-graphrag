@@ -24,15 +24,19 @@ import logging
 import math
 import re
 import threading
+import time
 
 import httpx
 
 from graphrag.config import settings
+from graphrag.http_client import request_get, request_post
 
 logger = logging.getLogger("graphrag.embeddings")
 
 _DIM = 256
 _TOKEN_RE = re.compile(r"[a-zA-Z0-9]+")
+_OLLAMA_PROBE_CACHE: tuple[str, bool, float] | None = None
+_OLLAMA_PROBE_LOCK = threading.Lock()
 
 
 class EmbeddingError(RuntimeError):
@@ -131,7 +135,7 @@ class OpenAICompatEmbedder:
         params = {"api-version": settings.OPENAI_API_VERSION} \
             if settings.OPENAI_API_VERSION else None
         try:
-            response = httpx.post(
+            response = request_post(
                 url, json={"model": self.model, "input": texts},
                 headers=headers, params=params, timeout=settings.LLM_TIMEOUT_S,
             )
@@ -169,16 +173,31 @@ class OllamaEmbedder:
             else (self._model or "")
 
     def available(self) -> bool:
-        try:
-            return httpx.get(f"{self.base_url}/api/tags", timeout=2).status_code == 200
-        except Exception:
-            return False
+        global _OLLAMA_PROBE_CACHE
+        now = time.monotonic()
+        ttl = max(0.0, float(settings.LLM_PROBE_TTL_S))
+        with _OLLAMA_PROBE_LOCK:
+            cached = _OLLAMA_PROBE_CACHE
+            if cached and cached[0] == self.base_url and now - cached[2] < ttl:
+                return cached[1]
+            try:
+                ok = request_get(
+                    f"{self.base_url}/api/tags", timeout=2
+                ).status_code == 200
+            except Exception:
+                ok = False
+            _OLLAMA_PROBE_CACHE = (self.base_url, ok, now)
+            return ok
 
     def embed(self, texts: list[str]) -> list[list[float]]:
         try:
-            response = httpx.post(
+            response = request_post(
                 f"{self.base_url}/api/embeddings",
-                json={"model": self.model, "prompt": texts[0] if len(texts) == 1 else texts},
+                json={
+                    "model": self.model,
+                    "prompt": texts[0] if len(texts) == 1 else texts,
+                    "keep_alive": settings.OLLAMA_KEEP_ALIVE,
+                },
                 timeout=settings.LLM_TIMEOUT_S,
             )
         except httpx.HTTPError as exc:
@@ -224,13 +243,35 @@ def get_embedder(mode: str | None = None):
     return _hash_emb
 
 
+def production_mode() -> bool:
+    return settings.APP_ENV.strip().lower() in {"prod", "production"}
+
+
+def assert_embedding_ready(*, production: bool | None = None):
+    """Fail configuration when production would silently use feature hashing."""
+    embedder = get_embedder()
+    production = production_mode() if production is None else production
+    if (production and isinstance(embedder, HashEmbedder)
+            and not settings.ALLOW_HASH_EMBEDDINGS_IN_PRODUCTION):
+        raise EmbeddingError(
+            "Production embeddings resolve to HashEmbedder. Configure "
+            "EMBEDDING_PROVIDER=openai/ollama (and its endpoint/model), or set "
+            "ALLOW_HASH_EMBEDDINGS_IN_PRODUCTION=true only for an explicit demo."
+        )
+    return embedder
+
+
 def embed_texts(texts: list[str], mode: str | None = None) -> list[list[float]]:
-    """Embed ``texts`` with the resolved backend (never raises for ``auto``)."""
+    """Embed text; production never silently falls back to hash vectors."""
     embedder = get_embedder(mode)
+    if mode is None:
+        assert_embedding_ready()
     try:
         return embedder.embed(texts)
     except EmbeddingError:
-        if mode in ("openai", "ollama"):
+        if mode in ("openai", "ollama") or (
+            production_mode() and not settings.ALLOW_HASH_EMBEDDINGS_IN_PRODUCTION
+        ):
             raise
         logger.warning("embedding provider %s failed, using hash fallback",
                        embedder.name)

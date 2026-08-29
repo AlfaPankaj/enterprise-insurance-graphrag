@@ -1,0 +1,5 @@
+# Optional PDF page rendering for provider-based OCR.
+# GLM-OCR itself runs behind a vLLM/SGLang OpenAI-compatible service and is
+# intentionally not installed into the application image.
+pypdfium2>=4.30,<5
+Pillow>=10,<12

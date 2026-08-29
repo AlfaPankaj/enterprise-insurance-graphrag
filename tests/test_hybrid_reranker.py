@@ -54,6 +54,30 @@ def test_hybrid_empty_nodes():
     assert HybridReranker(driver=None).rank("q", []) == []
 
 
+def test_hybrid_reuses_resolved_store_with_score_parity(monkeypatch):
+    from graphrag import vector_store
+
+    class _NonEmptyStore:
+        def __len__(self):
+            return 1
+
+    store = _NonEmptyStore()
+    calls = {"n": 0}
+
+    def resolve(_driver):
+        calls["n"] += 1
+        return store
+
+    monkeypatch.setattr(settings, "EMBEDDING_PROVIDER", "hash")
+    monkeypatch.setattr(vector_store, "build_vector_store", resolve)
+    baseline = HybridReranker(driver=object()).rank("claim status", NODES)
+    reused = HybridReranker(driver=object(), vector_store=store).rank(
+        "claim status", NODES
+    )
+    assert reused == baseline
+    assert calls["n"] == 1  # only the baseline resolves; reuse makes no call
+
+
 def test_factory_hybrid_mode():
     r = make_reranker("hybrid", driver=None)
     assert isinstance(r, HybridReranker)

@@ -39,12 +39,14 @@ def test_counter_inc_and_render():
 def test_histogram_buckets_and_sum():
     prom.query_latency.observe(0.3)
     prom.query_latency.observe(1.2)
+    prom.time_to_first_token.observe(0.2)
     text = prom.render()
     assert 'graphrag_query_latency_seconds_bucket{le="0.5"} 1' in text
     assert 'graphrag_query_latency_seconds_bucket{le="2.5"} 2' in text
     assert 'graphrag_query_latency_seconds_bucket{le="+Inf"} 2' in text
     assert "graphrag_query_latency_seconds_sum 1.5" in text
     assert "graphrag_query_latency_seconds_count 2" in text
+    assert "graphrag_time_to_first_token_seconds_count 1" in text
 
 
 def test_unobserved_metrics_not_rendered():

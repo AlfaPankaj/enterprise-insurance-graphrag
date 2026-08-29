@@ -11,28 +11,38 @@ masking, guardrails, an **answer cache**, and **streaming**:
   + PII scope + dataset revision (any graph write bumps the revision, so
   cached answers can never survive a mutation). Cache hits are re-audited
   (fresh audit id, ``cached: true``) — the trail stays complete.
-* ``stream_query(...)`` — the same pipeline as a generator: yields ``meta`` /
-  ``delta`` / ``done`` / ``blocked`` events (SSE endpoint + live UI). Live
-  token streaming is disabled when PII masking is active for the caller (the
+* ``stream_query(...)`` — the same pipeline as a generator: yields ``status`` /
+  ``meta`` / ``delta`` / ``done`` / ``blocked`` events (SSE endpoint + live
+  UI). Live token streaming is disabled when PII masking is active for the caller (the
   answer is delivered as one buffered delta instead).
 """
 
 from __future__ import annotations
 
+import copy
 import time
 import uuid
 
 from graphrag.answer_generator import generate_answer, stream_answer
-from graphrag.cache import build_cache_key, graph_revision, query_cache
+from graphrag.cache import (
+    build_cache_key,
+    graph_revision,
+    query_cache,
+    runtime_cache_signature,
+)
 from graphrag.config import settings
 from graphrag.context_pruner import prune_context
 from graphrag.graph_retriever import retrieve_subgraph, serialize_subgraph
 from graphrag.guardrails import run_guardrails
 from graphrag.identity import UserIdentity
 from graphrag.pii import MaskingPolicy, redact_node, scrub_answer
-from graphrag.prometheus import (cache_hits_total, cache_misses_total,
-                                 llm_cost_total, llm_fallbacks_total,
-                                 token_savings)
+from graphrag.prometheus import (
+    cache_hits_total,
+    cache_misses_total,
+    llm_cost_total,
+    llm_fallbacks_total,
+    token_savings,
+)
 from graphrag.reranker import _label_prior_hits, make_reranker
 from graphrag.token_counter import count_tokens
 from graphrag.tracing import start_span
@@ -83,6 +93,7 @@ def _prepare(driver, query: str, max_hops: int, token_budget: int,
     t1 = time.perf_counter()
 
     hybrid_mode = (reranker_mode or settings.RERANKER_MODE) == "hybrid"
+    store = None
     if hybrid_mode:
         # v2 semantic seed fallback: when id/keyword/numeric seeding found
         # nothing, embed the query and seed from the revision-cached vector
@@ -90,7 +101,7 @@ def _prepare(driver, query: str, max_hops: int, token_budget: int,
         # dataset revision; pure-Cypher retrieval is untouched otherwise.
         try:
             from graphrag.vector_store import build_vector_store
-            store = build_vector_store(driver)
+            store = build_vector_store(driver, tenant_id=scoped_tenant)
         except Exception:  # noqa: BLE001 - hybrid degrades to lexical
             store = None
         if store is not None and not subgraph["seeds"]:
@@ -101,7 +112,7 @@ def _prepare(driver, query: str, max_hops: int, token_budget: int,
                     with driver.session() as session:
                         extra = semantic_seeds(session, query, store, k=3)
                 if extra:
-                    from graphrag.graph_retriever import (retrieve_subgraph as _rs)
+                    from graphrag.graph_retriever import retrieve_subgraph as _rs
                     subgraph = _rs(driver, query, max_hops,
                                    tenant_id=scoped_tenant,
                                    vector_store=store)
@@ -113,7 +124,10 @@ def _prepare(driver, query: str, max_hops: int, token_budget: int,
             except Exception:  # noqa: BLE001
                 pass
 
-    reranker = make_reranker(reranker_mode, driver=driver)
+    # Reuse the exact revision/tenant-scoped store resolved above. Hybrid
+    # ranking still computes the same query/document vectors and RRF scores;
+    # this only removes a redundant store-resolution round trip.
+    reranker = make_reranker(reranker_mode, driver=driver, vector_store=store)
 
     # edge-aware ranking text: each node carries its direct neighbors + edge
     # types, so the scorer can connect "coverage COV-0017" to the claim's policy
@@ -240,6 +254,10 @@ def _finalize(ctx: dict, answer: dict) -> dict:
         "answer_ms": round((t4 - ctx["t3"]) * 1000, 2),
         "total_ms": round((t4 - ctx["t0"]) * 1000, 2),
     }
+    if ctx.get("_ttft_ms") is not None:
+        timings["time_to_first_token_ms"] = ctx["_ttft_ms"]
+    if ctx.get("_generation_ttft_ms") is not None:
+        timings["generation_time_to_first_token_ms"] = ctx["_generation_ttft_ms"]
 
     # --- explainability (Shot 3): build + persist the audit record ---
     audit_record = build_audit_record(
@@ -254,6 +272,11 @@ def _finalize(ctx: dict, answer: dict) -> dict:
         usage=answer.get("usage"),
         cost_usd=answer.get("cost_usd"),
     )
+    if ctx.get("_ttft_ms") is not None:
+        audit_record["timings_ms"]["time_to_first_token_ms"] = ctx["_ttft_ms"]
+    if ctx.get("_generation_ttft_ms") is not None:
+        audit_record["timings_ms"]["generation_time_to_first_token_ms"] = \
+            ctx["_generation_ttft_ms"]
     if settings.AUDIT_ENABLED:
         audit_store.append(audit_record)
     ctx["_audit_record"] = audit_record
@@ -302,6 +325,7 @@ def _finalize(ctx: dict, answer: dict) -> dict:
         },
         "traversal": traversal,
         "execution_time_ms": round((t4 - ctx["t0"]) * 1000, 2),
+        "time_to_first_token_ms": ctx.get("_ttft_ms"),
     }
 
 
@@ -309,35 +333,50 @@ def _cache_key(ctx_signature: dict) -> str | None:
     """Cache key for the query + pipeline + data signature; None = don't cache."""
     if not settings.CACHE_ENABLED:
         return None
-    rev = graph_revision(ctx_signature["driver"])
+    rev = graph_revision(ctx_signature["driver"], ctx_signature.get("tenant"))
     if rev is None:
         return None  # revision unreadable (DB down / no marker) -> skip caching
     return build_cache_key(
         query=ctx_signature["query"],
         max_hops=ctx_signature["max_hops"],
         token_budget=ctx_signature["token_budget"],
-        reranker_mode=ctx_signature["reranker_mode"],
-        answer_mode=ctx_signature["answer_mode"],
+        reranker_mode=ctx_signature["reranker_mode"] or settings.RERANKER_MODE,
+        answer_mode=ctx_signature["answer_mode"] or settings.ANSWER_MODE,
         tenant=ctx_signature["tenant"] or "",
         pii_scope=ctx_signature["pii_scope"],
+        include_context=ctx_signature.get("include_context", False),
+        runtime=runtime_cache_signature(
+            reranker_mode=ctx_signature["reranker_mode"],
+            answer_mode=ctx_signature["answer_mode"],
+        ),
         dataset=rev[0],
         rev=rev[1],
     )
 
 
-def _serve_cache_hit(key: str, query: str) -> dict:
+def _serve_cache_hit(key: str, query: str, entry: dict | None = None,
+                     time_to_first_token_ms: float | None = None) -> dict:
     """Re-audit + return a cached result (fresh audit id, cached flags)."""
     t_hit0 = time.perf_counter()
-    entry = query_cache.get(key)
+    entry = entry or query_cache.get(key)
+    if entry is None:  # defensive: a very short TTL may expire between calls
+        raise KeyError(f"cache entry expired: {key}")
     hit_ms = round((time.perf_counter() - t_hit0) * 1000, 2)
-    result = dict(entry["result"])
+    result = copy.deepcopy(entry["result"])
 
     # fresh audit event: same content, new id/timestamp, cached marker
-    new_audit = dict(entry["audit"])
+    new_audit = copy.deepcopy(entry["audit"])
     new_audit["audit_id"] = uuid.uuid4().hex[:12]
     new_audit["timestamp"] = time.strftime("%Y-%m-%dT%H:%M:%S")
     new_audit["cached"] = True
     new_audit.pop("record_hash", None)
+    audit_timings = dict(new_audit.get("timings_ms", {}))
+    audit_timings.pop("time_to_first_token_ms", None)
+    audit_timings.pop("generation_time_to_first_token_ms", None)
+    audit_timings["cache_lookup_ms"] = hit_ms
+    if time_to_first_token_ms is not None:
+        audit_timings["time_to_first_token_ms"] = time_to_first_token_ms
+    new_audit["timings_ms"] = audit_timings
     if settings.AUDIT_ENABLED:
         audit_store.append(new_audit)
 
@@ -346,6 +385,17 @@ def _serve_cache_hit(key: str, query: str) -> dict:
     result["cached_original_execution_ms"] = result.get("execution_time_ms")
     result["execution_time_ms"] = hit_ms
     result["traversal"] = {**result["traversal"], "audit_id": new_audit["audit_id"]}
+    result["cached_original_time_to_first_token_ms"] = result.get(
+        "time_to_first_token_ms"
+    )
+    result["time_to_first_token_ms"] = time_to_first_token_ms
+    cached_timings = dict(result["traversal"].get("timings_ms", {}))
+    cached_timings.pop("time_to_first_token_ms", None)
+    cached_timings.pop("generation_time_to_first_token_ms", None)
+    cached_timings["cache_lookup_ms"] = hit_ms
+    if time_to_first_token_ms is not None:
+        cached_timings["time_to_first_token_ms"] = time_to_first_token_ms
+    result["traversal"]["timings_ms"] = cached_timings
     if entry.get("context") is not None:
         result["context"] = entry["context"]
     cache_hits_total.inc()
@@ -394,9 +444,11 @@ def run_query(driver, query: str, max_hops: int | None = None,
         "answer_mode": answer_mode,
         "tenant": scoped_tenant,
         "pii_scope": _pii_scope(pii_policy),
+        "include_context": include_context,
     })
-    if key is not None and query_cache.get(key) is not None:
-        return _serve_cache_hit(key, query)
+    entry = query_cache.get(key) if key is not None else None
+    if entry is not None:
+        return _serve_cache_hit(key, query, entry)
     if key is not None:
         cache_misses_total.inc()
 
@@ -406,12 +458,27 @@ def run_query(driver, query: str, max_hops: int | None = None,
         answer = generate_answer(query, ctx["pruned"], mode=answer_mode)
     result = _finalize(ctx, answer)
 
-    if key is not None:
-        query_cache.put(key, {"result": result, "audit": ctx["_audit_record"],
-                              "context": _context_payload(ctx) if include_context else None})
+    requested_answer_mode = answer_mode or settings.ANSWER_MODE
+    if key is not None and _cacheable_result(result, requested_answer_mode):
+        query_cache.put(key, {
+            "result": result,
+            "audit": ctx["_audit_record"],
+            "context": _context_payload(ctx) if include_context else None,
+        })
     if include_context:
         result["context"] = _context_payload(ctx)
     return result
+
+
+def _cacheable_result(result: dict, requested_answer_mode: str) -> bool:
+    """Do not retain availability-driven or interrupted fallback answers."""
+    if result.get("answer_mode") == "blocked":
+        return True
+    if result.get("answer_fallback"):
+        return False
+    if requested_answer_mode == "auto" and result.get("answer_mode") != "llm":
+        return False
+    return True
 
 
 def _context_payload(ctx: dict) -> dict:
@@ -426,28 +493,72 @@ def stream_query(driver, query: str, max_hops: int | None = None,
                  token_budget: int | None = None, reranker_mode: str | None = None,
                  answer_mode: str | None = None,
                  identity: UserIdentity | None = None):
-    """The query pipeline as an event generator (v2 — SSE endpoint + live UI).
+    """The query pipeline as an event generator (SSE endpoint + live UI).
 
-    Event sequence:
-    * ``{"type": "meta", ...}`` — retrieval stats + streaming flag
-    * ``{"type": "delta", "text"}`` — answer tokens (live stream, or one
-      buffered delta when PII masking is active for this caller)
-    * ``{"type": "done", "result": {...}}`` — the full result (same shape as
-      ``run_query``) after the audit record is written
-    * ``{"type": "blocked", "result": {...}}`` — guardrail refusal instead of
-      an answer
-
-    Auto mode never raises; ``llm`` mode propagates provider failures.
+    ``status`` events are additive progress/latency metadata; ``meta``,
+    ``delta``, ``done``, and ``blocked`` retain their established contracts.
+    Cache hits are re-audited and delivered through the same stream protocol.
     """
+    stream_t0 = time.perf_counter()
     max_hops = max_hops or settings.MAX_HOPS
     token_budget = token_budget or settings.MAX_TOKENS
+
+    yield {"type": "status", "stage": "cache_lookup", "state": "started"}
+    tenant_id = identity.tenant_id if identity else None
+    scoped_tenant = tenant_id if settings.TENANT_MODE == "column" else None
+    pii_policy = MaskingPolicy.for_roles(set(identity.roles) if identity else None)
+    key = _cache_key({
+        "driver": driver,
+        "query": query,
+        "max_hops": max_hops,
+        "token_budget": token_budget,
+        "reranker_mode": reranker_mode,
+        "answer_mode": answer_mode,
+        "tenant": scoped_tenant,
+        "pii_scope": _pii_scope(pii_policy),
+        "include_context": False,
+    })
+    entry = query_cache.get(key) if key is not None else None
+    if entry is not None:
+        ttft_ms = round((time.perf_counter() - stream_t0) * 1000, 2)
+        result = _serve_cache_hit(
+            key, query, entry, time_to_first_token_ms=ttft_ms
+        )
+        yield {"type": "status", "stage": "cache_lookup", "state": "hit",
+               "elapsed_ms": ttft_ms}
+        if result.get("answer_mode") == "blocked":
+            yield {"type": "blocked", "result": result}
+            return
+        yield {
+            "type": "meta",
+            "streaming": True,
+            "cached": True,
+            "retrieval": result.get("retrieval", {}),
+            "reranker": result.get("reranker"),
+        }
+        yield {"type": "status", "stage": "generation", "state": "first_token",
+               "time_to_first_token_ms": ttft_ms, "cached": True}
+        yield {"type": "delta", "text": result["answer"], "cached": True}
+        yield {"type": "done", "result": result}
+        return
+    if key is not None:
+        cache_misses_total.inc()
+
+    yield {"type": "status", "stage": "retrieval", "state": "started"}
     ctx = _prepare(driver, query, max_hops, token_budget, reranker_mode, identity)
     pruned = ctx["pruned"]
     pii_policy = ctx["pii_policy"]
-
+    stage_timings = {
+        "retrieval_ms": round((ctx["t1"] - ctx["t0"]) * 1000, 2),
+        "rerank_ms": round((ctx["t2"] - ctx["t1"]) * 1000, 2),
+        "prune_ms": round((ctx["t3"] - ctx["t2"]) * 1000, 2),
+    }
+    yield {"type": "status", "stage": "retrieval", "state": "completed",
+           "timings_ms": stage_timings}
     yield {
         "type": "meta",
         "streaming": not pii_policy.active,
+        "cached": False,
         "retrieval": {
             "seeds": [s["id"] for s in ctx["subgraph"]["seeds"]],
             "node_count": ctx["subgraph"]["node_count"],
@@ -456,18 +567,31 @@ def stream_query(driver, query: str, max_hops: int | None = None,
             "pruned_tokens": pruned["tokens"],
         },
         "reranker": ctx["reranker"].name,
+        "timings_ms": stage_timings,
     }
 
-    # input guardrail before any token leaves (output checks still run at the end)
+    # Input guardrail before any answer token leaves. Output checks still run
+    # in _finalize, exactly as on the buffered path.
     from graphrag.guardrails import scan_query
     input_guard = scan_query(query) if settings.GUARDRAILS_ENABLED else None
     if input_guard is not None and input_guard.blocked:
-        blocked = {"answer": _BLOCKED_ANSWER, "mode": "blocked", "model": None,
-                   "fallback_reason": "guardrail: " + ", ".join(input_guard.injection_hits)}
-        yield {"type": "blocked", "result": _finalize(ctx, blocked)}
+        blocked = {
+            "answer": _BLOCKED_ANSWER,
+            "mode": "blocked",
+            "model": None,
+            "fallback_reason": "guardrail: " + ", ".join(input_guard.injection_hits),
+        }
+        result = _finalize(ctx, blocked)
+        if key is not None:
+            query_cache.put(key, {"result": result, "audit": ctx["_audit_record"],
+                                  "context": None})
+        yield {"type": "blocked", "result": result}
         return
 
+    generation_t0 = time.perf_counter()
+    yield {"type": "status", "stage": "generation", "state": "started"}
     use_live = not pii_policy.active
+    first_token_recorded = False
     if use_live:
         answer_dict: dict | None = None
         with start_span("graphrag.answer.stream",
@@ -475,6 +599,20 @@ def stream_query(driver, query: str, max_hops: int | None = None,
                          "mode": answer_mode or settings.ANSWER_MODE}):
             for ev in stream_answer(query, pruned, mode=answer_mode):
                 if ev["type"] == "delta":
+                    if ev.get("text") and not first_token_recorded:
+                        now = time.perf_counter()
+                        ctx["_ttft_ms"] = round((now - stream_t0) * 1000, 2)
+                        ctx["_generation_ttft_ms"] = round(
+                            (now - generation_t0) * 1000, 2
+                        )
+                        first_token_recorded = True
+                        yield {
+                            "type": "status", "stage": "generation",
+                            "state": "first_token",
+                            "time_to_first_token_ms": ctx["_ttft_ms"],
+                            "generation_time_to_first_token_ms":
+                                ctx["_generation_ttft_ms"],
+                        }
                     yield {"type": "delta", "text": ev["text"]}
                 else:
                     answer_dict = {
@@ -483,14 +621,39 @@ def stream_query(driver, query: str, max_hops: int | None = None,
                         "usage": ev.get("usage"), "cost_usd": ev.get("cost_usd"),
                         "fallback_reason": ev.get("fallback_reason"),
                     }
-        if answer_dict is None:  # pragma: no cover - stream_answer always ends with done
+        if answer_dict is None:  # pragma: no cover
+            # ``stream_answer`` always terminates with a done event.
             answer_dict = generate_answer(query, pruned, mode=answer_mode)
     else:
-        # PII masking active: buffered path so nothing sensitive streams
+        # PII masking active: buffer so no potentially sensitive partial text
+        # can leave before the complete answer is scrubbed.
         answer_dict = generate_answer(query, pruned, mode=answer_mode)
         if pii_policy.active:
             answer_dict = {**answer_dict,
                            "answer": scrub_answer(answer_dict["answer"], pii_policy)}
+        now = time.perf_counter()
+        ctx["_ttft_ms"] = round((now - stream_t0) * 1000, 2)
+        ctx["_generation_ttft_ms"] = round((now - generation_t0) * 1000, 2)
+        first_token_recorded = True
+        yield {
+            "type": "status", "stage": "generation", "state": "first_token",
+            "time_to_first_token_ms": ctx["_ttft_ms"],
+            "generation_time_to_first_token_ms": ctx["_generation_ttft_ms"],
+        }
         yield {"type": "delta", "text": answer_dict["answer"]}
 
-    yield {"type": "done", "result": _finalize(ctx, answer_dict)}
+    # Empty provider answers are rejected by providers, but retain a metric for
+    # defensive/custom implementations that emit no non-empty delta.
+    if not first_token_recorded:
+        now = time.perf_counter()
+        ctx["_ttft_ms"] = round((now - stream_t0) * 1000, 2)
+        ctx["_generation_ttft_ms"] = round((now - generation_t0) * 1000, 2)
+
+    result = _finalize(ctx, answer_dict)
+    requested_answer_mode = answer_mode or settings.ANSWER_MODE
+    if key is not None and _cacheable_result(result, requested_answer_mode):
+        query_cache.put(key, {"result": result, "audit": ctx["_audit_record"],
+                              "context": None})
+    yield {"type": "status", "stage": "generation", "state": "completed",
+           "elapsed_ms": result["traversal"]["timings_ms"]["answer_ms"]}
+    yield {"type": "done", "result": result}

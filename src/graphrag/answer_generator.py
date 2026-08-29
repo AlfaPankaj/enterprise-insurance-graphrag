@@ -22,12 +22,15 @@ Both paths return ``{"answer": str, "mode": "extractive"|"llm",
 from __future__ import annotations
 
 import logging
+import threading
 import time
+from functools import lru_cache
 from pathlib import Path
 
 import httpx
 
 from graphrag.config import settings
+from graphrag.http_client import request_get, request_post
 from graphrag.llm import ModelNotFoundError as ProviderModelNotFoundError
 from graphrag.llm.base import ProviderError
 from graphrag.llm.factory import get_provider
@@ -41,11 +44,10 @@ PROMPT_FILE = PROJECT_ROOT / "prompts" / "answer_prompts.txt"
 
 VALID_MODES = ("extractive", "auto", "llm")
 
-# Negative-probe cache: when Ollama is down, re-probing on every query adds
-# seconds of latency to the auto/fallback path. Remember a failed probe for a
-# short window instead (a fresh success probe still happens after the TTL).
-_PROBE_TTL_S = 15
+# Short probe cache: avoid a health round trip on every query while still
+# detecting provider availability changes promptly after the configured TTL.
 _PROBE_CACHE: dict[str, tuple[bool, float]] = {}
+_PROBE_LOCK = threading.Lock()
 
 # The prompt uses {query}/{context} so graph-derived text containing braces
 # cannot crash .format()/string interpolation (real claim text can hold JSON).
@@ -122,18 +124,22 @@ def ollama_available() -> bool:
     """
     url = settings.LLAMA_API_URL
     now = time.monotonic()
-    cached = _PROBE_CACHE.get(url)
-    if cached and not cached[0] and now - cached[1] < _PROBE_TTL_S:
-        return False  # still in the negative-cache window
-    try:
-        ok = httpx.get(f"{url}/api/tags", timeout=1).status_code == 200
-    except Exception:
-        ok = False
-    _PROBE_CACHE[url] = (ok, now)
-    return ok
+    ttl = max(0.0, float(settings.LLM_PROBE_TTL_S))
+    with _PROBE_LOCK:
+        cached = _PROBE_CACHE.get(url)
+        if cached and now - cached[1] < ttl:
+            return cached[0]
+        try:
+            ok = request_get(f"{url}/api/tags", timeout=1).status_code == 200
+        except Exception:
+            ok = False
+        _PROBE_CACHE[url] = (ok, now)
+        return ok
 
 
+@lru_cache(maxsize=1)
 def _load_prompt() -> str:
+    """Read the immutable runtime prompt once per process."""
     return PROMPT_FILE.read_text(encoding="utf-8")
 
 
@@ -174,13 +180,14 @@ def _generate_with_llm(query: str, pruned: dict, timeout: float = 90.0) -> dict:
     model = settings.ANSWER_MODEL or settings.LLAMA_MODEL
     prompt = _render_prompt(query, pruned["text"])
     start = time.perf_counter()
-    response = httpx.post(
+    response = request_post(
         f"{settings.LLAMA_API_URL}/api/generate",
         json={
             "model": model,
             "prompt": prompt,
             "stream": False,
             "options": {"temperature": 0.2, "num_predict": settings.ANSWER_MAX_TOKENS},
+            "keep_alive": settings.OLLAMA_KEEP_ALIVE,
         },
         timeout=timeout,
     )

@@ -55,6 +55,7 @@ def test_ollama_generate_contract(monkeypatch):
     assert result.input_tokens == 42 and result.output_tokens == 7
     assert captured["payload"]["stream"] is False
     assert captured["payload"]["options"]["num_predict"] == 512
+    assert captured["payload"]["keep_alive"] == settings.OLLAMA_KEEP_ALIVE
     assert "11434" in captured["url"]
 
 
@@ -188,6 +189,24 @@ def test_factory_openai_mode_requires_config(monkeypatch):
 def test_factory_unknown_mode_raises():
     with pytest.raises(ValueError, match="unknown"):
         get_provider("bogus")
+
+
+def test_positive_probe_cache_skips_repeat_probes():
+    from graphrag.llm import factory
+
+    class _Up:
+        name = "up-provider"
+        calls = 0
+
+        def available(self):
+            _Up.calls += 1
+            return True
+
+    clear_probe_cache()
+    assert factory._probe(_Up()) is True
+    assert factory._probe(_Up()) is True
+    assert _Up.calls == 1
+    clear_probe_cache()
 
 
 def test_negative_probe_cache_skips_repeat_probes(monkeypatch):

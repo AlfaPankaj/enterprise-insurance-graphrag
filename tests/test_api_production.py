@@ -82,3 +82,15 @@ def test_upload_rejects_fake_pdf_magic(monkeypatch):
         )
         assert resp.status_code == 400
         assert "header" in resp.json()["detail"]
+
+
+def test_upload_stops_at_configured_byte_limit(monkeypatch):
+    monkeypatch.setattr(settings, "API_KEY", "")
+    monkeypatch.setattr(settings, "UPLOAD_MAX_PDF_BYTES", 4)
+    with _client() as client:
+        resp = client.post(
+            "/api/v1/upload",
+            files={"file": ("large.pdf", b"%PDF-1.7", "application/pdf")},
+        )
+        assert resp.status_code == 413
+        assert "too large" in resp.json()["detail"]

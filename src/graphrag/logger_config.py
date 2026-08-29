@@ -30,7 +30,10 @@ class JsonFormatter(logging.Formatter):
         if record.exc_info:
             payload["exception"] = self.formatException(record.exc_info)
         # extra={"request_id": ...} style context lands as top-level fields
-        for key in ("request_id", "doc_id", "query", "latency_ms", "savings_pct"):
+        for key in (
+            "request_id", "doc_id", "query", "latency_ms", "savings_pct",
+            "tenant_id", "file_sha256", "upload_audit_id", "held_for_review",
+        ):
             value = getattr(record, key, None)
             if value is not None:
                 payload[key] = value

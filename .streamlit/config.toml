@@ -11,6 +11,9 @@
 
 [server]
 fileWatcherType = "none"
+# Reject very large bodies at the web-server boundary. Application-level
+# limits in upload.py are stricter for PDFs, batches, pages, rows, and columns.
+maxUploadSize = 50
 
 # Dark base theme — matches the palette in app.py / src/graphrag/audit_ui.py
 # (:root --bg / --surface / --accent / --text). Without this, Streamlit's

@@ -57,8 +57,9 @@ exactly), adds **no new hard dependencies**, and is covered by the test suite
 | Feature | What it does | Impact on the system |
 |---|---|---|
 | **Multi-provider LLM layer** — `LLM_PROVIDER=auto` | One interface over OpenAI-compatible gateways (OpenAI, **Azure OpenAI**, vLLM, Together…) with Ollama as the local fallback; automatic retries and a deterministic extractive last resort | **No vendor lock-in**, per-answer `usage` + `cost_usd` recorded in every result and audit record, and the system **never hard-fails** when a model is down |
-| **Answer cache** — `CACHE_ENABLED=true` | TTL+LRU cache keyed by query + parameters + **tenant + PII scope + dataset revision** | Repeated operations questions ("status of CLM-…?") answer in milliseconds at **zero LLM cost**; any graph write bumps the revision, so a stale answer can never survive a change |
-| **Streaming answers** — `POST /api/v1/query/stream` | SSE token streaming through the provider layer + a live-stream checkbox in the Dashboard | First token in well under a second instead of waiting for the full answer; automatically buffered whenever PII masking applies, so nothing sensitive streams |
+| **Answer cache** — `CACHE_ENABLED=true` | TTL+LRU cache keyed by query + effective provider/model/retrieval configuration + **tenant + PII scope + dataset revision** | Repeated operations questions avoid retrieval and LLM cost; graph/config changes invalidate the exact signature, and availability-driven `auto` fallbacks are not retained |
+| **Streaming answers** — `POST /api/v1/query/stream` | SSE progress + token events through the provider layer; both Streamlit query runners enable streaming by default | Users see retrieval/generation status immediately; TTFT and stage timings are recorded, while PII-masked answers remain safely buffered |
+| **Pooled provider transport** | A process-wide thread-safe HTTP/TLS pool serves Ollama, OpenAI-compatible, embedding, extraction, and OCR calls; successful and failed provider probes have a brief TTL | Removes repeated connection handshakes and health round trips without changing prompts, models, context, ranking, or generation limits; optional Ollama/reranker warm-up and `keep_alive` reduce cold starts |
 | **Durable job runner** — `POST /api/v1/jobs` | Seeding/benchmark runs are tracked jobs in SQLite (progress lines, cancel, crash recovery) instead of in-process threads | Long operations **survive API restarts** and are visible/cancelable — no more dead daemon threads |
 
 ### Retrieval & answer quality
@@ -66,7 +67,7 @@ exactly), adds **no new hard dependencies**, and is covered by the test suite
 | Feature | What it does | Impact on the system |
 |---|---|---|
 | **Hybrid retrieval** — `reranker_mode=hybrid` | Reciprocal-Rank-Fusion of BM25 + **embeddings** (OpenAI / Ollama / a free deterministic hash embedder) + graph proximity; semantic seed fallback for queries with no id/keyword signal | **Paraphrase and no-id questions now get answers** ("which account posted a payment to Aurora Rare Goods?"). The pure-Cypher path is untouched — the 10,200-query benchmark behavior is unchanged |
-| **Answer-quality evals** — `scripts/benchmark_answer_quality.py` | Every answer scored on faithfulness / relevance / groundedness / refusal against a golden set built from the source data (optional LLM rubric judge) | **Answer quality is now measured and CI-gated**, not just retrieval fidelity — a silent quality regression can't merge |
+| **Answer-quality evals** — `scripts/benchmark_answer_quality.py` | Scores faithfulness / relevance / groundedness / refusal; `data/benchmarks/independent_golden_questions.json` is a frozen 100-query holdout balanced across ID lookup, paraphrase, multi-hop, aggregation, and negative cases | **Answer quality is measured by category on a suite isolated from the demo golden-set builder** (`--golden ... --require-independent`) |
 | **Extraction review queue** — `EXTRACTION_REVIEW_ENABLED=true` | Every extracted entity gets a confidence score; low-confidence entities are **held for human review** (new Review Queue page + `/api/v1/review`) and applied via CDC only after approval | **CDC only ever applies confirmed changes** — the auditor's guarantee for document ingestion; real-world document key spellings are parsed too |
 
 ### Operations, observability & deployment
@@ -159,20 +160,31 @@ ground-truth comparisons follow the loaded dataset — no more copy-pasting
 The **Datasets** page lets you upload your **own PDF or CSV** and query it
 through the same pipeline:
 
-* Upload one or more files → give the session a **unique name** (must not
-  collide with the built-in sessions or another custom session) → the graph is
-  re-seeded and the session appears in the sidebar selector like any other.
-* **CSV** — a generic adapter maps claim-like columns (claim / fraud / amount /
-  loss / incident / coverage) onto `(:Claim)` / `(:FraudFlag)` nodes with
-  `FRAUD_DETECTED` edges; anything else becomes generic `(:Record)` nodes with
-  every column as a property.
-* **PDF** — processed by the standard extraction pipeline (pdf_processor →
-  entity_extractor → graph_updater) with entity-derived edges.
-* Custom sessions can be **renamed** (the graph marker is re-stamped on the
-  next switch) and **removed** from the **Datasets** page. They are persisted
-  in `data/custom_sessions.json` and re-seeded by
-  `scripts/ingest_custom_dataset.py <name> --reset`, so the API's
-  `POST /api/v1/session` and the streaming sidebar progress work for them too.
+* Upload a PDF bundle or a homogeneous **relational multi-CSV bundle** and give
+  it a tenant-local session name. Mixed PDF/CSV batches are rejected rather
+  than partially processed.
+* Root-level `upload.py` remains the security boundary: safe names, bounded
+  files/batches, PDF structure/page counts, UTF-8 CSV limits, malware hooks,
+  SHA-256 deduplication, atomic persistence, checksummed manifest metadata, and
+  mandatory revalidation before every profile or ingest.
+* **CSV workflow** — bounded-memory/disk-backed profiling induces labels, IDs,
+  types, FK edges, and dataset-specific ID regexes. An optional LLM may improve
+  the proposal, but strict validation and explicit **human approval** are
+  required before any graph write. Loading streams row batches, preserves every
+  source column, reports duplicates/orphans, and applies reviewed reversible
+  entity-resolution aliases with provenance.
+* **PDF workflow** — digital text and tables are extracted first; sparse pages
+  can use the optional OCR provider interface (`OCR_PROVIDER=glm-ocr` for a
+  separately deployed GLM-OCR service). Ontology-guided extraction treats the
+  document as untrusted data and validates labels/properties before CDC.
+* Session records, jobs, review items, files, snapshots, graph writes, and
+  retrieval are tenant-scoped. Custom sessions can be reviewed, renamed,
+  re-ingested, or removed from **Datasets**. The same workflow is available via
+  `POST /api/v1/datasets/upload`, mapping-review endpoints, and durable jobs.
+* Neo4j full-text indexes replace normal global keyword scans. Semantic search
+  supports Neo4j-native HNSW, pgvector HNSW, and a bounded memory fallback;
+  ingest/CDC update durable vectors incrementally. Production refuses a silent
+  `HashEmbedder` fallback.
 
 ![Description of PNG](image/upload_dataset.png)
 
@@ -257,7 +269,8 @@ dashboard's validation table. See the report for usage.
 ## Repository layout
 
 ```
-├── app.py            # main Streamlit app (Home / Dashboard / Audit Trail / Datasets / Review Queue)
+├── app.py                      # main Streamlit app (Home / Dashboard / Audit Trail / Datasets / Review Queue)
+├── upload.py                   # shared secure PDF/CSV validation, storage, scanning, checksums + audit
 ├── dashboard.py                # Shot 2: standalone cost-optimization dashboard
 ├── Dockerfile · Dockerfile.dashboard · docker-compose.yml · docker-compose.e2e.yml · docker-compose.aura.yml
 ├── docker-compose.age.yml · docker/age/     # Option A: PostgreSQL + AGE + pgvector, one instance

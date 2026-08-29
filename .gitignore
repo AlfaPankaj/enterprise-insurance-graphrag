@@ -29,6 +29,7 @@ kubeconfig*
 data/audit_trail/*.jsonl
 data/audit_trail/exports/
 data/custom/
+data/custom_sessions.json.lock
 data/benchmarks/.auto_pipeline_state.json
 data/jobs.db
 data/jobs.db-*

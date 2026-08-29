@@ -33,10 +33,10 @@ from neo4j import GraphDatabase
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT / "src"))
 
-from graphrag.config import settings  # noqa: E402
-from graphrag.evals import evaluate_answer, evaluate_answer_hybrid  # noqa: E402
-from graphrag.fraud_ground_truth import parse_fraud_verdict  # noqa: E402
-from graphrag.query_pipeline import run_query  # noqa: E402
+from graphrag.config import settings
+from graphrag.evals import evaluate_answer_hybrid
+from graphrag.fraud_ground_truth import parse_fraud_verdict
+from graphrag.query_pipeline import run_query
 
 GOLDEN = PROJECT_ROOT / "data" / "benchmarks" / "golden_questions.json"
 OUT = PROJECT_ROOT / "data" / "benchmarks" / "answer_quality_synthetic.json"
@@ -50,12 +50,16 @@ def _neo4j_available() -> bool:
             session.run("RETURN 1")
         driver.close()
         return True
-    except Exception:
+    except Exception:  # noqa: BLE001 - optional service probe
         return False
 
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--golden", type=Path, default=GOLDEN,
+                        help="frozen evaluation JSON (use independent_golden_questions.json for holdout)")
+    parser.add_argument("--require-independent", action="store_true",
+                        help="reject generated/non-holdout evaluation manifests")
     parser.add_argument("--answer-mode", default="extractive",
                         choices=["extractive", "auto", "llm"])
     parser.add_argument("--llm-judge", action="store_true",
@@ -69,8 +73,9 @@ def main(argv: list[str] | None = None) -> int:
                         help="fail when mean overall score drops below this")
     args = parser.parse_args(argv)
 
-    if not GOLDEN.exists():
-        print(f"ERROR: {GOLDEN} missing — run scripts/build_golden_set.py first")
+    golden_path = args.golden if args.golden.is_absolute() else PROJECT_ROOT / args.golden
+    if not golden_path.exists():
+        print(f"ERROR: {golden_path} missing")
         return 2
     if not _neo4j_available():
         print("SKIP: Neo4j not reachable — seed the demo graph first "
@@ -78,7 +83,13 @@ def main(argv: list[str] | None = None) -> int:
               "--reset --apply-schema)")
         return 0
 
-    payload = json.loads(GOLDEN.read_text(encoding="utf-8"))
+    payload = json.loads(golden_path.read_text(encoding="utf-8"))
+    if args.require_independent:
+        provenance = payload.get("provenance") or {}
+        if not str(payload.get("suite", "")).startswith("independent_") \
+                or "never generated" not in provenance.get("leakage_policy", "").lower():
+            print("ERROR: evaluation manifest is not an independent frozen holdout")
+            return 2
     questions = payload["questions"][:args.queries] if args.queries else payload["questions"]
 
     driver = GraphDatabase.driver(
@@ -132,8 +143,21 @@ def main(argv: list[str] | None = None) -> int:
         key: round(statistics.mean(r[key] for r in rows), 4)
         for key in ("faithfulness", "relevance", "groundedness", "refusal", "overall")
     }
+    categories = sorted({row["category"] for row in rows})
+    by_category = {
+        category: {
+            key: round(statistics.mean(
+                row[key] for row in rows if row["category"] == category
+            ), 4)
+            for key in ("faithfulness", "relevance", "groundedness", "refusal", "overall")
+        }
+        for category in categories
+    }
     report = {
         "generated_at": time.strftime("%Y-%m-%dT%H:%M:%S"),
+        "evaluation_suite": payload.get("suite", golden_path.stem),
+        "golden_path": str(golden_path.relative_to(PROJECT_ROOT)),
+        "category_means": by_category,
         "session": "synthetic",
         "answer_mode": args.answer_mode,
         "llm_judge": args.llm_judge,

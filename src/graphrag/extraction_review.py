@@ -28,8 +28,11 @@ import uuid
 from pathlib import Path
 
 from graphrag.config import settings
-from graphrag.prometheus import review_decisions_total, review_held_total, \
-    review_pending
+from graphrag.prometheus import (
+    review_decisions_total,
+    review_held_total,
+    review_pending,
+)
 
 logger = logging.getLogger("graphrag.review")
 
@@ -65,8 +68,14 @@ class ReviewStore:
             " status TEXT NOT NULL,"
             " created_at TEXT NOT NULL,"
             " decided_at TEXT,"
-            " decided_by TEXT)"
+            " decided_by TEXT,"
+            " tenant_id TEXT,"
+            " owner TEXT)"
         )
+        columns = {row[1] for row in self._conn.execute("PRAGMA table_info(review)")}
+        for column in ("tenant_id", "owner"):
+            if column not in columns:
+                self._conn.execute(f"ALTER TABLE review ADD COLUMN {column} TEXT")
         self._conn.execute(
             "CREATE INDEX IF NOT EXISTS review_doc_entity "
             "ON review (doc_id, entity_id)")
@@ -80,30 +89,46 @@ class ReviewStore:
         item["reasons"] = json.loads(item["reasons"] or "[]")
         return item
 
-    def get(self, review_id: str) -> dict | None:
+    def get(self, review_id: str, tenant_id: str | None = None) -> dict | None:
         with self._lock:
-            row = self._conn.execute(
-                "SELECT * FROM review WHERE id=?", (review_id,)).fetchone()
+            if tenant_id is None:
+                row = self._conn.execute(
+                    "SELECT * FROM review WHERE id=?", (review_id,)).fetchone()
+            else:
+                row = self._conn.execute(
+                    "SELECT * FROM review WHERE id=? AND tenant_id=?",
+                    (review_id, tenant_id),
+                ).fetchone()
         return self._row_to_item(row) if row else None
 
-    def list(self, status: str | None = None, limit: int = 100) -> list[dict]:
-        with self._lock:
-            if status:
-                rows = self._conn.execute(
-                    "SELECT * FROM review WHERE status=? "
-                    "ORDER BY created_at DESC LIMIT ?",
-                    (status, int(limit))).fetchall()
-            else:
-                rows = self._conn.execute(
-                    "SELECT * FROM review ORDER BY created_at DESC LIMIT ?",
-                    (int(limit),)).fetchall()
-        return [self._row_to_item(r) for r in rows]
-
-    def summary(self) -> dict:
+    def list(self, status: str | None = None, limit: int = 100,
+             tenant_id: str | None = None) -> list[dict]:
+        clauses, params = [], []
+        if status:
+            clauses.append("status=?")
+            params.append(status)
+        if tenant_id is not None:
+            clauses.append("tenant_id=?")
+            params.append(tenant_id)
+        where = " WHERE " + " AND ".join(clauses) if clauses else ""
         with self._lock:
             rows = self._conn.execute(
-                "SELECT status, count(*) AS c FROM review GROUP BY status"
+                f"SELECT * FROM review{where} ORDER BY created_at DESC LIMIT ?",
+                (*params, int(limit)),
             ).fetchall()
+        return [self._row_to_item(r) for r in rows]
+
+    def summary(self, tenant_id: str | None = None) -> dict:
+        with self._lock:
+            if tenant_id is None:
+                rows = self._conn.execute(
+                    "SELECT status, count(*) AS c FROM review GROUP BY status"
+                ).fetchall()
+            else:
+                rows = self._conn.execute(
+                    "SELECT status, count(*) AS c FROM review WHERE tenant_id=? "
+                    "GROUP BY status", (tenant_id,),
+                ).fetchall()
         out = {STATUS_PENDING: 0, STATUS_APPROVED: 0, STATUS_REJECTED: 0}
         for row in rows:
             out[row["status"]] = row["c"]
@@ -116,7 +141,9 @@ class ReviewStore:
     # ------------------------------------------------------------- lifecycle
     def submit(self, doc_id: str, source_file: str | None, label: str,
                entity_id: str, props: dict, confidence: float,
-               reasons: list[str] | None = None) -> tuple[str, bool]:
+               reasons: list[str] | None = None,
+               tenant_id: str | None = None,
+               owner: str | None = None) -> tuple[str, bool]:
         """Hold one low-confidence entity for review.
 
         Returns ``(review_id, created)`` — a pending item for the same
@@ -124,11 +151,12 @@ class ReviewStore:
         duplicated, so repeated uploads iterate on one review entry.
         """
         now = time.strftime("%Y-%m-%dT%H:%M:%S")
+        tenant_id = tenant_id or settings.DEFAULT_TENANT
         with self._lock:
             existing = self._conn.execute(
                 "SELECT id FROM review WHERE doc_id=? AND entity_id=? "
-                "AND status=? LIMIT 1",
-                (doc_id, entity_id, STATUS_PENDING)).fetchone()
+                "AND status=? AND coalesce(tenant_id,'')=coalesce(?,'') LIMIT 1",
+                (doc_id, entity_id, STATUS_PENDING, tenant_id)).fetchone()
             if existing:
                 with self._conn:
                     self._conn.execute(
@@ -141,17 +169,19 @@ class ReviewStore:
             with self._conn:
                 self._conn.execute(
                     "INSERT INTO review (id, doc_id, source_file, label, "
-                    "entity_id, props, confidence, reasons, status, created_at) "
-                    "VALUES (?,?,?,?,?,?,?,?,?,?)",
+                    "entity_id, props, confidence, reasons, status, created_at, "
+                    "tenant_id, owner) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
                     (review_id, doc_id, source_file, label, entity_id,
                      json.dumps(props, default=str), float(confidence),
-                     json.dumps(reasons or []), STATUS_PENDING, now))
+                     json.dumps(reasons or []), STATUS_PENDING, now,
+                     tenant_id, owner))
             review_pending.inc()
             review_held_total.inc()
             return review_id, True
 
     def decide(self, review_id: str, decision: str,
-               decided_by: str | None = None) -> dict | None:
+               decided_by: str | None = None,
+               tenant_id: str | None = None) -> dict | None:
         """Approve/reject a PENDING item; returns the updated item (or None).
 
         ``decision`` in {approved, rejected}. Only a pending item can be
@@ -160,8 +190,15 @@ class ReviewStore:
         if decision not in (STATUS_APPROVED, STATUS_REJECTED):
             raise ValueError(f"decision must be approved or rejected, got {decision!r}")
         with self._lock:
-            row = self._conn.execute(
-                "SELECT id, status FROM review WHERE id=?", (review_id,)).fetchone()
+            if tenant_id is None:
+                row = self._conn.execute(
+                    "SELECT id, status FROM review WHERE id=?", (review_id,)
+                ).fetchone()
+            else:
+                row = self._conn.execute(
+                    "SELECT id, status FROM review WHERE id=? AND tenant_id=?",
+                    (review_id, tenant_id),
+                ).fetchone()
             if row is None:
                 return None
             if row["status"] != STATUS_PENDING:
@@ -174,7 +211,7 @@ class ReviewStore:
                      review_id))
         review_pending.dec()
         review_decisions_total.inc(decision=decision)
-        return self.get(review_id)
+        return self.get(review_id, tenant_id)
 
 
 # ---------------------------------------------------------------------------
@@ -211,9 +248,10 @@ def apply_review_item(driver, item: dict) -> dict:
     doc_id = item["doc_id"]
     label = item["label"]
     entity_id = item["entity_id"]
+    tenant_id = item.get("tenant_id")
 
     with driver.session() as session:
-        old_snapshot = get_existing_entities(session, doc_id)
+        old_snapshot = get_existing_entities(session, doc_id, tenant_id=tenant_id)
 
     merged: dict = {lbl: dict(ents) for lbl, ents in old_snapshot.items()}
     merged.setdefault(label, {})[entity_id] = item["props"]
@@ -222,8 +260,9 @@ def apply_review_item(driver, item: dict) -> dict:
         "modified": [],
         "deleted": [],
     }
-    stats = update_graph_surgically(driver, doc_id, changes,
-                                    new_entities=merged)
+    stats = update_graph_surgically(
+        driver, doc_id, changes, new_entities=merged, tenant_id=tenant_id
+    )
     logger.info("review item applied doc=%s entity=%s", doc_id, entity_id,
                 extra={"doc_id": doc_id, "entity_id": entity_id,
                        "update_ms": stats["update_time_ms"]})

@@ -206,6 +206,16 @@ def main(argv: list[str] | None = None) -> int:
     _ok("Embeddings", settings.EMBEDDING_PROVIDER + (
         f" ({settings.EMBEDDING_MODEL})" if settings.EMBEDDING_PROVIDER != "hash" and settings.OPENAI_BASE_URL else
         f" ({settings.EMBEDDING_OLLAMA_MODEL})" if settings.EMBEDDING_PROVIDER == "ollama" else ""))
+    try:
+        from graphrag.embeddings import HashEmbedder, assert_embedding_ready
+        resolved = assert_embedding_ready()
+        is_hash = isinstance(resolved, HashEmbedder)
+        _ok("Resolved embedding backend", resolved.name,
+            "HashEmbedder is demo-only and has weak semantic recall" if is_hash else None)
+    except Exception as exc:  # production + hash, or a required provider misconfiguration
+        print(f"  [FAIL] embedding configuration: {exc}")
+        critical += 1
+    _ok("Environment", settings.APP_ENV)
     _ok("Audit dir", str(PROJECT_ROOT / settings.AUDIT_DIR))
 
     print("\n[Observability & jobs (v2)]")

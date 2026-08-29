@@ -103,8 +103,11 @@ def test_adapt_csv_uses_id_column_when_present(tmp_path):
 def test_registry_add_get_rename_remove(tmp_path):
     src = tmp_path / "claims.csv"
     src.write_text("a,b\n1,2\n", encoding="utf-8")
-    add_custom_session("my_claims", "csv", [str(src)], note="2 rows")
+    metadata = [{"filename": "claims.csv", "sha256": "a" * 64}]
+    add_custom_session("my_claims", "csv", [str(src)], note="2 rows",
+                       uploads=metadata)
     assert get_custom_session("my_claims")["kind"] == "csv"
+    assert get_custom_session("my_claims")["uploads"] == metadata
     assert list_custom_sessions()[0]["name"] == "my_claims"
 
     assert rename_custom_session("my_claims", "renamed_claims") is not None

@@ -24,9 +24,14 @@ class Settings(BaseSettings):
     POSTGRES_DSN: str = ""    # postgresql://graphrag:graphrag@localhost:5432/graphrag
     AGE_GRAPH_NAME: str = "graphrag"
     AGE_AUTO_CREATE: bool = True          # create the AGE graph on first use
-    # memory (default) = in-process vector index (v2 behavior);
-    # pgvector = semantic index in pgvector (needs GRAPH_BACKEND data source)
+    # memory = bounded demo index; neo4j = native HNSW for Neo4j;
+    # pgvector = HNSW in PostgreSQL/AGE.
     VECTOR_BACKEND: str = "memory"
+    NEO4J_VECTOR_INDEX: str = "graphrag_embeddings"
+    NEO4J_FULLTEXT_INDEX: str = "graphrag_fulltext"
+    VECTOR_INCREMENTAL_ENABLED: bool = True
+    KEYWORD_SEED_LIMIT_MIN: int = 5
+    KEYWORD_SEED_LIMIT_MAX: int = 50
 
     # Llama (Ollama) — optional; the extractor falls back to deterministic parsing
     LLAMA_API_URL: str = "http://localhost:11434"
@@ -61,9 +66,30 @@ class Settings(BaseSettings):
     OPENAI_API_VERSION: str = ""         # Azure only: e.g. 2024-06-01
     LLM_TIMEOUT_S: float = 90.0
     LLM_MAX_RETRIES: int = 2             # retries on transient 5xx/timeout
+    LLM_PROBE_TTL_S: float = 15.0        # cache both successful/failed health probes
+    OLLAMA_KEEP_ALIVE: str = "10m"       # retain the selected model in memory
+    QUERY_MODEL_WARMUP_ENABLED: bool = False
+    STREAM_ANSWERS_DEFAULT: bool = True
+    HTTP_POOL_MAX_CONNECTIONS: int = 100
+    HTTP_POOL_MAX_KEEPALIVE_CONNECTIONS: int = 20
+    HTTP_POOL_KEEPALIVE_EXPIRY_S: float = 30.0
     # per-1k-token USD used to price provider usage blocks (set contracted rates)
     LLM_PRICE_PER_1K_INPUT: float = 0.0
     LLM_PRICE_PER_1K_OUTPUT: float = 0.0
+
+    # Schema induction stays deterministic unless explicitly enabled. Sample
+    # values are withheld from LLM providers by default to protect uploaded PII.
+    SCHEMA_INDUCTION_MODE: str = "deterministic"  # deterministic | auto | llm
+    SCHEMA_LLM_INCLUDE_SAMPLES: bool = False
+
+    # OCR provider interface. glm-ocr targets an OpenAI-compatible GLM-OCR
+    # service (vLLM/SGLang); dependencies and the model remain optional.
+    OCR_PROVIDER: str = "none"                    # none | auto | glm-ocr
+    OCR_MIN_CHARS_PER_PAGE: int = 80
+    GLM_OCR_BASE_URL: str = ""
+    GLM_OCR_API_KEY: str = ""
+    GLM_OCR_MODEL: str = "zai-org/GLM-OCR"
+    OCR_TIMEOUT_S: float = 120.0
 
     # ------------------------------------------------------------------
     # v2 — identity & RBAC (trust & compliance workstream)
@@ -109,6 +135,25 @@ class Settings(BaseSettings):
     DOC_SNAPSHOT_LABEL: str = "DocSnapshot"
     BATCH_SIZE: int = 500
 
+    # Shared upload pipeline (root upload.py). Byte values are explicit so the
+    # same limits apply to FastAPI, Streamlit, and custom-session re-ingestion.
+    UPLOAD_MAX_PDF_BYTES: int = 25 * 1024 * 1024
+    UPLOAD_MAX_CSV_BYTES: int = 50 * 1024 * 1024
+    UPLOAD_MAX_BATCH_BYTES: int = 100 * 1024 * 1024
+    UPLOAD_MAX_FILES: int = 20
+    UPLOAD_MAX_PDF_PAGES: int = 400
+    UPLOAD_MAX_CSV_ROWS: int = 100_000
+    UPLOAD_MAX_CSV_COLUMNS: int = 256
+    UPLOAD_MAX_CSV_FIELD_CHARS: int = 100_000
+    UPLOAD_MAX_FILENAME_CHARS: int = 128
+    # Optional scanner command, e.g. "clamscan --no-summary". The temporary
+    # file path is appended unless an argument contains the {path} placeholder.
+    UPLOAD_MALWARE_SCAN_COMMAND: str = ""
+    UPLOAD_MALWARE_SCAN_TIMEOUT_S: float = 30.0
+    UPLOAD_MALWARE_SCAN_FAIL_CLOSED: bool = True
+    UPLOAD_DEDUPLICATE_CUSTOM: bool = True
+    UPLOAD_AUDIT_PATH: str = "data/audit_trail/uploads.jsonl"
+
     # Retrieval & token optimization (Phase 3)
     MAX_HOPS: int = 2             # BFS expansion depth from seed nodes
     MAX_TOKENS: int = 1280        # pruned-context token budget (answer context
@@ -151,6 +196,10 @@ class Settings(BaseSettings):
     EMBEDDING_PROVIDER: str = "auto"
     EMBEDDING_MODEL: str = "text-embedding-3-small"
     EMBEDDING_OLLAMA_MODEL: str = "nomic-embed-text"
+    # Hash vectors are a demo fallback only. Production startup/config checks
+    # fail if provider resolution would select them.
+    APP_ENV: str = "development"
+    ALLOW_HASH_EMBEDDINGS_IN_PRODUCTION: bool = False
     # cap on nodes indexed into the in-memory vector store (large CSV
     # sessions stay bounded; the store is cached per dataset revision)
     VECTOR_INDEX_MAX_NODES: int = 25000

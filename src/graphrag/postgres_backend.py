@@ -58,7 +58,7 @@ _CLAUSE_END = {"ORDER", "SKIP", "LIMIT", "UNION", "CALL", "WITH"}
 def _psycopg2():
     """Import psycopg2 lazily with an actionable error message."""
     try:
-        import psycopg2  # noqa: PLC0415 - deliberately lazy, optional dep
+        import psycopg2
         return psycopg2
     except ImportError as exc:  # pragma: no cover - environment dependent
         raise RuntimeError(
@@ -184,7 +184,7 @@ def _split_top_level(text: str) -> list[str]:
 
 def _find_last_return(cypher: str) -> int | None:
     """Index of the final top-level RETURN keyword, or None."""
-    hits = [m.start() for m in re.finditer(r"\bRETURN\b", cypher, re.I)]
+    hits = [m.start() for m in re.finditer(r"\bRETURN\b", cypher, re.IGNORECASE)]
     top = {i for i, _ in _scan_top_level(cypher)}
     for start in reversed(hits):
         # keyword must start at top level and not be inside a larger word
@@ -217,7 +217,7 @@ def _return_specs(cypher: str) -> list[str] | None:
     pos = _find_last_return(cypher)
     if pos is None:
         return None
-    m = re.match(r"RETURN\b", cypher[pos:], re.I)
+    m = re.match(r"RETURN\b", cypher[pos:], re.IGNORECASE)
     body = cypher[pos + m.end():]
 
     # the clause runs until a top-level ORDER/SKIP/LIMIT/UNION/WITH keyword
@@ -344,13 +344,13 @@ class AgeTransaction:
     **one PostgreSQL transaction**.
     """
 
-    def __init__(self, session: "AgeSession"):
+    def __init__(self, session: AgeSession):
         self._session = session
 
     def run(self, query: str, **params) -> AgeResult:
         return self._session.run(query, **params)
 
-    def __enter__(self) -> "AgeTransaction":
+    def __enter__(self) -> AgeTransaction:
         return self
 
     def __exit__(self, exc_type, exc, tb) -> bool:
@@ -377,7 +377,7 @@ class AgeSession:
         self._prepare()
         translated = translate(query, params, self._graph)
         if translated is None:  # Neo4j SHOW … → empty answer (prints only)
-            m = re.search(r"YIELD\s+(.+)$", query.strip(), re.I)
+            m = re.search(r"YIELD\s+(.+)$", query.strip(), re.IGNORECASE)
             cols = [c.strip() for c in m.group(1).split(",")] if m else []
             return AgeResult([c for c in cols if _IDENT_RE.match(c)], [])
         sql, names = translated
@@ -412,7 +412,7 @@ class AgeSession:
             finally:
                 self._closed = True
 
-    def __enter__(self) -> "AgeSession":
+    def __enter__(self) -> AgeSession:
         return self
 
     def __exit__(self, exc_type, exc, tb) -> bool:
@@ -470,7 +470,7 @@ class AgeDriver:
     def close(self) -> None:
         self._closed = True
 
-    def __enter__(self) -> "AgeDriver":
+    def __enter__(self) -> AgeDriver:
         return self
 
     def __exit__(self, exc_type, exc, tb) -> bool:
@@ -512,12 +512,14 @@ class PgVectorStore:
                 "dataset text NOT NULL, node_id text NOT NULL, label text NOT NULL,"
                 f"text text NOT NULL, embedding vector({self._dim}))")
             cur.execute(f"CREATE INDEX IF NOT EXISTS {self._table}_emb_hnsw "
-                        f"ON {self._table} USING hnsw (embedding)")
+                        f"ON {self._table} USING hnsw (embedding vector_cosine_ops)")
+            cur.execute(f"CREATE UNIQUE INDEX IF NOT EXISTS {self._table}_entity_unique "
+                        f"ON {self._table} (dataset, node_id)")
         self._conn.commit()
 
     def rebuild(self, entries: list[tuple[str, str, str, list[float]]]) -> None:
         """Replace this dataset's index in one transaction."""
-        from psycopg2.extras import execute_values  # noqa: PLC0415
+        from psycopg2.extras import execute_values
         with self._conn.cursor() as cur:
             cur.execute(f"DELETE FROM {self._table} WHERE dataset = %s",
                         (self._dataset,))
@@ -531,10 +533,37 @@ class PgVectorStore:
             )
         self._conn.commit()
 
+    def upsert(self, entries: list[tuple[str, str, str, list[float]]]) -> None:
+        """Incrementally insert/update only changed entities."""
+        if not entries:
+            return
+        from psycopg2.extras import execute_values
+        with self._conn.cursor() as cur:
+            execute_values(
+                cur,
+                f"INSERT INTO {self._table} (dataset,node_id,label,text,embedding) "
+                "VALUES %s ON CONFLICT (dataset,node_id) DO UPDATE SET "
+                "label=EXCLUDED.label,text=EXCLUDED.text,embedding=EXCLUDED.embedding",
+                [(self._dataset, nid, label, text, _vec_literal(vec))
+                 for nid, label, text, vec in entries],
+                template="(%s,%s,%s,%s,%s::vector)",
+            )
+        self._conn.commit()
+
+    def delete(self, node_ids: list[str]) -> None:
+        if not node_ids:
+            return
+        with self._conn.cursor() as cur:
+            cur.execute(
+                f"DELETE FROM {self._table} WHERE dataset=%s AND node_id=ANY(%s)",
+                (self._dataset, list(node_ids)),
+            )
+        self._conn.commit()
+
     # -- VectorStore-compatible surface -----------------------------------
 
     def add(self, node_id: str, label: str, text: str, vector: list[float]) -> None:
-        self.rebuild([(node_id, label, text, vector)])
+        self.upsert([(node_id, label, text, vector)])
 
     def __len__(self) -> int:
         with self._conn.cursor() as cur:
