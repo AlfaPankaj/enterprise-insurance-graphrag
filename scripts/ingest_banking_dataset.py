@@ -39,7 +39,8 @@ SAMPLE = PROJECT_ROOT / "data" / "samples" / "banking.json"
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     p = argparse.ArgumentParser(description=__doc__)
-    p.add_argument("--reset", action="store_true", help="clear the graph first")
+    p.add_argument("--reset", action="store_true", help="clear this tenant's graph scope")
+    p.add_argument("--tenant", default=settings.DEFAULT_TENANT)
     p.add_argument("--uri", default=settings.NEO4J_URI)
     p.add_argument("--user", default=settings.NEO4J_USER)
     p.add_argument("--password", default=settings.NEO4J_PASSWORD)
@@ -94,30 +95,49 @@ def main(argv: list[str] | None = None) -> int:
     data = json.loads(SAMPLE.read_text(encoding="utf-8"))
 
     nodes, rels = adapt_banking(data)
-    tenant = settings.DEFAULT_TENANT if settings.TENANT_MODE == "column" else None
+    tenant = args.tenant if settings.TENANT_MODE == "column" else None
 
     driver = GraphDatabase.driver(args.uri, auth=(args.user, args.password))
     try:
         with driver.session() as session:
             if args.reset:
                 from scripts.seed_graph import clear_graph_batched
-                clear_graph_batched(session)
-                print("  graph cleared (--reset)")
+                clear_graph_batched(session, tenant_id=tenant)
+                print("  graph scope cleared (--reset)")
             if tenant:
                 print(f"  stamping tenant_id={tenant} (TENANT_MODE=column)")
             load_nodes(session, nodes, tenant_id=tenant)
-            load_relationships(session, rels)
-            session.run(
-                "MERGE (d:Dataset {name: 'banking'}) "
-                "ON CREATE SET d.rev = 0 "
-                "ON MATCH SET d.rev = coalesce(d.rev, 0) + 1"
-            )
-            counts = session.run(
-                "MATCH (n) RETURN labels(n)[0] AS label, count(*) AS c ORDER BY label"
-            ).data()
-            rel_counts = session.run(
-                "MATCH ()-[r]->() RETURN type(r) AS t, count(*) AS c ORDER BY t"
-            ).data()
+            load_relationships(session, rels, tenant_id=tenant)
+            if tenant:
+                session.run(
+                    "MERGE (d:Dataset {name:'banking', tenant_id:$tenant}) "
+                    "ON CREATE SET d.rev=0 "
+                    "ON MATCH SET d.rev=coalesce(d.rev,0)+1 "
+                    "SET d.updated_at=datetime(), d.active=true", tenant=tenant,
+                )
+            else:
+                session.run(
+                    "MERGE (d:Dataset {name: 'banking'}) "
+                    "ON CREATE SET d.rev = 0 "
+                    "ON MATCH SET d.rev = coalesce(d.rev, 0) + 1"
+                )
+            if tenant:
+                counts = session.run(
+                    "MATCH (n {tenant_id:$tenant}) "
+                    "RETURN labels(n)[0] AS label,count(*) AS c ORDER BY label",
+                    tenant=tenant,
+                ).data()
+                rel_counts = session.run(
+                    "MATCH (a {tenant_id:$tenant})-[r]->(b {tenant_id:$tenant}) "
+                    "RETURN type(r) AS t,count(*) AS c ORDER BY t", tenant=tenant,
+                ).data()
+            else:
+                counts = session.run(
+                    "MATCH (n) RETURN labels(n)[0] AS label, count(*) AS c ORDER BY label"
+                ).data()
+                rel_counts = session.run(
+                    "MATCH ()-[r]->() RETURN type(r) AS t, count(*) AS c ORDER BY t"
+                ).data()
         print("  graph nodes:", ", ".join(f"{r['label']}={r['c']}" for r in counts))
         print("  relationships:", ", ".join(f"{r['t']}={r['c']}" for r in rel_counts))
     finally:

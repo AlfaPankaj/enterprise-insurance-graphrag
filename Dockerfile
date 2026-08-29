@@ -9,6 +9,7 @@ COPY requirements-api.txt .
 RUN pip install --no-cache-dir -r requirements-api.txt
 
 # App code + the assets the runtime touches
+COPY upload.py .
 COPY src ./src
 COPY scripts ./scripts
 COPY prompts ./prompts

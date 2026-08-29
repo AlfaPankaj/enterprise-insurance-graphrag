@@ -106,94 +106,110 @@ _MARKER_TO_SESSION = {
 }
 
 
-def custom_sessions_meta() -> list[dict]:
-    """Built-in-style session dicts for the registered custom uploads."""
+def custom_sessions_meta(tenant_id: str | None = None) -> list[dict]:
+    """Built-in-style metadata for custom uploads visible to one tenant."""
     from graphrag.custom_sessions import list_custom_sessions
 
     out: list[dict] = []
-    for r in list_custom_sessions():
+    for record in list_custom_sessions(tenant_id):
+        status = (record.get("ingestion") or {}).get("status")
         out.append({
-            "id": r["name"],
-            "label": f"{r['name']} — custom ({r['kind'].upper()})",
+            "id": record["name"],
+            "label": f"{record['name']} — custom ({record['kind'].upper()})",
             "kind": "custom",
-            "dataset": r["name"],
-            "desc": r.get("note") or f"{r['kind'].upper()} upload — "
-                                      f"{len(r['sources'])} file(s)",
+            "dataset": record["name"],
+            "tenant_id": record.get("tenant_id", settings.DEFAULT_TENANT),
+            "owner": record.get("owner"),
+            "ingestion_status": status,
+            "desc": record.get("note") or f"{record['kind'].upper()} upload — "
+                                            f"{len(record['sources'])} file(s)",
         })
     return out
 
 
-def all_sessions() -> list[dict]:
-    """Built-in sessions + any user-uploaded custom sessions."""
-    return SESSIONS + custom_sessions_meta()
+def all_sessions(tenant_id: str | None = None) -> list[dict]:
+    """Built-in sessions + the authenticated tenant's custom sessions."""
+    return SESSIONS + custom_sessions_meta(tenant_id)
 
 
-def get_session_meta(session_id: str) -> dict | None:
-    """Session metadata (built-in or custom) for a session id."""
+def get_session_meta(session_id: str, tenant_id: str | None = None) -> dict | None:
+    """Tenant-scoped session metadata (built-ins remain globally selectable)."""
     if session_id in SESSION_BY_ID:
         return SESSION_BY_ID[session_id]
-    return next((s for s in custom_sessions_meta() if s["id"] == session_id), None)
+    return next((s for s in custom_sessions_meta(tenant_id)
+                 if s["id"] == session_id), None)
 
 
-def session_exists(session_id: str) -> bool:
-    """True if the id is a built-in or registered custom session."""
-    return get_session_meta(session_id) is not None
+def session_exists(session_id: str, tenant_id: str | None = None) -> bool:
+    return get_session_meta(session_id, tenant_id) is not None
 
 
-def session_for_marker(marker: str | None) -> str:
-    """Session id for the dataset marker stamped on the loaded graph."""
+def session_for_marker(marker: str | None, tenant_id: str | None = None) -> str:
+    """Session id for a tenant-owned dataset marker."""
     if not marker:
-        return "pdf_demo"  # graph predates the marker -> demo graph
+        return "pdf_demo"
     if marker in _MARKER_TO_SESSION:
         return _MARKER_TO_SESSION[marker]
-    # a custom session stamps its own name as the marker
-    if get_session_meta(marker) is not None:
+    if get_session_meta(marker, tenant_id) is not None:
         return marker
     return "pdf_demo"
 
 
-def current_session_id(driver) -> str:
-    """Session id currently loaded in Neo4j (best-effort)."""
+def current_session_id(driver, tenant_id: str | None = None) -> str:
+    """Session currently active for a tenant (best-effort)."""
     try:
+        if tenant_id and settings.TENANT_MODE == "column":
+            with driver.session() as session:
+                row = session.run(
+                    "MATCH (d:Dataset {tenant_id:$tenant}) "
+                    "RETURN d.name AS name "
+                    "ORDER BY coalesce(d.updated_at, datetime({epochMillis:0})) DESC "
+                    "LIMIT 1", tenant=tenant_id,
+                ).single()
+            return session_for_marker(row["name"] if row else None, tenant_id)
         return session_for_marker(detect_dataset(driver))
     except Exception:
         return "pdf_demo"
 
 
-def _seed_command(session: dict) -> list[str]:
+def _seed_command(session: dict, tenant_id: str | None = None) -> list[str]:
     """The CLI command that (re)seeds the graph for this session.
 
     ``-u`` (unbuffered) keeps the child's stdout line-buffered so the
     streaming runner can relay progress lines in real time.
     """
     if session["kind"] == "excel":
-        return [
+        command = [
             sys.executable, "-u",
             str(ROOT / "scripts" / "ingest_real_dataset.py"),
-            session["dataset"],
-            "--reset",
+            session["dataset"], "--reset",
         ]
+        if settings.TENANT_MODE == "column":
+            command.extend(["--tenant", tenant_id or settings.DEFAULT_TENANT])
+        return command
     if session["kind"] == "custom":
-        # user-uploaded dataset — reprocess its stored sources
+        # Re-ingestion is tenant-qualified; CSV scripts enforce the review gate.
+        owner_tenant = session.get("tenant_id") or tenant_id or settings.DEFAULT_TENANT
         return [
             sys.executable, "-u",
             str(ROOT / "scripts" / "ingest_custom_dataset.py"),
-            session["dataset"],
-            "--reset",
+            session["dataset"], "--reset", "--tenant", owner_tenant,
         ]
     if session["kind"] == "banking":
         # v2 banking domain demo (WS-E)
-        return [
+        command = [
             sys.executable, "-u",
-            str(ROOT / "scripts" / "ingest_banking_dataset.py"),
-            "--reset",
+            str(ROOT / "scripts" / "ingest_banking_dataset.py"), "--reset",
         ]
+        if settings.TENANT_MODE == "column":
+            command.extend(["--tenant", tenant_id or settings.DEFAULT_TENANT])
+        return command
     return [
         sys.executable, "-u",
         str(ROOT / "scripts" / "seed_graph.py"),
         "--reset",
         "--apply-schema",
-        *(["--tenant", settings.DEFAULT_TENANT]
+        *(["--tenant", tenant_id or settings.DEFAULT_TENANT]
           if settings.TENANT_MODE == "column" else []),
     ]
 
@@ -280,8 +296,25 @@ def ensure_pdf_demo_fraud_benchmark() -> None:
                      name="auto-bench-pdf-demo").start()
 
 
+def _refresh_durable_vectors(driver, tenant_id: str | None,
+                             line_cb=None) -> None:
+    """Reconcile durable vectors after a destructive session seed."""
+    if (settings.VECTOR_BACKEND or "memory").strip().lower() not in {
+        "neo4j", "pgvector",
+    }:
+        return
+    try:
+        from graphrag.vector_store import build_vector_store
+        if line_cb:
+            line_cb("  refreshing durable vector index ...")
+        build_vector_store(driver, force=True, tenant_id=tenant_id)
+    except Exception as exc:  # noqa: BLE001 - graph seed remains authoritative
+        if line_cb:
+            line_cb(f"  WARNING: vector refresh failed: {type(exc).__name__}")
+
+
 def _run_blocking(driver, session_id: str, force: bool, timeout: int,
-                  line_cb=None) -> dict:
+                  line_cb=None, tenant_id: str | None = None) -> dict:
     """Execute the seed for ``session_id`` (serialized under the lock).
 
     ``line_cb(line)`` is invoked for every stdout line when streaming is
@@ -289,22 +322,29 @@ def _run_blocking(driver, session_id: str, force: bool, timeout: int,
     Raises ``ValueError`` for unknown sessions and ``RuntimeError`` on seed
     failure/timeout.
     """
-    if not session_exists(session_id):
+    if not session_exists(session_id, tenant_id):
         raise ValueError(f"unknown session: {session_id!r} (expected one of "
-                         f"{sorted(s['id'] for s in all_sessions())})")
-    session = get_session_meta(session_id)
+                         f"{sorted(s['id'] for s in all_sessions(tenant_id))})")
+    session = get_session_meta(session_id, tenant_id)
+    if session and session.get("kind") == "custom" \
+            and session.get("ingestion_status") in {"awaiting_profile", "awaiting_review", "rejected"}:
+        raise ValueError("custom CSV schema must be reviewed and approved before loading")
 
-    if not force and current_session_id(driver) == session_id:
+    current = (current_session_id(driver, tenant_id) if tenant_id
+               else current_session_id(driver))
+    if not force and current == session_id:
         _maybe_auto_benchmark(session_id)
         return {"status": "already_loaded", "session": session_id, "output": ""}
 
     with _switch_lock:
         # re-check under the lock: another caller may have landed this session
         # while we were waiting for the lock
-        if not force and current_session_id(driver) == session_id:
+        current = (current_session_id(driver, tenant_id) if tenant_id
+                   else current_session_id(driver))
+        if not force and current == session_id:
             _maybe_auto_benchmark(session_id)
             return {"status": "already_loaded", "session": session_id, "output": ""}
-        cmd = _seed_command(session)
+        cmd = _seed_command(session, tenant_id)
         try:
             if line_cb is None:
                 proc = subprocess.run(cmd, cwd=ROOT, capture_output=True,
@@ -315,6 +355,7 @@ def _run_blocking(driver, session_id: str, force: bool, timeout: int,
                         f"(rc={proc.returncode}):\n{proc.stdout[-1500:]}"
                         f"\n{proc.stderr[-1500:]}"
                     )
+                _refresh_durable_vectors(driver, tenant_id)
                 _maybe_auto_benchmark(session_id)
                 return {"status": "seeded", "session": session_id,
                         "output": proc.stdout[-2000:]}
@@ -336,6 +377,7 @@ def _run_blocking(driver, session_id: str, force: bool, timeout: int,
                     f"Session '{session_id}' seeding failed (rc={proc.returncode}):\n"
                     + "\n".join(lines[-30:])
                 )
+            _refresh_durable_vectors(driver, tenant_id, line_cb=line_cb)
             _maybe_auto_benchmark(session_id)
             return {"status": "seeded", "session": session_id,
                     "output": "\n".join(lines[-2000:])}
@@ -346,7 +388,8 @@ def _run_blocking(driver, session_id: str, force: bool, timeout: int,
 
 
 def switch_session(driver, session_id: str, force: bool = False,
-                   timeout: int = 900, line_cb=None) -> dict:
+                   timeout: int = 900, line_cb=None,
+                   tenant_id: str | None = None) -> dict:
     """Seed the graph for the requested session; **blocking** (REST API path).
 
     Returns ``{"status": "already_loaded"|"seeded", "session": id,
@@ -356,7 +399,8 @@ def switch_session(driver, session_id: str, force: bool = False,
     ``line_cb(line)`` (v2, jobs) streams every subprocess stdout line as it
     arrives — the job runner uses it to record live progress.
     """
-    return _run_blocking(driver, session_id, force, timeout, line_cb=line_cb)
+    return _run_blocking(driver, session_id, force, timeout, line_cb=line_cb,
+                         tenant_id=tenant_id)
 
 
 # ---------------------------------------------------------------------------
@@ -364,7 +408,7 @@ def switch_session(driver, session_id: str, force: bool = False,
 # ---------------------------------------------------------------------------
 
 def start_switch(driver, session_id: str, force: bool = False,
-                 timeout: int = 900) -> dict:
+                 timeout: int = 900, tenant_id: str | None = None) -> dict:
     """Start a session switch in a background daemon thread.
 
     Returns a **progress handle**::
@@ -390,8 +434,14 @@ def start_switch(driver, session_id: str, force: bool = False,
 
     def work() -> None:
         try:
-            info = _run_blocking(driver, session_id, force, timeout,
-                                 line_cb=handle["lines"].append)
+            if tenant_id:
+                info = _run_blocking(
+                    driver, session_id, force, timeout,
+                    line_cb=handle["lines"].append, tenant_id=tenant_id,
+                )
+            else:
+                info = _run_blocking(driver, session_id, force, timeout,
+                                     line_cb=handle["lines"].append)
             handle["result"] = info
             handle["ok"] = True
         except Exception as exc:  # noqa: BLE001 - surfaced via the handle

@@ -76,8 +76,18 @@ class JobStore:
             " result TEXT,"
             " created_at TEXT NOT NULL,"
             " started_at TEXT,"
-            " finished_at TEXT)"
+            " finished_at TEXT,"
+            " tenant_id TEXT,"
+            " owner TEXT,"
+            " duration_ms REAL)"
         )
+        # Additive migration for stores created by earlier releases.
+        columns = {r[1] for r in self._conn.execute("PRAGMA table_info(jobs)")}
+        for column, ddl in {
+            "tenant_id": "TEXT", "owner": "TEXT", "duration_ms": "REAL"
+        }.items():
+            if column not in columns:
+                self._conn.execute(f"ALTER TABLE jobs ADD COLUMN {column} {ddl}")
         self._conn.commit()
         # crash recovery: anything still running was abandoned by a dead process
         with self._conn:
@@ -103,17 +113,30 @@ class JobStore:
             job["result"] = job["result"]
         return job
 
-    def get(self, job_id: str) -> dict | None:
+    def get(self, job_id: str, tenant_id: str | None = None) -> dict | None:
         with self._lock:
-            row = self._conn.execute(
-                "SELECT * FROM jobs WHERE id=?", (job_id,)).fetchone()
+            if tenant_id is None:
+                row = self._conn.execute(
+                    "SELECT * FROM jobs WHERE id=?", (job_id,)).fetchone()
+            else:
+                row = self._conn.execute(
+                    "SELECT * FROM jobs WHERE id=? AND tenant_id=?",
+                    (job_id, tenant_id),
+                ).fetchone()
         return self._row_to_job(row) if row else None
 
-    def list(self, limit: int = 20) -> list[dict]:
+    def list(self, limit: int = 20, tenant_id: str | None = None) -> list[dict]:
         with self._lock:
-            rows = self._conn.execute(
-                "SELECT * FROM jobs ORDER BY created_at DESC LIMIT ?",
-                (int(limit),)).fetchall()
+            if tenant_id is None:
+                rows = self._conn.execute(
+                    "SELECT * FROM jobs ORDER BY created_at DESC LIMIT ?",
+                    (int(limit),)).fetchall()
+            else:
+                rows = self._conn.execute(
+                    "SELECT * FROM jobs WHERE tenant_id=? "
+                    "ORDER BY created_at DESC LIMIT ?",
+                    (tenant_id, int(limit)),
+                ).fetchall()
         return [self._row_to_job(r) for r in rows]
 
     def clear(self) -> None:
@@ -121,27 +144,34 @@ class JobStore:
             self._conn.execute("DELETE FROM jobs")
 
     # ------------------------------------------------------------- lifecycle
-    def submit(self, kind: str, params: dict | None = None) -> str:
-        """Enqueue a job (status pending) and start its worker thread."""
+    def submit(self, kind: str, params: dict | None = None,
+               tenant_id: str | None = None, owner: str | None = None) -> str:
+        """Enqueue a tenant-owned job and start its worker thread."""
         handler = get_handler(kind)
         if handler is None:
             raise JobError(f"unknown job kind: {kind!r}")
         job_id = uuid.uuid4().hex[:12]
         now = _now()
+        payload = dict(params or {})
+        if tenant_id:
+            payload["tenant_id"] = tenant_id
+        if owner:
+            payload["actor"] = owner
         with self._lock, self._conn:
             self._conn.execute(
-                "INSERT INTO jobs (id, kind, params, status, created_at) "
-                "VALUES (?,?,?,?,?)",
-                (job_id, kind, json.dumps(params or {}), STATUS_PENDING, now),
+                "INSERT INTO jobs (id, kind, params, status, created_at, tenant_id, owner) "
+                "VALUES (?,?,?,?,?,?,?)",
+                (job_id, kind, json.dumps(payload), STATUS_PENDING, now,
+                 tenant_id, owner),
             )
         threading.Thread(target=self._worker, args=(job_id,),
                          name=f"job-{job_id}", daemon=True).start()
         return job_id
 
-    def cancel(self, job_id: str) -> bool:
-        """Cancel a pending job (never started) or flag a running one."""
+    def cancel(self, job_id: str, tenant_id: str | None = None) -> bool:
+        """Cancel a pending/running job only within the caller's tenant."""
         with self._lock:
-            job = self.get(job_id)
+            job = self.get(job_id, tenant_id)
             if job is None:
                 return False
             if job["status"] == STATUS_PENDING:
@@ -176,6 +206,7 @@ class JobStore:
         if handler is None:  # pragma: no cover - submit validates
             return
         jobs_running.inc()
+        worker_started = time.perf_counter()
         lines: list[str] = []
 
         def progress(line: str) -> None:
@@ -196,9 +227,10 @@ class JobStore:
         finally:
             with self._lock, self._conn:
                 self._conn.execute(
-                    "UPDATE jobs SET status=?, result=?, error=?, finished_at=? "
-                    "WHERE id=?",
-                    (status, payload[0], payload[1], _now(), job_id))
+                    "UPDATE jobs SET status=?, result=?, error=?, finished_at=?, "
+                    "duration_ms=? WHERE id=?",
+                    (status, payload[0], payload[1], _now(),
+                     round((time.perf_counter() - worker_started) * 1000, 2), job_id))
             jobs_running.dec()
             self._cancel_flags.discard(job_id)
         jobs_completed_total.inc(status=status)
@@ -232,10 +264,10 @@ def register_default_handlers(driver_getter) -> None:
         session_id = params.get("session_id")
         if not session_id:
             raise JobError("session_switch requires 'session_id'")
-        info = sessions.switch_session(
-            driver_getter(), session_id, force=bool(params.get("force")),
-            line_cb=progress,
-        )
+        kwargs = {"force": bool(params.get("force")), "line_cb": progress}
+        if params.get("tenant_id"):
+            kwargs["tenant_id"] = params["tenant_id"]
+        info = sessions.switch_session(driver_getter(), session_id, **kwargs)
         return {"status": info["status"], "session": session_id}
 
     def benchmark(job, params, progress, cancelled):
@@ -261,6 +293,10 @@ def register_default_handlers(driver_getter) -> None:
     register_handler("session_switch", session_switch)
     register_handler("benchmark", benchmark)
     register_handler("fraud_benchmark", fraud_benchmark)
+
+    # Real-world custom ingestion stages share the same durable job ledger.
+    from graphrag.ingestion_workflow import register_ingestion_handlers
+    register_ingestion_handlers(driver_getter)
 
 
 def _run_subprocess(job, cmd: list[str], progress, cancelled) -> dict:

@@ -183,7 +183,7 @@ def validation_entries(loaded: str | None) -> list[dict]:
          "desc": "Synthetic demo graph — policies, claims, endorsements",
          "kind": "pdf", "fraud_name": "synthetic"},
     ]
-    for rec in list_custom_sessions():
+    for rec in list_custom_sessions(settings.DEFAULT_TENANT):
         entries.append({
             "label": rec["name"], "files": [rec["name"]], "kind": "custom",
             "fraud_name": rec["name"],

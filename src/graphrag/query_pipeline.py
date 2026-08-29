@@ -90,7 +90,7 @@ def _prepare(driver, query: str, max_hops: int, token_budget: int,
         # dataset revision; pure-Cypher retrieval is untouched otherwise.
         try:
             from graphrag.vector_store import build_vector_store
-            store = build_vector_store(driver)
+            store = build_vector_store(driver, tenant_id=scoped_tenant)
         except Exception:  # noqa: BLE001 - hybrid degrades to lexical
             store = None
         if store is not None and not subgraph["seeds"]:
@@ -309,7 +309,7 @@ def _cache_key(ctx_signature: dict) -> str | None:
     """Cache key for the query + pipeline + data signature; None = don't cache."""
     if not settings.CACHE_ENABLED:
         return None
-    rev = graph_revision(ctx_signature["driver"])
+    rev = graph_revision(ctx_signature["driver"], ctx_signature.get("tenant"))
     if rev is None:
         return None  # revision unreadable (DB down / no marker) -> skip caching
     return build_cache_key(

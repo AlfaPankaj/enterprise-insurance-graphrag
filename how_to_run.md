@@ -53,15 +53,15 @@ loaded dataset. Equivalent one-liners if you prefer the terminal:
 
 ### Custom sessions — upload your own PDF/CSV
 
-The **Datasets** page in `app.py` accepts your own files: upload a PDF or CSV,
-give the session a **unique name** (no collision with the built-ins above),
-and it is re-seeded into the graph so you can query your own data. Sessions
-can be **renamed** / **removed** there, are persisted in
-`data/custom_sessions.json`, and appear in the sidebar + API session list like
-any other session. **CSV uploads are benchmarked automatically**: after the
-session seeds, `scripts/benchmark_real_dataset.py --custom-session <name>`
-runs in the background and the Dashboard's Pipeline Validation row fills in by
-itself. Terminal equivalent:
+The **Datasets** page accepts homogeneous PDF bundles or relational multi-CSV
+bundles (mixed batches are rejected). Root `upload.py` enforces configured
+limits, parsing checks, safe paths, checksums/deduplication, optional malware
+scanning, atomic storage/manifests, and mandatory pre-ingest revalidation.
+CSV bundles are profiled first: review the proposed labels, ID columns, FK
+edges, and entity-resolution candidates, then click **Approve mapping &
+ingest**. No CSV graph write occurs before approval. Jobs and sessions are
+persisted and tenant-scoped. PDFs use digital text/table extraction with an
+optional GLM-OCR service for sparse pages. Terminal equivalent after approval:
 
 ```bash
 .venv/Scripts/python.exe scripts/ingest_custom_dataset.py <name> --reset

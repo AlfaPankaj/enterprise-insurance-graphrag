@@ -18,13 +18,21 @@ Pipeline:
 
 from __future__ import annotations
 
+import logging
 import re
 
 from graphrag.config import settings
-from graphrag.domains import (merged_entity_id_re, merged_keyword_props,
-                              merged_node_kinds, merged_numeric_props,
-                              merged_prop_focus, merged_stopwords,
-                              merged_text_props)
+from graphrag.domains import (
+    merged_entity_id_re,
+    merged_keyword_props,
+    merged_node_kinds,
+    merged_numeric_props,
+    merged_prop_focus,
+    merged_stopwords,
+    merged_text_props,
+)
+
+logger = logging.getLogger("graphrag.retrieval")
 
 # ---------------------------------------------------------------------------
 # v2 tenant isolation (WS-B, G4)
@@ -144,9 +152,42 @@ def query_tokens(query: str) -> list[str]:
     return [w for w in words if w not in STOPWORDS]
 
 
-def extract_seed_ids(query: str) -> list[str]:
-    """Entity ids explicitly mentioned in the query (e.g. ``CLM-0003``)."""
-    return list(dict.fromkeys(ENTITY_ID_RE.findall(query)))
+_QUOTED_VALUE_RE = re.compile(r"(?:\"([^\"\r\n]{1,128})\"|'([^'\r\n]{1,128})'|`([^`\r\n]{1,128})`)")
+_GENERIC_ID_RE = re.compile(
+    r"(?<![A-Za-z0-9])(?=[A-Za-z0-9_./-]{2,128}(?![A-Za-z0-9_./-]))"
+    r"(?=[A-Za-z0-9_./-]*\d)[A-Za-z0-9]+(?:[-_./][A-Za-z0-9]+)+(?![A-Za-z0-9])"
+)
+_ID_CANDIDATE_RE = re.compile(r"[A-Za-z0-9][A-Za-z0-9_./:-]{1,127}")
+
+
+def extract_seed_ids(query: str, learned_patterns: list[str] | None = None) -> list[str]:
+    """Extract fixed, learned, generic, and explicitly quoted exact IDs."""
+    unquoted = _QUOTED_VALUE_RE.sub(" ", query)
+    found = list(ENTITY_ID_RE.findall(unquoted))
+    found.extend(_GENERIC_ID_RE.findall(unquoted))
+    # Quoting is an explicit exact-lookup signal and supports IDs containing
+    # spaces or punctuation no regex learner should guess.
+    for groups in _QUOTED_VALUE_RE.findall(query):
+        value = next((group for group in groups if group), "").strip()
+        if value and (any(ch.isdigit() for ch in value)
+                      or any(ch in value for ch in "-_/.:")):
+            found.append(value)
+    if learned_patterns:
+        candidates = _ID_CANDIDATE_RE.findall(query)
+        for pattern in learned_patterns[:64]:
+            if not isinstance(pattern, str) or len(pattern) > 256:
+                continue
+            # Stored patterns are validated at induction/approval. Defensive
+            # rejection here avoids dangerous regex extensions after manual DB edits.
+            if any(token in pattern for token in (".*", ".+", "(?=", "(?<", "\\1")):
+                continue
+            try:
+                compiled = re.compile(pattern)
+            except re.error:
+                continue
+            found.extend(candidate for candidate in candidates
+                         if compiled.fullmatch(candidate))
+    return list(dict.fromkeys(found))
 
 
 # ---------------------------------------------------------------------------
@@ -155,17 +196,60 @@ def extract_seed_ids(query: str) -> list[str]:
 
 def _keyword_seeds(session, tokens: list[str], limit: int = 5,
                    tenant_id: str | None = None) -> list[dict]:
-    """Global keyword scan — used when the query names no entity id."""
+    """Use the native full-text index; scan only as a compatibility fallback."""
     if not tokens:
         return []
-    tokens = [_singular(t) for t in tokens]  # "doctors" must hit occupation "Doctor"
+    tokens = [_singular(t) for t in tokens]
+    adaptive_limit = min(
+        max(int(settings.KEYWORD_SEED_LIMIT_MIN), limit, len(tokens) * 2),
+        int(settings.KEYWORD_SEED_LIMIT_MAX),
+    )
+    tp = tenant_predicate("node")
+    # Quote each token and strip Lucene control punctuation. Parameters protect
+    # Cypher; this protects the full-text query parser itself.
+    terms = [re.sub(r"[^A-Za-z0-9_]+", "", token) for token in tokens]
+    fulltext_query = " OR ".join(f'"{term}"' for term in terms if term)
+    if fulltext_query:
+        indexes = [settings.NEO4J_FULLTEXT_INDEX, *_learned_fulltext_indexes(
+            session, tenant_id
+        )]
+        queried = False
+        collected: list[dict] = []
+        seen: set[str] = set()
+        for index_name in dict.fromkeys(indexes):
+            try:
+                rows = session.run(
+                    f"CALL db.index.fulltext.queryNodes($index, $lucene_query, "
+                    "{limit:$limit}) YIELD node, score "
+                    f"WHERE NOT 'Dataset' IN labels(node) AND {tp} "
+                    "RETURN labels(node) AS labels, node.id AS id, score "
+                    "ORDER BY score DESC LIMIT $limit",
+                    index=index_name, lucene_query=fulltext_query,
+                    limit=min(adaptive_limit * 20, 1_000),
+                    tenant=tenant_id if tenant_active(tenant_id) else None,
+                ).data()
+                queried = True
+                for row in rows:
+                    if row.get("id") and row["id"] not in seen:
+                        seen.add(row["id"])
+                        collected.append({"id": row["id"], "label": row["labels"][0],
+                                          "kind": "keyword",
+                                          "_score": float(row.get("score", 0.0))})
+            except Exception as exc:  # noqa: BLE001 - index may not exist/backend may differ
+                logger.debug("full-text index %s unavailable: %s", index_name, exc)
+                continue
+        if queried and collected:
+            collected.sort(key=lambda row: row.pop("_score", 0.0), reverse=True)
+            return collected[:adaptive_limit]
+        # An old index definition may omit a newly registered domain/label.
+        # Preserve recall via the compatibility scan until schema migration.
+
     tp = tenant_predicate("n")
     rows = session.run(
         f"""
         UNWIND $tokens AS tok
         UNWIND $props AS prop
         MATCH (n)
-        // the (:Dataset) metadata marker must never be keyword-seeded
         WHERE NOT 'Dataset' IN labels(n)
           AND {tp}
           AND n[prop] IS NOT NULL AND toLower(toString(n[prop])) CONTAINS toLower(tok)
@@ -174,10 +258,11 @@ def _keyword_seeds(session, tokens: list[str], limit: int = 5,
         RETURN labels, n.id AS id
         LIMIT $limit
         """,
-        tokens=tokens, props=_KEYWORD_PROPS, limit=limit,
+        tokens=tokens, props=_KEYWORD_PROPS, limit=adaptive_limit,
         tenant=tenant_id if tenant_active(tenant_id) else None,
     ).data()
-    return [{"id": r["id"], "label": r["labels"][0], "kind": "keyword"} for r in rows]
+    return [{"id": row["id"], "label": row["labels"][0], "kind": "keyword"}
+            for row in rows]
 
 
 def _numeric_seeds_global(session, numbers: list[int], direction: int, limit: int = 5,
@@ -230,10 +315,64 @@ def _neighborhood_keyword_seeds(nodes: dict[str, dict], tokens: list[str],
             for n, _ in scored[:limit]]
 
 
+def _learned_fulltext_indexes(session, tenant_id: str | None = None) -> list[str]:
+    try:
+        if tenant_active(tenant_id):
+            row = session.run(
+                "MATCH (d:Dataset {tenant_id:$tenant}) "
+                "WHERE d.fulltext_indexes_json IS NOT NULL "
+                "RETURN d.fulltext_indexes_json AS indexes "
+                "ORDER BY coalesce(d.updated_at, datetime({epochMillis:0})) DESC LIMIT 1",
+                tenant=tenant_id,
+            ).single()
+        else:
+            row = session.run(
+                "MATCH (d:Dataset) WHERE d.fulltext_indexes_json IS NOT NULL "
+                "AND ($tenant IS NULL OR d.tenant_id=$tenant) "
+                "RETURN d.fulltext_indexes_json AS indexes ORDER BY d.name LIMIT 1",
+                tenant=None,
+            ).single()
+        if not row or not row["indexes"]:
+            return []
+        import json
+        return [name for name in json.loads(row["indexes"])
+                if isinstance(name, str) and name.replace("_", "").isalnum()]
+    except Exception:  # noqa: BLE001 - old markers/backends may lack metadata
+        return []
+
+
+def _learned_id_patterns(session, tenant_id: str | None = None) -> list[str]:
+    try:
+        if tenant_active(tenant_id):
+            row = session.run(
+                "MATCH (d:Dataset {tenant_id:$tenant}) "
+                "WHERE d.id_patterns_json IS NOT NULL "
+                "RETURN d.id_patterns_json AS patterns "
+                "ORDER BY coalesce(d.updated_at, datetime({epochMillis:0})) DESC LIMIT 1",
+                tenant=tenant_id,
+            ).single()
+        else:
+            row = session.run(
+                "MATCH (d:Dataset) WHERE d.id_patterns_json IS NOT NULL "
+                "AND ($tenant IS NULL OR d.tenant_id=$tenant) "
+                "RETURN d.id_patterns_json AS patterns ORDER BY d.name LIMIT 1",
+                tenant=None,
+            ).single()
+        if not row or not row["patterns"]:
+            return []
+        import json
+        decoded = json.loads(row["patterns"])
+        return [item["pattern"] for item in decoded
+                if isinstance(item, dict) and isinstance(item.get("pattern"), str)]
+    except Exception:  # noqa: BLE001 - migration/back-end compatibility
+        return []
+
+
 def _id_seeds(session, query: str, tenant_id: str | None = None) -> list[dict]:
     seeds: list[dict] = []
     tp = tenant_predicate("n")
-    for eid in extract_seed_ids(query):
+    patterns = _learned_id_patterns(session, tenant_id)
+    for eid in extract_seed_ids(query, patterns):
         row = session.run(
             f"MATCH (n {{id: $id}}) WHERE {tp} "
             "RETURN labels(n) AS labels, n.id AS id",
@@ -270,7 +409,10 @@ def _threshold_numbers(query: str) -> list[int]:
     "amount >= 99999" and returns rich claims instead of refusing (caught
     by the negative generalization probes in the 10,200-query CI run).
     """
-    return _numeric_tokens(ENTITY_ID_RE.sub(" ", query))
+    cleaned = query
+    for entity_id in extract_seed_ids(query):
+        cleaned = cleaned.replace(entity_id, " ")
+    return _numeric_tokens(cleaned)
 
 
 def _threshold_direction(query: str) -> int:
@@ -295,11 +437,7 @@ def _numeric_hits(props: dict, numbers: list[int], direction: int,
         value = props.get(prop)
         if not isinstance(value, (int, float)):
             continue
-        if direction > 0 and value >= max(numbers):
-            hits += 1
-        elif direction < 0 and value <= min(numbers):
-            hits += 1
-        elif direction == 0 and int(value) in numbers:
+        if direction > 0 and value >= max(numbers) or direction < 0 and value <= min(numbers) or direction == 0 and int(value) in numbers:
             hits += 1
     return hits
 
@@ -350,8 +488,8 @@ def _fetch_nodes(session, ids: list[str],
     try:
         from graphrag.pii import decrypt_node, encryption_enabled
     except ImportError:  # pragma: no cover - graphrag package always present
-        encryption_enabled = lambda: False  # noqa: E731
-        decrypt_node = lambda n: n  # noqa: E731
+        encryption_enabled = lambda: False
+        decrypt_node = lambda n: n
     nodes: dict[str, dict] = {}
     tp = tenant_predicate("n")
     for row in session.run(

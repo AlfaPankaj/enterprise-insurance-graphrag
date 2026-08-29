@@ -22,7 +22,7 @@ from datetime import datetime, timezone
 from graphrag.cache import bump_revision
 from graphrag.config import settings
 from graphrag.graph_store import SNAPSHOT_LABEL, save_existing_entities
-from graphrag.pii import classify, encryption_enabled, encrypt_value
+from graphrag.pii import classify, encrypt_value, encryption_enabled
 
 # Join fields are used to derive edges and are not stored as node properties.
 JOIN_FIELDS = {"policy_id", "claim_id", "investigator_id", "policyholder_id", "doc_id"}
@@ -37,48 +37,45 @@ _DERIVED_EDGES: dict[str, list[str]] = {
 }
 
 
-def _derive_edges(tx, label: str, eid: str, props: dict) -> None:
-    """Create the relationships implied by an entity's join props."""
+def _derive_edges(tx, label: str, eid: str, props: dict,
+                  tenant_id: str | None = None) -> None:
+    """Create relationships without ever matching nodes owned by another tenant."""
+    scoped = bool(tenant_id) and settings.TENANT_MODE == "column"
+
+    def run(a_label: str, a_id: str, b_label: str, b_id: str,
+            relationship: str) -> None:
+        if scoped:
+            tx.run(
+                f"MERGE (a:{a_label} {{id:$aid, tenant_id:$tenant}}) "
+                f"MERGE (b:{b_label} {{id:$bid, tenant_id:$tenant}}) "
+                f"MERGE (a)-[:{relationship}]->(b)",
+                aid=a_id, bid=b_id, tenant=tenant_id,
+            )
+        else:
+            tx.run(
+                f"MERGE (a:{a_label} {{id:$aid}}) MERGE (b:{b_label} {{id:$bid}}) "
+                f"MERGE (a)-[:{relationship}]->(b)",
+                aid=a_id, bid=b_id,
+            )
+
     if label == "Claim":
         if props.get("policy_id"):
-            tx.run(
-                "MERGE (p:Policy {id: $pid}) MERGE (c:Claim {id: $cid}) "
-                "MERGE (p)-[:HAS_CLAIM]->(c)",
-                pid=props["policy_id"], cid=eid,
-            )
+            run("Policy", props["policy_id"], "Claim", eid, "HAS_CLAIM")
         if props.get("investigator_id"):
-            tx.run(
-                "MERGE (i:Investigator {id: $iid}) MERGE (c:Claim {id: $cid}) "
-                "MERGE (i)-[:INVESTIGATES_CLAIM]->(c)",
-                iid=props["investigator_id"], cid=eid,
-            )
+            run("Investigator", props["investigator_id"], "Claim", eid,
+                "INVESTIGATES_CLAIM")
     elif label == "Endorsement" and props.get("policy_id"):
-        tx.run(
-            "MERGE (p:Policy {id: $pid}) MERGE (e:Endorsement {id: $eid}) "
-            "MERGE (p)-[:ENDORSED_BY]->(e)",
-            pid=props["policy_id"], eid=eid,
-        )
+        run("Policy", props["policy_id"], "Endorsement", eid, "ENDORSED_BY")
     elif label == "Coverage" and props.get("policy_id"):
-        tx.run(
-            "MERGE (p:Policy {id: $pid}) MERGE (c:Coverage {id: $cid}) "
-            "MERGE (p)-[:COVERS]->(c)",
-            pid=props["policy_id"], cid=eid,
-        )
+        run("Policy", props["policy_id"], "Coverage", eid, "COVERS")
     elif label == "FraudFlag" and props.get("claim_id"):
-        tx.run(
-            "MERGE (c:Claim {id: $cid}) MERGE (f:FraudFlag {id: $fid}) "
-            "MERGE (c)-[:FRAUD_DETECTED]->(f)",
-            cid=props["claim_id"], fid=eid,
-        )
+        run("Claim", props["claim_id"], "FraudFlag", eid, "FRAUD_DETECTED")
     elif label == "Policy" and props.get("policyholder_id"):
-        tx.run(
-            "MERGE (ph:Policyholder {id: $phid}) MERGE (p:Policy {id: $pid}) "
-            "MERGE (ph)-[:HAS_POLICY]->(p)",
-            phid=props["policyholder_id"], pid=eid,
-        )
+        run("Policyholder", props["policyholder_id"], "Policy", eid, "HAS_POLICY")
 
 
-def _prune_derived_edges(tx, label: str, eid: str) -> None:
+def _prune_derived_edges(tx, label: str, eid: str,
+                         tenant_id: str | None = None) -> None:
     """Remove the edges this label derives, so re-derivation never leaves stale ones.
 
     Called for *modified* entities before re-deriving — if a claim is re-assigned
@@ -87,40 +84,62 @@ def _prune_derived_edges(tx, label: str, eid: str) -> None:
     edge_types = _DERIVED_EDGES.get(label)
     if not edge_types:
         return
-    tx.run(
-        f"MATCH (n:{label} {{id: $id}})-[r:{'|'.join(edge_types)}]->() DELETE r",
-        id=eid,
-    )
+    if tenant_id and settings.TENANT_MODE == "column":
+        tx.run(
+            f"MATCH (n:{label} {{id:$id, tenant_id:$tenant}})"
+            f"-[r:{'|'.join(edge_types)}]->() DELETE r",
+            id=eid, tenant=tenant_id,
+        )
+    else:
+        tx.run(
+            f"MATCH (n:{label} {{id: $id}})-[r:{'|'.join(edge_types)}]->() DELETE r",
+            id=eid,
+        )
 
 
-def _count_rels(tx, ids: list[str]) -> int:
-    row = tx.run(
-        "UNWIND $ids AS id MATCH (n {id: id})-[r]-() RETURN count(r) AS c",
-        ids=ids,
-    ).single()
+def _count_rels(tx, ids: list[str], tenant_id: str | None = None) -> int:
+    if tenant_id and settings.TENANT_MODE == "column":
+        row = tx.run(
+            "UNWIND $ids AS id MATCH (n {id:id, tenant_id:$tenant})-[r]-() "
+            "RETURN count(r) AS c", ids=ids, tenant=tenant_id,
+        ).single()
+    else:
+        row = tx.run(
+            "UNWIND $ids AS id MATCH (n {id: id})-[r]-() RETURN count(r) AS c",
+            ids=ids,
+        ).single()
     return row["c"] if row else 0
 
 
-def _referenced_elsewhere(tx, eid: str, doc_id: str) -> bool:
+def _referenced_elsewhere(tx, eid: str, doc_id: str,
+                          tenant_id: str | None = None) -> bool:
     """True if another DocSnapshot (not this doc) still contains the entity id.
 
     Snapshots are JSON strings keyed by entity id, so the entity id is quoted
     in the search string — this makes the CONTAINS match exact
     ("POL-0001" will not match a hypothetical "POL-0001x").
     """
-    row = tx.run(
-        f"MATCH (n:{SNAPSHOT_LABEL}) "
-        "WHERE n.doc_id <> $doc_id AND n.entities_json CONTAINS $quoted "
-        "RETURN count(n) AS c",
-        doc_id=doc_id,
-        quoted=json.dumps(eid),
-    ).single()
+    if tenant_id and settings.TENANT_MODE == "column":
+        row = tx.run(
+            f"MATCH (n:{SNAPSHOT_LABEL}) WHERE n.tenant_id=$tenant "
+            "AND n.doc_id <> $doc_id AND n.entities_json CONTAINS $quoted "
+            "RETURN count(n) AS c", doc_id=doc_id, quoted=json.dumps(eid),
+            tenant=tenant_id,
+        ).single()
+    else:
+        row = tx.run(
+            f"MATCH (n:{SNAPSHOT_LABEL}) "
+            "WHERE n.doc_id <> $doc_id AND n.entities_json CONTAINS $quoted "
+            "RETURN count(n) AS c", doc_id=doc_id, quoted=json.dumps(eid),
+        ).single()
     return bool(row and row["c"] > 0)
 
 
 def update_graph_surgically(driver, doc_id: str, changes: dict,
                             new_entities: dict | None = None,
-                            tenant_id: str | None = None) -> dict:
+                            tenant_id: str | None = None,
+                            dataset_name: str | None = None,
+                            replace_vectors: bool = False) -> dict:
     """Apply CDC changes to Neo4j. Returns timing + count stats.
 
     If ``new_entities`` is given, the document snapshot is saved in the SAME
@@ -142,6 +161,9 @@ def update_graph_surgically(driver, doc_id: str, changes: dict,
         "entities_deleted": len(changes["deleted"]),
         "deleted_skipped": 0,  # entities still referenced by other docs
         "edges_added": 0,
+        "embeddings_updated": 0,
+        "embeddings_deleted": 0,
+        "embedding_warning": None,
         "neo4j_query_time_ms": 0.0,
         "update_time_ms": 0.0,
     }
@@ -151,15 +173,22 @@ def update_graph_surgically(driver, doc_id: str, changes: dict,
     with driver.session() as session:
         query_start = time.perf_counter()
         with session.begin_transaction() as tx:
-            rels_before = _count_rels(tx, kept_ids) if kept_ids else 0
+            rels_before = _count_rels(tx, kept_ids, tenant_id) if kept_ids else 0
             for entity in changes["deleted"]:
-                if _referenced_elsewhere(tx, entity["id"], doc_id):
+                if _referenced_elsewhere(tx, entity["id"], doc_id, tenant_id):
                     stats["deleted_skipped"] += 1
                     continue
-                tx.run(
-                    f"MATCH (n:{entity['label']} {{id: $id}}) DETACH DELETE n",
-                    id=entity["id"],
-                )
+                if stamp_tenant:
+                    tx.run(
+                        f"MATCH (n:{entity['label']} "
+                        "{id:$id, tenant_id:$tenant}) DETACH DELETE n",
+                        id=entity["id"], tenant=tenant_id,
+                    )
+                else:
+                    tx.run(
+                        f"MATCH (n:{entity['label']} {{id: $id}}) DETACH DELETE n",
+                        id=entity["id"],
+                    )
             for entity in upserts:
                 # NOTE: don't use .get(key, entity["props"]) — the default is
                 # evaluated eagerly and raises for modified entities.
@@ -173,11 +202,10 @@ def update_graph_surgically(driver, doc_id: str, changes: dict,
                               for k, v in stored.items()}
                 if stamp_tenant:
                     tx.run(
-                        f"MERGE (n:{entity['label']} {{id: $id}}) SET n += $props "
+                        f"MERGE (n:{entity['label']} "
+                        "{id:$id, tenant_id:$tenant}) SET n += $props "
                         "SET n.tenant_id = coalesce(n.tenant_id, $tenant)",
-                        id=entity["id"],
-                        props=stored,
-                        tenant=tenant_id,
+                        id=entity["id"], props=stored, tenant=tenant_id,
                     )
                 else:
                     tx.run(
@@ -186,18 +214,41 @@ def update_graph_surgically(driver, doc_id: str, changes: dict,
                         props=stored,
                     )
                 if "new_props" in entity:
-                    _prune_derived_edges(tx, entity["label"], entity["id"])
-                _derive_edges(tx, entity["label"], entity["id"], full_props)
+                    _prune_derived_edges(tx, entity["label"], entity["id"], tenant_id)
+                _derive_edges(tx, entity["label"], entity["id"], full_props,
+                              tenant_id)
             # v2 cache invalidation: any effective write bumps the graph
             # revision so cached answers can never survive a mutation
             effective_deletes = len(changes["deleted"]) - stats["deleted_skipped"]
             if upserts or effective_deletes > 0:
-                bump_revision(tx)
-            rels_after = _count_rels(tx, kept_ids) if kept_ids else 0
+                bump_revision(tx, tenant_id)
+            rels_after = _count_rels(tx, kept_ids, tenant_id) if kept_ids else 0
             if new_entities is not None:
-                save_existing_entities(tx, doc_id, new_entities)
+                save_existing_entities(tx, doc_id, new_entities,
+                                       tenant_id=tenant_id)
         stats["neo4j_query_time_ms"] = round((time.perf_counter() - query_start) * 1000, 2)
         stats["edges_added"] = max(rels_after - rels_before, 0)
+
+    if settings.VECTOR_INCREMENTAL_ENABLED and (upserts or changes["deleted"]):
+        try:
+            from graphrag.vector_store import (
+                delete_vector_embeddings,
+                update_native_embeddings,
+            )
+            if upserts:
+                stats["embeddings_updated"] = update_native_embeddings(
+                    driver, upserts, tenant_id=tenant_id,
+                    dataset_name=dataset_name, replace=replace_vectors,
+                )
+            if changes["deleted"]:
+                stats["embeddings_deleted"] = delete_vector_embeddings(
+                    driver, [item["id"] for item in changes["deleted"]],
+                    tenant_id=tenant_id, dataset_name=dataset_name,
+                )
+        except Exception as exc:  # noqa: BLE001 - graph commit already succeeded
+            stats["embedding_warning"] = (
+                f"incremental embedding update failed: {type(exc).__name__}"
+            )
 
     stats["update_time_ms"] = round((time.perf_counter() - start) * 1000, 2)
     return stats

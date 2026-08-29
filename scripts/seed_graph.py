@@ -101,35 +101,55 @@ def batches(rows: Iterable[Any], size: int = BATCH_SIZE) -> Iterable[list]:
         yield buffer[start : start + size]
 
 
-def clear_graph_batched(session) -> None:
-    """Delete the whole graph in per-label, LIMIT-chunked batches.
-
-    A single ``MATCH (n) DETACH DELETE n`` on a 120k-node graph (e.g. right
-    after a full data_synthetic ingest) can exceed the server's per-transaction
-    memory limit. Deleting label-by-label with a small LIMIT keeps each
-    transaction tiny and idempotent (re-running is safe).
-    """
-    labels = [r["label"] for r in session.run(
-        "MATCH (n) WITH labels(n) AS l UNWIND l AS label "
-        "RETURN DISTINCT label ORDER BY label").data()]
+def clear_graph_batched(session, tenant_id: str | None = None) -> None:
+    """Delete the whole graph, or only one tenant, in bounded transactions."""
+    if tenant_id:
+        labels = [row["label"] for row in session.run(
+            "MATCH (n {tenant_id:$tenant}) WITH labels(n) AS l UNWIND l AS label "
+            "RETURN DISTINCT label ORDER BY label", tenant=tenant_id).data()]
+    else:
+        labels = [row["label"] for row in session.run(
+            "MATCH (n) WITH labels(n) AS l UNWIND l AS label "
+            "RETURN DISTINCT label ORDER BY label").data()]
     for label in labels:
         while True:
-            res = session.run(
-                f"MATCH (n:{label}) WITH n LIMIT 2000 DETACH DELETE n "
-                "RETURN count(*) AS c").single()
-            if not res or res["c"] == 0:
+            if tenant_id:
+                result = session.run(
+                    f"MATCH (n:{label} {{tenant_id:$tenant}}) WITH n LIMIT 2000 "
+                    "DETACH DELETE n RETURN count(*) AS c", tenant=tenant_id,
+                ).single()
+            else:
+                result = session.run(
+                    f"MATCH (n:{label}) WITH n LIMIT 2000 DETACH DELETE n "
+                    "RETURN count(*) AS c").single()
+            if not result or result["c"] == 0:
                 break
-    # anything without a label (defensive)
     while True:
-        res = session.run(
-            "MATCH (n) WHERE size(labels(n)) = 0 WITH n LIMIT 2000 "
-            "DETACH DELETE n RETURN count(*) AS c").single()
-        if not res or res["c"] == 0:
+        if tenant_id:
+            result = session.run(
+                "MATCH (n {tenant_id:$tenant}) WHERE size(labels(n))=0 "
+                "WITH n LIMIT 2000 DETACH DELETE n RETURN count(*) AS c",
+                tenant=tenant_id,
+            ).single()
+        else:
+            result = session.run(
+                "MATCH (n) WHERE size(labels(n))=0 WITH n LIMIT 2000 "
+                "DETACH DELETE n RETURN count(*) AS c").single()
+        if not result or result["c"] == 0:
             break
 
 
-def apply_schema(session, schema_path: Path) -> None:
-    statements = split_cypher(schema_path.read_text(encoding="utf-8"))
+def apply_schema(session, schema_path: Path,
+                 tenant_scoped: bool = False) -> None:
+    text = schema_path.read_text(encoding="utf-8")
+    if tenant_scoped:
+        # A global n.id constraint prevents two tenants from owning the same
+        # business ID. Fresh column-mode deployments use composite uniqueness.
+        text = re.sub(r"(CONSTRAINT\s+)([a-z0-9_]+_id_unique)",
+                      r"\1\2_tenant", text)
+        text = text.replace("REQUIRE n.id IS UNIQUE",
+                            "REQUIRE (n.tenant_id, n.id) IS UNIQUE")
+    statements = split_cypher(text)
     print(f"  applying {len(statements)} statements from {schema_path.name} ...")
     for stmt in statements:
         session.run(stmt)
@@ -168,7 +188,8 @@ def load_nodes(runner, nodes_by_label: dict[str, list[dict]],
                     for r in batch]
             if tenant_id:
                 runner.run(
-                    f"UNWIND $rows AS r MERGE (n:{label} {{id: r.id}}) SET n += r.props "
+                    f"UNWIND $rows AS r MERGE (n:{label} "
+                    "{id: r.id, tenant_id: $tenant}) SET n += r.props "
                     "SET n.tenant_id = coalesce(n.tenant_id, $tenant)",
                     rows=safe, tenant=tenant_id,
                 )
@@ -179,8 +200,9 @@ def load_nodes(runner, nodes_by_label: dict[str, list[dict]],
                 )
 
 
-def load_relationships(runner, rels: list[tuple[str, str, str, str, str]]) -> None:
-    """rels: (a_label, b_label, a_id, b_id, relationship_type)"""
+def load_relationships(runner, rels: list[tuple[str, str, str, str, str]],
+                       tenant_id: str | None = None) -> None:
+    """rels: (a_label, b_label, a_id, b_id, relationship_type)."""
     groups: dict[tuple[str, str, str], list[dict]] = defaultdict(list)
     for a_label, b_label, a_id, b_id, rtype in rels:
         groups[(a_label, b_label, rtype)].append({"a": a_id, "b": b_id})
@@ -188,11 +210,20 @@ def load_relationships(runner, rels: list[tuple[str, str, str, str, str]]) -> No
         if not rows:
             continue
         for batch in batches(rows):
-            runner.run(
-                f"UNWIND $rows AS r MATCH (a:{a_label} {{id: r.a}}), (b:{b_label} {{id: r.b}}) "
-                f"MERGE (a)-[:{rtype}]->(b)",
-                rows=batch,
-            )
+            if tenant_id:
+                runner.run(
+                    f"UNWIND $rows AS r MATCH (a:{a_label} "
+                    "{id: r.a, tenant_id: $tenant}), "
+                    f"(b:{b_label} {{id: r.b, tenant_id: $tenant}}) "
+                    f"MERGE (a)-[:{rtype}]->(b)",
+                    rows=batch, tenant=tenant_id,
+                )
+            else:
+                runner.run(
+                    f"UNWIND $rows AS r MATCH (a:{a_label} {{id: r.a}}), "
+                    f"(b:{b_label} {{id: r.b}}) MERGE (a)-[:{rtype}]->(b)",
+                    rows=batch,
+                )
 
 
 def seed(session, samples_dir: Path, tenant_id: str | None = None) -> None:
@@ -250,7 +281,7 @@ def seed(session, samples_dir: Path, tenant_id: str | None = None) -> None:
     # MERGEs make re-running the recovery path either way).
     with session.begin_transaction() as tx:
         load_nodes(tx, nodes, tenant_id=tenant_id)
-        load_relationships(tx, rels)
+        load_relationships(tx, rels, tenant_id=tenant_id)
 
     # Queued counts are pre-dedupe (endorsements appear in policies.json AND
     # endorsements.json; investigators repeat across claims) — the graph counts
@@ -340,25 +371,39 @@ def main(argv: list[str] | None = None) -> int:
             session.run("RETURN 1")  # connectivity check
             print(f"connected to {args.uri}")
             if args.apply_schema:
-                apply_schema(session, args.schema_file)
+                apply_schema(session, args.schema_file,
+                             tenant_scoped=bool(args.tenant))
             if args.reset:
-                clear_graph_batched(session)
-                print("  graph cleared (--reset)")
+                clear_graph_batched(session, tenant_id=args.tenant)
+                print("  graph scope cleared (--reset)")
             seed(session, args.samples_dir, tenant_id=args.tenant)
             # stamp the demo dataset so the dashboard picks the right fraud
             # ground-truth table (samples/claims.json labels) — but never
             # overwrite a real-dataset marker (e.g. when adding snapshots to a
             # graph that was seeded from a real CSV without --reset)
-            if args.reset or not session.run(
+            marker_exists = (session.run(
+                "MATCH (d:Dataset {tenant_id:$tenant}) RETURN d LIMIT 1",
+                tenant=args.tenant,
+            ).single() if args.tenant else session.run(
                 "MATCH (d:Dataset) RETURN d LIMIT 1"
-            ).single():
+            ).single())
+            if args.reset or not marker_exists:
                 # v2: bump the dataset revision on (re)stamp so the answer
                 # cache invalidates across processes
-                session.run(
-                    "MERGE (d:Dataset {name: 'synthetic'}) "
-                    "ON CREATE SET d.rev = 0 "
-                    "ON MATCH SET d.rev = coalesce(d.rev, 0) + 1"
-                )
+                if args.tenant:
+                    session.run(
+                        "MERGE (d:Dataset {name:'synthetic', tenant_id:$tenant}) "
+                        "ON CREATE SET d.rev=0 "
+                        "ON MATCH SET d.rev=coalesce(d.rev,0)+1 "
+                        "SET d.updated_at=datetime(), d.active=true",
+                        tenant=args.tenant,
+                    )
+                else:
+                    session.run(
+                        "MERGE (d:Dataset {name: 'synthetic'}) "
+                        "ON CREATE SET d.rev = 0 "
+                        "ON MATCH SET d.rev = coalesce(d.rev, 0) + 1"
+                    )
             report_counts(session)
             if args.snapshots:
                 create_snapshots(driver, PROJECT_ROOT / "data" / "pdfs", args.samples_dir)

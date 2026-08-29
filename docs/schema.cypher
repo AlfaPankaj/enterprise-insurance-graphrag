@@ -69,6 +69,19 @@ CREATE INDEX fraudflag_confidence_idx IF NOT EXISTS FOR (n:FraudFlag)    ON (n.c
 CREATE TEXT INDEX policyholder_name_text_idx IF NOT EXISTS FOR (n:Policyholder) ON (n.name);
 CREATE TEXT INDEX investigator_name_text_idx  IF NOT EXISTS FOR (n:Investigator) ON (n.name);
 
+// Native full-text keyword seeding. The retriever falls back to a compatibility
+// scan only when this index/procedure is unavailable (for example Apache AGE).
+CREATE FULLTEXT INDEX graphrag_fulltext IF NOT EXISTS
+FOR (n:Policyholder|Policy|Coverage|Claim|Endorsement|FraudFlag|Investigator|Customer|Account|Transaction|Dispute|AMLAlert)
+ON EACH [n.id, n.name, n.policy_number, n.claim_number, n.account_number,
+         n.transaction_id, n.dispute_id, n.alert_id, n.status, n.type, n.category,
+         n.cause, n.description, n.reason, n.role, n.occupation, n.merchant,
+         n.address, n.tenant_id];
+
+// Neo4j-native HNSW vectors share a stable :Searchable label. Dimensions are
+// provider-specific, so graphrag.vector_store creates the vector index lazily
+// after resolving the real embedding model.
+
 // ============================================================================
 // Optional: validate the schema
 // ============================================================================

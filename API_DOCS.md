@@ -39,12 +39,50 @@ curl -X POST http://localhost:8000/api/v1/upload \
      -F "file=@data/pdfs/policy_POL-0009.pdf"
 ```
 
-Response: `{status, file, doc_id, extraction_mode, changes: {added, modified,
-deleted}, update_stats: {entities_added, entities_updated, entities_deleted,
-edges_added, update_time_ms, ...}}`
+Response: `{status, file, doc_id, content_sha256, size_bytes, page_count,
+malware_scan, deduplicated, upload_audit_id, extraction_mode, changes: {added,
+modified, deleted}, update_stats: {entities_added, entities_updated,
+entities_deleted, edges_added, update_time_ms, ...}}`
 
-Validation (400/422): non-PDF extension, bad filename, empty file, >25 MB,
-missing `%PDF` header, or no extractable entities.
+The request body is read incrementally. Validation rejects unsafe filenames,
+non-PDF files, empty/corrupt/encrypted PDFs, files over the configured byte or
+page limits, malware detections, and PDFs with no extractable entities. Invalid
+content returns `400`, oversized content `413`, scanner unavailability `503`
+(when fail-closed), and no extractable entities `422`. Limits and the optional
+scanner command are configured with the `UPLOAD_*` environment variables in
+`.env.example`. Content-free audit events are appended to
+`UPLOAD_AUDIT_PATH` (default `data/audit_trail/uploads.jsonl`).
+
+### `POST /api/v1/datasets/upload` — tenant-owned PDF/CSV bundle
+
+Uploads a homogeneous bundle atomically. CSV bundles are profiled and stop at
+`awaiting_mapping_review`; PDFs start a tenant-scoped ingest job.
+
+```bash
+curl -X POST http://localhost:8000/api/v1/datasets/upload \
+  -H "X-API-Key: $API_KEY" \
+  -F "session_name=claims_2026" \
+  -F "files=@customers.csv" -F "files=@policies.csv"
+```
+
+The response contains `job_id`, per-file checksums, and `next_stage`. Poll
+`GET /api/v1/jobs/{job_id}` and retrieve the proposal with
+`GET /api/v1/datasets`. After review:
+
+```bash
+curl -X POST http://localhost:8000/api/v1/datasets/claims_2026/mapping/approve \
+  -H "X-API-Key: $API_KEY" -H "Content-Type: application/json" \
+  -d '{"mapping": { ... reviewed proposal ... }, "start_ingestion": true}'
+```
+
+Related endpoints:
+
+| Method | Path | Purpose |
+|---|---|---|
+| GET | `/api/v1/datasets` | Tenant's custom sessions, workflow state, profiles, and mappings |
+| POST | `/api/v1/datasets/{id}/profile` | Restart durable profiling |
+| POST | `/api/v1/datasets/{id}/mapping/approve` | Validate/approve mapping and optionally ingest |
+| GET | `/api/v1/jobs/{job_id}` | Status, timing, warnings, cost, and result |
 
 ### `GET /api/v1/session` — current session + available sessions
 

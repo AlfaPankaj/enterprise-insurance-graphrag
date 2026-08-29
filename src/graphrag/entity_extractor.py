@@ -68,7 +68,7 @@ _TERM = re.compile(r"^(\d{4}-\d{2}-\d{2})\s+to\s+(\d{4}-\d{2}-\d{2})$")
 # well-formedness — deterministic and honest: a complete, well-formed entity
 # scores 1.0; anything a human should look at scores below the review
 # threshold. Merged across registered domains (v2).
-from graphrag.domains import merged_id_patterns, merged_required_fields  # noqa: E402
+from graphrag.domains import merged_id_patterns, merged_required_fields
 
 _REQUIRED_FIELDS: dict[str, list[str]] = merged_required_fields()
 
@@ -410,7 +410,7 @@ def extract_entities_heuristic(text: str, doc_id_hint: str | None = None) -> dic
 def _ollama_available() -> bool:
     try:
         return httpx.get(f"{settings.LLAMA_API_URL}/api/tags", timeout=2).status_code == 200
-    except Exception:
+    except Exception:  # noqa: BLE001 - optional local service probe
         return False
 
 
@@ -418,14 +418,59 @@ def _load_prompts() -> tuple[str, str]:
     return PROMPT_FILE.read_text(encoding="utf-8").split("\n---\n", 1)
 
 
-def _render_extraction_prompt(text: str) -> str:
-    """Fill the extraction template — brace-safe (document text may hold {}).
+def _ontology_prompt() -> str:
+    """Compact ontology generated from every registered DomainSpec."""
+    from graphrag.domains import specs
 
-    A document containing literal braces (JSON snippets in clauses, etc.)
-    must not crash ``.format()``; the swap goes through a sentinel.
-    """
+    payload = {
+        domain.name: {
+            "description": domain.description,
+            "entities": {label: list(fields)
+                         for label, fields in domain.required_fields.items()},
+            "relationships": [list(rel) for rel in domain.relationships],
+        }
+        for domain in specs()
+    }
+    return json.dumps(payload, ensure_ascii=False, separators=(",", ":"))
+
+
+def _render_extraction_prompt(text: str) -> str:
+    """Render a brace-safe, ontology-guided, prompt-injection-resistant prompt."""
     prompt, _qa = _load_prompts()
-    return prompt.replace("{text}", "\x00DOC_TEXT\x00").replace("\x00DOC_TEXT\x00", text)
+    # Limit ingestion-time prompt size independently of provider context windows.
+    text = text[:500_000]
+    return (prompt.replace("{ontology}", _ontology_prompt())
+            .replace("{text}", "\x00DOC_TEXT\x00")
+            .replace("\x00DOC_TEXT\x00", text))
+
+
+def _validate_llm_entities(value: object) -> dict:
+    """Reject invented labels and nested/executable values from model output."""
+    allowed = set(_REQUIRED_FIELDS)
+    if not isinstance(value, dict):
+        raise ValueError("extraction output must be a JSON object")  # noqa: TRY004
+    clean: dict[str, dict[str, dict]] = {}
+    for label, entities in value.items():
+        if label not in allowed or not isinstance(entities, dict):
+            raise ValueError(f"unregistered extraction label: {label!r}")
+        for eid, props in entities.items():
+            eid = str(eid)
+            if not eid or len(eid) > 128 or not isinstance(props, dict):
+                raise ValueError("invalid extracted entity contract")
+            flat = {}
+            for key, item in props.items():
+                key = str(key)
+                if not re.fullmatch(r"[A-Za-z][A-Za-z0-9_]{0,63}", key):
+                    continue
+                if item is None or isinstance(item, (str, int, float, bool)):
+                    flat[key] = item
+                elif isinstance(item, list) and all(
+                    x is None or isinstance(x, (str, int, float, bool)) for x in item
+                ):
+                    flat[key] = item[:100]
+            flat.setdefault("id", eid)
+            clean.setdefault(label, {})[eid] = flat
+    return clean
 
 
 def _extract_with_llm(text: str, doc_id_hint: str | None) -> dict:
@@ -438,10 +483,10 @@ def _extract_with_llm(text: str, doc_id_hint: str | None) -> dict:
         timeout=120,
     )
     response.raise_for_status()
-    entities = json.loads(response.json()["response"])
+    entities = _validate_llm_entities(json.loads(response.json()["response"]))
     doc_id = _hint_id(doc_id_hint) or ""
-    for label, ents in entities.items():
-        for eid, props in ents.items():
+    for ents in entities.values():
+        for eid in ents:
             if not doc_id and re.fullmatch(r"(POL|CLM|END)-\d+", eid):
                 doc_id = eid
     return {"doc_id": doc_id, "entities": entities, "mode": "llm"}
@@ -465,10 +510,10 @@ def _extract_with_openai(text: str, doc_id_hint: str | None) -> dict:
     if raw.startswith("```"):
         raw = raw.strip("`")
         raw = raw.removeprefix("json")
-    entities = json.loads(raw)
+    entities = _validate_llm_entities(json.loads(raw))
     doc_id = _hint_id(doc_id_hint) or ""
-    for label, ents in entities.items():
-        for eid, props in ents.items():
+    for ents in entities.values():
+        for eid in ents:
             if not doc_id and re.fullmatch(r"(POL|CLM|END)-\d+", eid):
                 doc_id = eid
     return {"doc_id": doc_id, "entities": entities, "mode": "llm",

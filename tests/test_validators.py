@@ -3,11 +3,13 @@
 from __future__ import annotations
 
 import sys
+from io import BytesIO
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 import pytest
+from PyPDF2 import PdfWriter
 
 from graphrag.validators import (
     MAX_PDF_BYTES,
@@ -16,6 +18,14 @@ from graphrag.validators import (
 )
 
 _PDF_HEADER = b"%PDF-1.7\n..."
+
+
+def _valid_pdf() -> bytes:
+    writer = PdfWriter()
+    writer.add_blank_page(width=72, height=72)
+    stream = BytesIO()
+    writer.write(stream)
+    return stream.getvalue()
 
 
 def test_rejects_non_pdf():
@@ -28,7 +38,7 @@ def test_rejects_non_pdf():
 def test_rejects_empty_and_missing_name():
     with pytest.raises(UploadValidationError, match="Empty"):
         validate_pdf_upload("policy.pdf", b"")
-    with pytest.raises(UploadValidationError, match="PDF"):
+    with pytest.raises(UploadValidationError, match="filename"):
         validate_pdf_upload(None, _PDF_HEADER)
 
 
@@ -44,4 +54,4 @@ def test_rejects_non_pdf_magic_bytes():
 
 
 def test_accepts_valid():
-    validate_pdf_upload("endorsement_001.pdf", _PDF_HEADER)  # no raise
+    validate_pdf_upload("endorsement_001.pdf", _valid_pdf())  # no raise

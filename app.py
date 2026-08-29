@@ -19,8 +19,8 @@ sys.path.insert(0, str(ROOT / "src"))
 
 from neo4j import GraphDatabase
 from src.graphrag.config import settings
-from src.graphrag.identity import (effective_auth_mode, identity_from_api_key,
-                                   identity_from_token)
+from src.graphrag.identity import (UPLOAD_ROLES, effective_auth_mode,
+                                   identity_from_api_key, identity_from_token)
 from src.graphrag.fraud_ground_truth import build_comparison, detect_dataset, load_ground_truth
 from src.graphrag.query_pipeline import run_query, stream_query
 from src.graphrag.reranker import make_reranker
@@ -31,13 +31,21 @@ from src.graphrag.custom_sessions import (add_custom_session,
                                           list_custom_sessions,
                                           remove_custom_session,
                                           rename_custom_session,
+                                          tenant_storage_dir,
                                           validate_session_name)
+from src.graphrag.ingestion_workflow import approve_mapping
+from src.graphrag.jobs import get_store, register_default_handlers
 from src.graphrag.sessions import (all_sessions, active_switches,
                                    benchmark_running, clear_progress,
                                    current_session_id,
                                    ensure_pdf_demo_fraud_benchmark,
                                    get_session_meta, start_switch,
                                    switch_in_progress)
+from upload import (UploadLimits, UploadValidationError,
+                    ensure_no_duplicate_uploads, rollback_upload_directory,
+                    safe_record_upload_audit, save_upload_batch_atomic,
+                    scanner_from_settings, validate_upload_batch,
+                    validate_upload_manifest)
 
 # ---------------------------------------------------------------------------
 # Shared helpers
@@ -164,7 +172,8 @@ def _load_benchmark_entry(entry: dict, loaded: str | None) -> dict | None:
         "_confusion": entry_conf,
     }
 
-def validation_entries(loaded: str | None) -> list[dict]:
+def validation_entries(loaded: str | None,
+                       tenant_id: str | None = None) -> list[dict]:
     """All validation-table entries: 3 real datasets + PDF demo graph + any
     user-uploaded custom sessions (so a new upload appears automatically)."""
     entries = [
@@ -183,7 +192,7 @@ def validation_entries(loaded: str | None) -> list[dict]:
          "desc": "60 customers · 80 accounts · 400 transactions · 30 disputes · 18 AML alerts",
          "kind": "real"},
     ]
-    for rec in list_custom_sessions():
+    for rec in list_custom_sessions(tenant_id):
         entries.append({
             "label": rec["name"], "files": [rec["name"]], "kind": "custom",
             "fraud_name": rec["name"],
@@ -338,23 +347,27 @@ with st.sidebar:
                 st.rerun()
         identity = st.session_state.get("identity")
 
+    active_tenant = identity.tenant_id if identity else settings.DEFAULT_TENANT
+
     # ---- session switcher (Phase 6): re-seeds the graph from the web UI ----
     st.markdown("---")
     st.markdown("#### Active Session")
     msg = st.session_state.pop("session_msg", None)
     if msg:
         st.success(msg)
-    all_sess = all_sessions()
+    all_sess = all_sessions(active_tenant)
     session_ids = [s["id"] for s in all_sess]
     session_labels = {s["id"]: s["label"] for s in all_sess}
-    cur_session = current_session_id(get_driver()) if db_ok else "pdf_demo"
+    cur_session = (current_session_id(get_driver(), active_tenant)
+                   if db_ok and settings.TENANT_MODE == "column"
+                   else (current_session_id(get_driver()) if db_ok else "pdf_demo"))
     sel_session = st.selectbox(
         "Session", session_ids,
         format_func=lambda sid: session_labels[sid],
         index=session_ids.index(cur_session) if cur_session in session_ids else 0,
         label_visibility="collapsed",
     )
-    sess = get_session_meta(sel_session) or {}
+    sess = get_session_meta(sel_session, active_tenant) or {}
     kind_note = ("📊 Excel / real CSV" if sess.get("kind") == "excel"
                  else ("📤 Custom upload" if sess.get("kind") == "custom"
                        else ("🏦 Banking demo" if sess.get("kind") == "banking"
@@ -369,7 +382,7 @@ with st.sidebar:
         if not db_ok:
             st.error("Neo4j not reachable — start it before switching sessions.")
         else:
-            start_switch(get_driver(), sel_session)
+            start_switch(get_driver(), sel_session, tenant_id=active_tenant)
             st.rerun()
     if st.button("Re-seed this session", type="secondary", use_container_width=True):
         if not db_ok:
@@ -377,7 +390,8 @@ with st.sidebar:
         elif switch_in_progress():
             st.caption("A session switch is already running — wait for it to finish.")
         else:
-            start_switch(get_driver(), sel_session, force=True)
+            start_switch(get_driver(), sel_session, force=True,
+                         tenant_id=active_tenant)
             st.rerun()
 
 # =========================================================================
@@ -404,7 +418,7 @@ if page == "Home":
     st.markdown("---")
     st.markdown("### Two Ingestion Pipelines")
     st.caption("Both pipelines run on the same Neo4j graph — switch sessions from the sidebar (or upload your own dataset on the Datasets page) and it re-seeds automatically.")
-    cur_meta = get_session_meta(cur_session) or {}
+    cur_meta = get_session_meta(cur_session, active_tenant) or {}
     pdf_active = "● Active now" if cur_meta.get("kind") == "pdf" else ""
     xls_active = "● Active now" if cur_meta.get("kind") in ("excel", "custom") else ""
     p1, p2 = st.columns(2)
@@ -480,10 +494,13 @@ elif page == "Dashboard":
     # while any auto-benchmark is in flight, refresh this table every 5s so the
     # new row fills in without a manual reload (fragment keeps the live query
     # runner below undisturbed)
-    @st.fragment(run_every="5s" if any(benchmark_running(e["files"][0]) for e in validation_entries(ds)) else None)
+    @st.fragment(run_every="5s" if any(
+        benchmark_running(e["files"][0])
+        for e in validation_entries(ds, active_tenant)
+    ) else None)
     def _render_validation_table(loaded):
         real_rows = []; fraud_conf = {"tp":0,"fp":0,"tn":0,"fn":0}
-        for entry in validation_entries(loaded):
+        for entry in validation_entries(loaded, active_tenant):
             row = _load_benchmark_entry(entry, loaded)
             if row is None:
                 continue
@@ -700,61 +717,209 @@ elif page == "Datasets":
 
     st.markdown("---")
     st.markdown("#### Upload your dataset")
+    upload_limits = UploadLimits.from_settings(settings)
+    st.caption(
+        f"Upload up to {upload_limits.max_files} PDFs (max "
+        f"{upload_limits.max_pdf_bytes // (1024 * 1024)} MB each, "
+        f"{upload_limits.max_pdf_pages} pages) or a related UTF-8 CSV bundle (max "
+        f"{upload_limits.max_csv_bytes // (1024 * 1024)} MB and "
+        f"{upload_limits.max_csv_rows:,} rows per file). Mixed batches are not allowed; "
+        "CSV mappings require review before graph writes."
+    )
     up_files = st.file_uploader("Choose PDF or CSV file(s)", type=["pdf", "csv"],
                                 accept_multiple_files=True,
                                 label_visibility="collapsed")
     c1, c2 = st.columns([3, 1])
     new_name = c1.text_input("Session name — must be unique (not one of the built-ins)",
                              placeholder="e.g. my_claims")
-    create = c2.button("Create & load", type="primary", use_container_width=True)
+    can_upload = identity is None or identity.has_any(UPLOAD_ROLES)
+    create = c2.button("Create workflow", type="primary", use_container_width=True,
+                       disabled=not can_upload)
+    if not can_upload:
+        st.error("Your account does not have permission to upload datasets.")
     if create:
-        if not up_files:
-            st.error("Choose at least one file first.")
-        else:
+        validated_files = []
+        target_dir = None
+        registered = False
+        actor = identity.subject if identity else "anonymous"
+        tenant_id = identity.tenant_id if identity else settings.DEFAULT_TENANT
+        audit_path = Path(settings.UPLOAD_AUDIT_PATH)
+        if not audit_path.is_absolute():
+            audit_path = ROOT / audit_path
+        try:
+            cleaned = validate_session_name(new_name, tenant_id=tenant_id)
+            selected_files = list(up_files or [])
+            validate_upload_manifest(
+                [(uploaded.name, uploaded.size) for uploaded in selected_files],
+                limits=upload_limits,
+            )
+            payloads = [
+                (uploaded.name, bytes(uploaded.getbuffer()), uploaded.type)
+                for uploaded in selected_files
+            ]
+            validated_files = validate_upload_batch(
+                payloads,
+                limits=upload_limits,
+                malware_scanner=scanner_from_settings(settings),
+            )
+            existing_sessions = list_custom_sessions(tenant_id)
+            if settings.UPLOAD_DEDUPLICATE_CUSTOM:
+                ensure_no_duplicate_uploads(
+                    validated_files, existing_sessions, project_root=ROOT
+                )
+
+            target_dir = tenant_storage_dir(tenant_id, cleaned)
+            saved_paths = save_upload_batch_atomic(validated_files, target_dir)
             try:
-                cleaned = validate_session_name(new_name)
-            except ValueError as exc:
-                st.error(str(exc))
-            else:
-                target_dir = ROOT / "data" / "custom" / cleaned
-                target_dir.mkdir(parents=True, exist_ok=True)
-                saved = []
-                for f in up_files:
-                    dest = target_dir / f.name
-                    dest.write_bytes(f.getbuffer())
-                    saved.append(f"data/custom/{cleaned}/{f.name}")
-                kind = "pdf" if any(f.name.lower().endswith(".pdf") for f in up_files) else "csv"
-                note = f"{len(up_files)} file(s) · {up_files[0].name}"
-                add_custom_session(cleaned, kind, saved, note=note)
+                saved = [path.relative_to(ROOT).as_posix() for path in saved_paths]
+                kind = validated_files[0].kind
+                note = f"{len(validated_files)} file(s) · {validated_files[0].filename}"
+                add_custom_session(
+                    cleaned,
+                    kind,
+                    saved,
+                    note=note,
+                    uploads=[item.metadata() for item in validated_files],
+                    tenant_id=tenant_id,
+                    owner=actor,
+                )
+                registered = True
+            except Exception:
+                rollback_upload_directory(target_dir)
+                raise
+
+            audit_event = safe_record_upload_audit(
+                audit_path=audit_path,
+                outcome="success",
+                actor=actor,
+                tenant_id=tenant_id,
+                entry_point="streamlit",
+                uploads=validated_files,
+                session_name=cleaned,
+                extra={"deduplication_enabled": settings.UPLOAD_DEDUPLICATE_CUSTOM},
+            )
+            checksum = validated_files[0].sha256[:12]
+            audit_suffix = (f" · audit `{audit_event['audit_id']}`"
+                            if audit_event else "")
+            if kind == "csv":
+                register_default_handlers(lambda: get_driver())
+                job_id = get_store().submit(
+                    "profile_upload",
+                    {"session_id": cleaned},
+                    tenant_id=tenant_id,
+                    owner=actor,
+                )
                 st.session_state["session_msg"] = (
-                    f"Custom session '{cleaned}' created — loading it now…"
+                    f"Custom session '{cleaned}' persisted (SHA-256 `{checksum}…`"
+                    f"{audit_suffix}). Profiling job `{job_id}` started; review its "
+                    "mapping below before any graph write."
+                )
+            else:
+                st.session_state["session_msg"] = (
+                    f"Custom session '{cleaned}' created (SHA-256 `{checksum}…`"
+                    f"{audit_suffix}) — loading it now…"
                 )
                 if db_ok:
-                    start_switch(get_driver(), cleaned)
-                st.rerun()
+                    start_switch(get_driver(), cleaned, tenant_id=tenant_id)
+            st.rerun()
+        except (UploadValidationError, ValueError) as exc:
+            safe_record_upload_audit(
+                audit_path=audit_path,
+                outcome="rejected",
+                actor=actor,
+                tenant_id=tenant_id,
+                entry_point="streamlit",
+                uploads=validated_files,
+                session_name=new_name.strip() or None,
+                reason=getattr(exc, "code", "invalid_session"),
+                extra={"message": str(exc)},
+            )
+            st.error(str(exc))
+        except Exception:
+            if target_dir is not None and not registered:
+                rollback_upload_directory(target_dir)
+            safe_record_upload_audit(
+                audit_path=audit_path,
+                outcome="failed",
+                actor=actor,
+                tenant_id=tenant_id,
+                entry_point="streamlit",
+                uploads=validated_files,
+                session_name=new_name.strip() or None,
+                reason=("load_start_error" if registered else "creation_error"),
+            )
+            if registered:
+                st.error("The dataset was created, but loading could not start. "
+                         "Use 'Re-seed this session' to retry.")
+            else:
+                st.error("Could not create the dataset. No partial upload was kept.")
 
     st.markdown("---")
     st.markdown("#### Your custom sessions")
-    customs = list_custom_sessions()
+    customs = list_custom_sessions(active_tenant)
     if not customs:
         st.info("No custom sessions yet — upload your first file above.")
     for rec in customs:
+        workflow = rec.get("ingestion") or {}
         st.markdown(
             f"**`{rec['name']}`** · {rec['kind'].upper()} · "
-            f"{rec.get('note') or '—'} · created {rec['created_at']}"
+            f"{rec.get('note') or '—'} · created {rec['created_at']} · "
+            f"workflow **{workflow.get('status', 'ready')}**"
         )
+        mapping = rec.get("schema_mapping")
+        if rec["kind"] == "csv" and mapping:
+            with st.expander("Review induced schema mapping",
+                             expanded=workflow.get("status") == "awaiting_review"):
+                edited_mapping = st.text_area(
+                    "Mapping JSON", value=json.dumps(mapping, indent=2),
+                    height=320, key=f"mapping_{rec['name']}",
+                )
+                st.caption(
+                    "Verify labels, ID columns, relationships, and entity-resolution "
+                    "rules. All source columns are preserved. Add reviewed ID pairs to "
+                    "accepted_merges or rejected_merges."
+                )
+                candidates = rec.get("entity_resolution_candidates") or []
+                if candidates:
+                    st.markdown("**Fuzzy merge candidates (not auto-applied)**")
+                    st.dataframe(candidates[:200], width="stretch", hide_index=True)
+                if st.button("Approve mapping & ingest", type="primary",
+                             key=f"approve_mapping_{rec['name']}", disabled=not db_ok):
+                    try:
+                        approved = approve_mapping(
+                            rec["name"], active_tenant, json.loads(edited_mapping),
+                            actor=(identity.subject if identity else "anonymous"),
+                        )
+                        register_default_handlers(lambda: get_driver())
+                        job_id = get_store().submit(
+                            "ingest_custom", {"session_id": rec["name"], "reset": True},
+                            tenant_id=active_tenant,
+                            owner=(identity.subject if identity else "anonymous"),
+                        )
+                        st.session_state["session_msg"] = (
+                            f"Mapping approved at `{approved['schema_mapping']['fingerprint'][:12]}`; "
+                            f"ingestion job `{job_id}` started."
+                        )
+                        st.rerun()
+                    except (ValueError, json.JSONDecodeError) as exc:
+                        st.error(f"Mapping was not approved: {exc}")
         cols = st.columns([3, 1, 1])
         new_nm = cols[0].text_input("Rename to", value=rec["name"],
                                     key=f"rn_{rec['name']}")
         if cols[1].button("Rename", key=f"rb_{rec['name']}"):
             old = rec["name"]
             try:
-                cleaned = validate_session_name(new_nm, exclude=old)
-                rename_custom_session(old, cleaned)
+                cleaned = validate_session_name(
+                    new_nm, exclude=old, tenant_id=active_tenant
+                )
+                rename_custom_session(old, cleaned, tenant_id=active_tenant)
                 # if the renamed session is loaded, re-seed so the graph marker
                 # (and session detection) follows the new name
-                if db_ok and current_session_id(get_driver()) == old:
-                    start_switch(get_driver(), cleaned)
+                current = (current_session_id(get_driver(), active_tenant)
+                           if settings.TENANT_MODE == "column"
+                           else current_session_id(get_driver()))
+                if db_ok and current == old:
+                    start_switch(get_driver(), cleaned, tenant_id=active_tenant)
                     st.session_state["session_msg"] = (
                         f"Renamed '{old}' → '{cleaned}' — re-seeding…"
                     )
@@ -766,7 +931,7 @@ elif page == "Datasets":
             except ValueError as exc:
                 st.error(str(exc))
         if cols[2].button("Delete", key=f"db_{rec['name']}"):
-            remove_custom_session(rec["name"])
+            remove_custom_session(rec["name"], tenant_id=active_tenant)
             st.session_state["session_msg"] = (
                 f"Deleted custom session '{rec['name']}'."
             )
@@ -774,9 +939,9 @@ elif page == "Datasets":
         st.markdown("---")
 
     st.markdown("#### How to use")
-    st.markdown("1. **Create** — upload a CSV or PDF, type a unique session name, hit *Create & load*.\n"
-                "2. **Watch** — the sidebar shows the ingest log streaming live; when it finishes the session is active.\n"
-                "3. **Query** — open the *Dashboard* and ask anything about your dataset. The graph responds to keyword and id queries (CSVs with claim/fraud columns get Claim + FraudFlag nodes; anything else becomes generic Record nodes).")
+    st.markdown("1. **Create** — upload a relational CSV bundle or PDF bundle and choose a tenant-local name.\n"
+                "2. **Review CSV** — inspect/edit the proposed labels, ID/FK mapping, and fuzzy matches; approve it to start graph writes.\n"
+                "3. **Watch & query** — follow the durable job, then ask exact-ID, keyword, semantic, or multi-hop questions on the Dashboard.")
 
 # =========================================================================
 # REVIEW QUEUE PAGE (v2 — extraction review, WS-C G17)
@@ -794,7 +959,7 @@ elif page == "Review Queue":
                "pending item instead of duplicating it.")
 
     store = get_review_store()
-    summary = store.summary()
+    summary = store.summary(active_tenant)
     c1, c2, c3 = st.columns(3)
     c1.markdown(f"<div class='grag-kpi orange'><div class='kpi-value'>{summary['pending']}</div><div class='kpi-label'>Pending</div></div>", unsafe_allow_html=True)
     c2.markdown(f"<div class='grag-kpi green'><div class='kpi-value'>{summary['approved']}</div><div class='kpi-label'>Approved</div></div>", unsafe_allow_html=True)
@@ -807,7 +972,7 @@ elif page == "Review Queue":
 
     st.markdown("---")
     status_filter = st.selectbox("Status", ["pending", "approved", "rejected"])
-    items = store.list(status=status_filter, limit=50)
+    items = store.list(status=status_filter, limit=50, tenant_id=active_tenant)
     if not items:
         st.info(f"No {status_filter} items.")
     for item in items:
@@ -826,7 +991,7 @@ elif page == "Review Queue":
                 try:
                     stats = apply_review_item(get_driver(), item)
                     store.decide(item["id"], "approved",
-                                 identity.subject if identity else "anonymous")
+                                 identity.subject if identity else "anonymous", active_tenant)
                     st.success(f"Applied {item['entity_id']} "
                                f"in {stats['update_time_ms']:.0f}ms")
                     st.rerun()
@@ -834,7 +999,7 @@ elif page == "Review Queue":
                     st.error(f"Approve failed: {exc}")
             if b2.button("Reject", key=f"rej_{item['id']}"):
                 store.decide(item["id"], "rejected",
-                             identity.subject if identity else "anonymous")
+                             identity.subject if identity else "anonymous", active_tenant)
                 st.rerun()
         elif item.get("decided_at"):
             st.caption(f"decided {item['decided_at']} "

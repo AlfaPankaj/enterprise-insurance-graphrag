@@ -224,13 +224,35 @@ def get_embedder(mode: str | None = None):
     return _hash_emb
 
 
+def production_mode() -> bool:
+    return settings.APP_ENV.strip().lower() in {"prod", "production"}
+
+
+def assert_embedding_ready(*, production: bool | None = None):
+    """Fail configuration when production would silently use feature hashing."""
+    embedder = get_embedder()
+    production = production_mode() if production is None else production
+    if (production and isinstance(embedder, HashEmbedder)
+            and not settings.ALLOW_HASH_EMBEDDINGS_IN_PRODUCTION):
+        raise EmbeddingError(
+            "Production embeddings resolve to HashEmbedder. Configure "
+            "EMBEDDING_PROVIDER=openai/ollama (and its endpoint/model), or set "
+            "ALLOW_HASH_EMBEDDINGS_IN_PRODUCTION=true only for an explicit demo."
+        )
+    return embedder
+
+
 def embed_texts(texts: list[str], mode: str | None = None) -> list[list[float]]:
-    """Embed ``texts`` with the resolved backend (never raises for ``auto``)."""
+    """Embed text; production never silently falls back to hash vectors."""
     embedder = get_embedder(mode)
+    if mode is None:
+        assert_embedding_ready()
     try:
         return embedder.embed(texts)
     except EmbeddingError:
-        if mode in ("openai", "ollama"):
+        if mode in ("openai", "ollama") or (
+            production_mode() and not settings.ALLOW_HASH_EMBEDDINGS_IN_PRODUCTION
+        ):
             raise
         logger.warning("embedding provider %s failed, using hash fallback",
                        embedder.name)

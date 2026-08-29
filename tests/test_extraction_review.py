@@ -368,11 +368,16 @@ def test_upload_holds_low_confidence_when_review_enabled(monkeypatch,
     driver = _Driver()
     with TestClient(api.app) as client:
         api.app.state.driver = driver  # lifespan driver is replaced for the test
+        pdf = (ROOT / "data" / "pdfs" / "policy_POL-0001.pdf").read_bytes()
         resp = client.post("/api/v1/upload",
-                           files={"file": ("policy.pdf", b"%PDF-1.4 fake",
+                           files={"file": ("policy.pdf", pdf,
                                            "application/pdf")})
     assert resp.status_code == 200
     body = resp.json()
+    assert len(body["content_sha256"]) == 64
+    assert body["page_count"] == 1
+    assert body["malware_scan"]["status"] == "disabled"
+    assert body["upload_audit_id"]
     assert body["review"]["held"] == 1            # PH-0077 held
     assert body["review"]["applied_entities"] == 1  # POL-0077 applied
     assert review_store.summary()["pending"] == 1

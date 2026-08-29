@@ -1,0 +1,1078 @@
+{
+  "suite": "independent_holdout_v1",
+  "count": 100,
+  "provenance": {
+    "authorship": "curated and frozen separately from scripts/build_golden_set.py",
+    "leakage_policy": "This file is never generated, sampled, or overwritten by the training/demo golden-set builder.",
+    "review_status": "baseline curator review required for expected-fact changes",
+    "created_at": "2026-08-29"
+  },
+  "category_counts": {
+    "id_lookup": 20,
+    "paraphrase": 20,
+    "multi_hop": 20,
+    "aggregation": 20,
+    "negative": 20
+  },
+  "questions": [
+    {
+      "id": "ID-001",
+      "query": "Look up claim 'CLM-0001' and report its current status.",
+      "category": "id_lookup",
+      "answerable": true,
+      "expected_ids": [
+        "CLM-0001"
+      ],
+      "expected_facts": {
+        "status": "IN_REVIEW"
+      }
+    },
+    {
+      "id": "ID-002",
+      "query": "Look up claim 'CLM-0002' and report its current status.",
+      "category": "id_lookup",
+      "answerable": true,
+      "expected_ids": [
+        "CLM-0002"
+      ],
+      "expected_facts": {
+        "status": "SUBMITTED"
+      }
+    },
+    {
+      "id": "ID-003",
+      "query": "Look up claim 'CLM-0003' and report its current status.",
+      "category": "id_lookup",
+      "answerable": true,
+      "expected_ids": [
+        "CLM-0003"
+      ],
+      "expected_facts": {
+        "status": "PAID"
+      }
+    },
+    {
+      "id": "ID-004",
+      "query": "Look up claim 'CLM-0004' and report its current status.",
+      "category": "id_lookup",
+      "answerable": true,
+      "expected_ids": [
+        "CLM-0004"
+      ],
+      "expected_facts": {
+        "status": "SUBMITTED"
+      }
+    },
+    {
+      "id": "ID-005",
+      "query": "Look up claim 'CLM-0005' and report its current status.",
+      "category": "id_lookup",
+      "answerable": true,
+      "expected_ids": [
+        "CLM-0005"
+      ],
+      "expected_facts": {
+        "status": "IN_REVIEW"
+      }
+    },
+    {
+      "id": "ID-006",
+      "query": "Look up claim 'CLM-0006' and report its current status.",
+      "category": "id_lookup",
+      "answerable": true,
+      "expected_ids": [
+        "CLM-0006"
+      ],
+      "expected_facts": {
+        "status": "SUBMITTED"
+      }
+    },
+    {
+      "id": "ID-007",
+      "query": "Look up claim 'CLM-0007' and report its current status.",
+      "category": "id_lookup",
+      "answerable": true,
+      "expected_ids": [
+        "CLM-0007"
+      ],
+      "expected_facts": {
+        "status": "DENIED"
+      }
+    },
+    {
+      "id": "ID-008",
+      "query": "Look up claim 'CLM-0008' and report its current status.",
+      "category": "id_lookup",
+      "answerable": true,
+      "expected_ids": [
+        "CLM-0008"
+      ],
+      "expected_facts": {
+        "status": "DENIED"
+      }
+    },
+    {
+      "id": "ID-009",
+      "query": "Look up claim 'CLM-0009' and report its current status.",
+      "category": "id_lookup",
+      "answerable": true,
+      "expected_ids": [
+        "CLM-0009"
+      ],
+      "expected_facts": {
+        "status": "IN_REVIEW"
+      }
+    },
+    {
+      "id": "ID-010",
+      "query": "Look up claim 'CLM-0010' and report its current status.",
+      "category": "id_lookup",
+      "answerable": true,
+      "expected_ids": [
+        "CLM-0010"
+      ],
+      "expected_facts": {
+        "status": "PAID"
+      }
+    },
+    {
+      "id": "ID-011",
+      "query": "Look up claim 'CLM-0011' and report its current status.",
+      "category": "id_lookup",
+      "answerable": true,
+      "expected_ids": [
+        "CLM-0011"
+      ],
+      "expected_facts": {
+        "status": "IN_REVIEW"
+      }
+    },
+    {
+      "id": "ID-012",
+      "query": "Look up claim 'CLM-0012' and report its current status.",
+      "category": "id_lookup",
+      "answerable": true,
+      "expected_ids": [
+        "CLM-0012"
+      ],
+      "expected_facts": {
+        "status": "APPROVED"
+      }
+    },
+    {
+      "id": "ID-013",
+      "query": "Look up claim 'CLM-0013' and report its current status.",
+      "category": "id_lookup",
+      "answerable": true,
+      "expected_ids": [
+        "CLM-0013"
+      ],
+      "expected_facts": {
+        "status": "IN_REVIEW"
+      }
+    },
+    {
+      "id": "ID-014",
+      "query": "Look up claim 'CLM-0014' and report its current status.",
+      "category": "id_lookup",
+      "answerable": true,
+      "expected_ids": [
+        "CLM-0014"
+      ],
+      "expected_facts": {
+        "status": "PAID"
+      }
+    },
+    {
+      "id": "ID-015",
+      "query": "Look up claim 'CLM-0015' and report its current status.",
+      "category": "id_lookup",
+      "answerable": true,
+      "expected_ids": [
+        "CLM-0015"
+      ],
+      "expected_facts": {
+        "status": "DENIED"
+      }
+    },
+    {
+      "id": "ID-016",
+      "query": "Look up claim 'CLM-0016' and report its current status.",
+      "category": "id_lookup",
+      "answerable": true,
+      "expected_ids": [
+        "CLM-0016"
+      ],
+      "expected_facts": {
+        "status": "APPROVED"
+      }
+    },
+    {
+      "id": "ID-017",
+      "query": "Look up claim 'CLM-0017' and report its current status.",
+      "category": "id_lookup",
+      "answerable": true,
+      "expected_ids": [
+        "CLM-0017"
+      ],
+      "expected_facts": {
+        "status": "DENIED"
+      }
+    },
+    {
+      "id": "ID-018",
+      "query": "Look up claim 'CLM-0018' and report its current status.",
+      "category": "id_lookup",
+      "answerable": true,
+      "expected_ids": [
+        "CLM-0018"
+      ],
+      "expected_facts": {
+        "status": "SUBMITTED"
+      }
+    },
+    {
+      "id": "ID-019",
+      "query": "Look up claim 'CLM-0019' and report its current status.",
+      "category": "id_lookup",
+      "answerable": true,
+      "expected_ids": [
+        "CLM-0019"
+      ],
+      "expected_facts": {
+        "status": "APPROVED"
+      }
+    },
+    {
+      "id": "ID-020",
+      "query": "Look up claim 'CLM-0020' and report its current status.",
+      "category": "id_lookup",
+      "answerable": true,
+      "expected_ids": [
+        "CLM-0020"
+      ],
+      "expected_facts": {
+        "status": "IN_REVIEW"
+      }
+    },
+    {
+      "id": "PAR-001",
+      "query": "Find the loss described as product liability and summarize what happened, including the claim reference.",
+      "category": "paraphrase",
+      "answerable": true,
+      "expected_ids": [
+        "CLM-0021"
+      ],
+      "expected_facts": {
+        "cause": "Product liability"
+      }
+    },
+    {
+      "id": "PAR-002",
+      "query": "Find the loss described as product liability and summarize what happened, including the claim reference.",
+      "category": "paraphrase",
+      "answerable": true,
+      "expected_ids": [
+        "CLM-0022"
+      ],
+      "expected_facts": {
+        "cause": "Product liability"
+      }
+    },
+    {
+      "id": "PAR-003",
+      "query": "Find the loss described as vandalism and summarize what happened, including the claim reference.",
+      "category": "paraphrase",
+      "answerable": true,
+      "expected_ids": [
+        "CLM-0023"
+      ],
+      "expected_facts": {
+        "cause": "Vandalism"
+      }
+    },
+    {
+      "id": "PAR-004",
+      "query": "Find the loss described as vandalism and summarize what happened, including the claim reference.",
+      "category": "paraphrase",
+      "answerable": true,
+      "expected_ids": [
+        "CLM-0024"
+      ],
+      "expected_facts": {
+        "cause": "Vandalism"
+      }
+    },
+    {
+      "id": "PAR-005",
+      "query": "Find the loss described as fire damage and summarize what happened, including the claim reference.",
+      "category": "paraphrase",
+      "answerable": true,
+      "expected_ids": [
+        "CLM-0025"
+      ],
+      "expected_facts": {
+        "cause": "Fire damage"
+      }
+    },
+    {
+      "id": "PAR-006",
+      "query": "Find the loss described as theft / burglary and summarize what happened, including the claim reference.",
+      "category": "paraphrase",
+      "answerable": true,
+      "expected_ids": [
+        "CLM-0026"
+      ],
+      "expected_facts": {
+        "cause": "Theft / burglary"
+      }
+    },
+    {
+      "id": "PAR-007",
+      "query": "Find the loss described as property damage and summarize what happened, including the claim reference.",
+      "category": "paraphrase",
+      "answerable": true,
+      "expected_ids": [
+        "CLM-0027"
+      ],
+      "expected_facts": {
+        "cause": "Property damage"
+      }
+    },
+    {
+      "id": "PAR-008",
+      "query": "Find the loss described as vandalism and summarize what happened, including the claim reference.",
+      "category": "paraphrase",
+      "answerable": true,
+      "expected_ids": [
+        "CLM-0028"
+      ],
+      "expected_facts": {
+        "cause": "Vandalism"
+      }
+    },
+    {
+      "id": "PAR-009",
+      "query": "Find the loss described as property damage and summarize what happened, including the claim reference.",
+      "category": "paraphrase",
+      "answerable": true,
+      "expected_ids": [
+        "CLM-0029"
+      ],
+      "expected_facts": {
+        "cause": "Property damage"
+      }
+    },
+    {
+      "id": "PAR-010",
+      "query": "Find the loss described as property damage and summarize what happened, including the claim reference.",
+      "category": "paraphrase",
+      "answerable": true,
+      "expected_ids": [
+        "CLM-0030"
+      ],
+      "expected_facts": {
+        "cause": "Property damage"
+      }
+    },
+    {
+      "id": "PAR-011",
+      "query": "Find the loss described as employee injury and summarize what happened, including the claim reference.",
+      "category": "paraphrase",
+      "answerable": true,
+      "expected_ids": [
+        "CLM-0031"
+      ],
+      "expected_facts": {
+        "cause": "Employee injury"
+      }
+    },
+    {
+      "id": "PAR-012",
+      "query": "Find the loss described as property damage and summarize what happened, including the claim reference.",
+      "category": "paraphrase",
+      "answerable": true,
+      "expected_ids": [
+        "CLM-0032"
+      ],
+      "expected_facts": {
+        "cause": "Property damage"
+      }
+    },
+    {
+      "id": "PAR-013",
+      "query": "Find the loss described as vandalism and summarize what happened, including the claim reference.",
+      "category": "paraphrase",
+      "answerable": true,
+      "expected_ids": [
+        "CLM-0033"
+      ],
+      "expected_facts": {
+        "cause": "Vandalism"
+      }
+    },
+    {
+      "id": "PAR-014",
+      "query": "Find the loss described as employee injury and summarize what happened, including the claim reference.",
+      "category": "paraphrase",
+      "answerable": true,
+      "expected_ids": [
+        "CLM-0034"
+      ],
+      "expected_facts": {
+        "cause": "Employee injury"
+      }
+    },
+    {
+      "id": "PAR-015",
+      "query": "Find the loss described as fire damage and summarize what happened, including the claim reference.",
+      "category": "paraphrase",
+      "answerable": true,
+      "expected_ids": [
+        "CLM-0035"
+      ],
+      "expected_facts": {
+        "cause": "Fire damage"
+      }
+    },
+    {
+      "id": "PAR-016",
+      "query": "Find the loss described as auto collision and summarize what happened, including the claim reference.",
+      "category": "paraphrase",
+      "answerable": true,
+      "expected_ids": [
+        "CLM-0036"
+      ],
+      "expected_facts": {
+        "cause": "Auto collision"
+      }
+    },
+    {
+      "id": "PAR-017",
+      "query": "Find the loss described as professional negligence and summarize what happened, including the claim reference.",
+      "category": "paraphrase",
+      "answerable": true,
+      "expected_ids": [
+        "CLM-0037"
+      ],
+      "expected_facts": {
+        "cause": "Professional negligence"
+      }
+    },
+    {
+      "id": "PAR-018",
+      "query": "Find the loss described as property damage and summarize what happened, including the claim reference.",
+      "category": "paraphrase",
+      "answerable": true,
+      "expected_ids": [
+        "CLM-0038"
+      ],
+      "expected_facts": {
+        "cause": "Property damage"
+      }
+    },
+    {
+      "id": "PAR-019",
+      "query": "Find the loss described as water damage and summarize what happened, including the claim reference.",
+      "category": "paraphrase",
+      "answerable": true,
+      "expected_ids": [
+        "CLM-0039"
+      ],
+      "expected_facts": {
+        "cause": "Water damage"
+      }
+    },
+    {
+      "id": "PAR-020",
+      "query": "Find the loss described as professional negligence and summarize what happened, including the claim reference.",
+      "category": "paraphrase",
+      "answerable": true,
+      "expected_ids": [
+        "CLM-0040"
+      ],
+      "expected_facts": {
+        "cause": "Professional negligence"
+      }
+    },
+    {
+      "id": "HOP-001",
+      "query": "For policy 'POL-0001', identify its holder and the claim files connected to it.",
+      "category": "multi_hop",
+      "answerable": true,
+      "expected_ids": [
+        "PH-0001",
+        "CLM-0037"
+      ],
+      "expected_hops": 2
+    },
+    {
+      "id": "HOP-002",
+      "query": "For policy 'POL-0003', identify its holder and the claim files connected to it.",
+      "category": "multi_hop",
+      "answerable": true,
+      "expected_ids": [
+        "PH-0003",
+        "CLM-0125"
+      ],
+      "expected_hops": 2
+    },
+    {
+      "id": "HOP-003",
+      "query": "For policy 'POL-0004', identify its holder and the claim files connected to it.",
+      "category": "multi_hop",
+      "answerable": true,
+      "expected_ids": [
+        "PH-0004",
+        "CLM-0091",
+        "CLM-0148"
+      ],
+      "expected_hops": 2
+    },
+    {
+      "id": "HOP-004",
+      "query": "For policy 'POL-0005', identify its holder and the claim files connected to it.",
+      "category": "multi_hop",
+      "answerable": true,
+      "expected_ids": [
+        "PH-0005",
+        "CLM-0106",
+        "CLM-0124"
+      ],
+      "expected_hops": 2
+    },
+    {
+      "id": "HOP-005",
+      "query": "For policy 'POL-0006', identify its holder and the claim files connected to it.",
+      "category": "multi_hop",
+      "answerable": true,
+      "expected_ids": [
+        "PH-0006",
+        "CLM-0009",
+        "CLM-0053",
+        "CLM-0079",
+        "CLM-0095"
+      ],
+      "expected_hops": 2
+    },
+    {
+      "id": "HOP-006",
+      "query": "For policy 'POL-0007', identify its holder and the claim files connected to it.",
+      "category": "multi_hop",
+      "answerable": true,
+      "expected_ids": [
+        "PH-0007",
+        "CLM-0001",
+        "CLM-0120"
+      ],
+      "expected_hops": 2
+    },
+    {
+      "id": "HOP-007",
+      "query": "For policy 'POL-0008', identify its holder and the claim files connected to it.",
+      "category": "multi_hop",
+      "answerable": true,
+      "expected_ids": [
+        "PH-0008",
+        "CLM-0140"
+      ],
+      "expected_hops": 2
+    },
+    {
+      "id": "HOP-008",
+      "query": "For policy 'POL-0009', identify its holder and the claim files connected to it.",
+      "category": "multi_hop",
+      "answerable": true,
+      "expected_ids": [
+        "PH-0009",
+        "CLM-0084"
+      ],
+      "expected_hops": 2
+    },
+    {
+      "id": "HOP-009",
+      "query": "For policy 'POL-0010', identify its holder and the claim files connected to it.",
+      "category": "multi_hop",
+      "answerable": true,
+      "expected_ids": [
+        "PH-0010",
+        "CLM-0028",
+        "CLM-0199"
+      ],
+      "expected_hops": 2
+    },
+    {
+      "id": "HOP-010",
+      "query": "For policy 'POL-0011', identify its holder and the claim files connected to it.",
+      "category": "multi_hop",
+      "answerable": true,
+      "expected_ids": [
+        "PH-0011",
+        "CLM-0031",
+        "CLM-0123",
+        "CLM-0138",
+        "CLM-0155"
+      ],
+      "expected_hops": 2
+    },
+    {
+      "id": "HOP-011",
+      "query": "For policy 'POL-0012', identify its holder and the claim files connected to it.",
+      "category": "multi_hop",
+      "answerable": true,
+      "expected_ids": [
+        "PH-0012",
+        "CLM-0012",
+        "CLM-0034"
+      ],
+      "expected_hops": 2
+    },
+    {
+      "id": "HOP-012",
+      "query": "For policy 'POL-0013', identify its holder and the claim files connected to it.",
+      "category": "multi_hop",
+      "answerable": true,
+      "expected_ids": [
+        "PH-0013",
+        "CLM-0048",
+        "CLM-0071",
+        "CLM-0083",
+        "CLM-0184"
+      ],
+      "expected_hops": 2
+    },
+    {
+      "id": "HOP-013",
+      "query": "For policy 'POL-0014', identify its holder and the claim files connected to it.",
+      "category": "multi_hop",
+      "answerable": true,
+      "expected_ids": [
+        "PH-0014",
+        "CLM-0058"
+      ],
+      "expected_hops": 2
+    },
+    {
+      "id": "HOP-014",
+      "query": "For policy 'POL-0015', identify its holder and the claim files connected to it.",
+      "category": "multi_hop",
+      "answerable": true,
+      "expected_ids": [
+        "PH-0015",
+        "CLM-0041",
+        "CLM-0082",
+        "CLM-0094"
+      ],
+      "expected_hops": 2
+    },
+    {
+      "id": "HOP-015",
+      "query": "For policy 'POL-0016', identify its holder and the claim files connected to it.",
+      "category": "multi_hop",
+      "answerable": true,
+      "expected_ids": [
+        "PH-0016",
+        "CLM-0024"
+      ],
+      "expected_hops": 2
+    },
+    {
+      "id": "HOP-016",
+      "query": "For policy 'POL-0017', identify its holder and the claim files connected to it.",
+      "category": "multi_hop",
+      "answerable": true,
+      "expected_ids": [
+        "PH-0017",
+        "CLM-0085",
+        "CLM-0113",
+        "CLM-0151"
+      ],
+      "expected_hops": 2
+    },
+    {
+      "id": "HOP-017",
+      "query": "For policy 'POL-0018', identify its holder and the claim files connected to it.",
+      "category": "multi_hop",
+      "answerable": true,
+      "expected_ids": [
+        "PH-0018",
+        "CLM-0133",
+        "CLM-0197"
+      ],
+      "expected_hops": 2
+    },
+    {
+      "id": "HOP-018",
+      "query": "For policy 'POL-0019', identify its holder and the claim files connected to it.",
+      "category": "multi_hop",
+      "answerable": true,
+      "expected_ids": [
+        "PH-0019",
+        "CLM-0076",
+        "CLM-0141"
+      ],
+      "expected_hops": 2
+    },
+    {
+      "id": "HOP-019",
+      "query": "For policy 'POL-0020', identify its holder and the claim files connected to it.",
+      "category": "multi_hop",
+      "answerable": true,
+      "expected_ids": [
+        "PH-0020",
+        "CLM-0049",
+        "CLM-0105",
+        "CLM-0154"
+      ],
+      "expected_hops": 2
+    },
+    {
+      "id": "HOP-020",
+      "query": "For policy 'POL-0021', identify its holder and the claim files connected to it.",
+      "category": "multi_hop",
+      "answerable": true,
+      "expected_ids": [
+        "PH-0021",
+        "CLM-0147",
+        "CLM-0185"
+      ],
+      "expected_hops": 2
+    },
+    {
+      "id": "AGG-001",
+      "query": "How many claim records have status APPROVED?",
+      "category": "aggregation",
+      "answerable": true,
+      "expected_value": 52,
+      "filters": {
+        "status": "APPROVED"
+      }
+    },
+    {
+      "id": "AGG-002",
+      "query": "How many claim records have status DENIED?",
+      "category": "aggregation",
+      "answerable": true,
+      "expected_value": 19,
+      "filters": {
+        "status": "DENIED"
+      }
+    },
+    {
+      "id": "AGG-003",
+      "query": "How many claim records have status IN_REVIEW?",
+      "category": "aggregation",
+      "answerable": true,
+      "expected_value": 51,
+      "filters": {
+        "status": "IN_REVIEW"
+      }
+    },
+    {
+      "id": "AGG-004",
+      "query": "How many claim records have status PAID?",
+      "category": "aggregation",
+      "answerable": true,
+      "expected_value": 41,
+      "filters": {
+        "status": "PAID"
+      }
+    },
+    {
+      "id": "AGG-005",
+      "query": "How many claim records have status SUBMITTED?",
+      "category": "aggregation",
+      "answerable": true,
+      "expected_value": 37,
+      "filters": {
+        "status": "SUBMITTED"
+      }
+    },
+    {
+      "id": "AGG-006",
+      "query": "Count policies whose type is AUTO_FLEET.",
+      "category": "aggregation",
+      "answerable": true,
+      "expected_value": 11,
+      "filters": {
+        "type": "AUTO_FLEET"
+      }
+    },
+    {
+      "id": "AGG-007",
+      "query": "Count policies whose type is COMMERCIAL_GENERAL_LIABILITY.",
+      "category": "aggregation",
+      "answerable": true,
+      "expected_value": 26,
+      "filters": {
+        "type": "COMMERCIAL_GENERAL_LIABILITY"
+      }
+    },
+    {
+      "id": "AGG-008",
+      "query": "Count policies whose type is COMMERCIAL_PROPERTY.",
+      "category": "aggregation",
+      "answerable": true,
+      "expected_value": 24,
+      "filters": {
+        "type": "COMMERCIAL_PROPERTY"
+      }
+    },
+    {
+      "id": "AGG-009",
+      "query": "Count policies whose type is PROFESSIONAL_LIABILITY.",
+      "category": "aggregation",
+      "answerable": true,
+      "expected_value": 23,
+      "filters": {
+        "type": "PROFESSIONAL_LIABILITY"
+      }
+    },
+    {
+      "id": "AGG-010",
+      "query": "Count policies whose type is WORKERS_COMPENSATION.",
+      "category": "aggregation",
+      "answerable": true,
+      "expected_value": 16,
+      "filters": {
+        "type": "WORKERS_COMPENSATION"
+      }
+    },
+    {
+      "id": "AGG-011",
+      "query": "How many claims cite vandalism as the cause?",
+      "category": "aggregation",
+      "answerable": true,
+      "expected_value": 26,
+      "filters": {
+        "cause": "Vandalism"
+      }
+    },
+    {
+      "id": "AGG-012",
+      "query": "How many claims cite property damage as the cause?",
+      "category": "aggregation",
+      "answerable": true,
+      "expected_value": 24,
+      "filters": {
+        "cause": "Property damage"
+      }
+    },
+    {
+      "id": "AGG-013",
+      "query": "How many claims cite professional negligence as the cause?",
+      "category": "aggregation",
+      "answerable": true,
+      "expected_value": 22,
+      "filters": {
+        "cause": "Professional negligence"
+      }
+    },
+    {
+      "id": "AGG-014",
+      "query": "How many claims cite employee injury as the cause?",
+      "category": "aggregation",
+      "answerable": true,
+      "expected_value": 22,
+      "filters": {
+        "cause": "Employee injury"
+      }
+    },
+    {
+      "id": "AGG-015",
+      "query": "How many claims cite product liability as the cause?",
+      "category": "aggregation",
+      "answerable": true,
+      "expected_value": 21,
+      "filters": {
+        "cause": "Product liability"
+      }
+    },
+    {
+      "id": "AGG-016",
+      "query": "How many claims cite water damage as the cause?",
+      "category": "aggregation",
+      "answerable": true,
+      "expected_value": 21,
+      "filters": {
+        "cause": "Water damage"
+      }
+    },
+    {
+      "id": "AGG-017",
+      "query": "How many claims cite theft / burglary as the cause?",
+      "category": "aggregation",
+      "answerable": true,
+      "expected_value": 20,
+      "filters": {
+        "cause": "Theft / burglary"
+      }
+    },
+    {
+      "id": "AGG-018",
+      "query": "How many claims cite auto collision as the cause?",
+      "category": "aggregation",
+      "answerable": true,
+      "expected_value": 17,
+      "filters": {
+        "cause": "Auto collision"
+      }
+    },
+    {
+      "id": "AGG-019",
+      "query": "How many fraud flags are present across all claims?",
+      "category": "aggregation",
+      "answerable": true,
+      "expected_value": 42,
+      "filters": {}
+    },
+    {
+      "id": "AGG-020",
+      "query": "How many policy records are in the graph?",
+      "category": "aggregation",
+      "answerable": true,
+      "expected_value": 100,
+      "filters": {}
+    },
+    {
+      "id": "NEG-001",
+      "query": "What records are connected to the external reference 'EXT/2099/900000'?",
+      "category": "negative",
+      "answerable": false,
+      "expected_ids": []
+    },
+    {
+      "id": "NEG-002",
+      "query": "What records are connected to the external reference 'EXT/2099/900001'?",
+      "category": "negative",
+      "answerable": false,
+      "expected_ids": []
+    },
+    {
+      "id": "NEG-003",
+      "query": "What records are connected to the external reference 'EXT/2099/900002'?",
+      "category": "negative",
+      "answerable": false,
+      "expected_ids": []
+    },
+    {
+      "id": "NEG-004",
+      "query": "What records are connected to the external reference 'EXT/2099/900003'?",
+      "category": "negative",
+      "answerable": false,
+      "expected_ids": []
+    },
+    {
+      "id": "NEG-005",
+      "query": "What records are connected to the external reference 'EXT/2099/900004'?",
+      "category": "negative",
+      "answerable": false,
+      "expected_ids": []
+    },
+    {
+      "id": "NEG-006",
+      "query": "What records are connected to the external reference 'EXT/2099/900005'?",
+      "category": "negative",
+      "answerable": false,
+      "expected_ids": []
+    },
+    {
+      "id": "NEG-007",
+      "query": "What records are connected to the external reference 'EXT/2099/900006'?",
+      "category": "negative",
+      "answerable": false,
+      "expected_ids": []
+    },
+    {
+      "id": "NEG-008",
+      "query": "What records are connected to the external reference 'EXT/2099/900007'?",
+      "category": "negative",
+      "answerable": false,
+      "expected_ids": []
+    },
+    {
+      "id": "NEG-009",
+      "query": "What records are connected to the external reference 'EXT/2099/900008'?",
+      "category": "negative",
+      "answerable": false,
+      "expected_ids": []
+    },
+    {
+      "id": "NEG-010",
+      "query": "What records are connected to the external reference 'EXT/2099/900009'?",
+      "category": "negative",
+      "answerable": false,
+      "expected_ids": []
+    },
+    {
+      "id": "NEG-011",
+      "query": "What records are connected to the external reference 'EXT/2099/900010'?",
+      "category": "negative",
+      "answerable": false,
+      "expected_ids": []
+    },
+    {
+      "id": "NEG-012",
+      "query": "What records are connected to the external reference 'EXT/2099/900011'?",
+      "category": "negative",
+      "answerable": false,
+      "expected_ids": []
+    },
+    {
+      "id": "NEG-013",
+      "query": "What records are connected to the external reference 'EXT/2099/900012'?",
+      "category": "negative",
+      "answerable": false,
+      "expected_ids": []
+    },
+    {
+      "id": "NEG-014",
+      "query": "What records are connected to the external reference 'EXT/2099/900013'?",
+      "category": "negative",
+      "answerable": false,
+      "expected_ids": []
+    },
+    {
+      "id": "NEG-015",
+      "query": "What records are connected to the external reference 'EXT/2099/900014'?",
+      "category": "negative",
+      "answerable": false,
+      "expected_ids": []
+    },
+    {
+      "id": "NEG-016",
+      "query": "What records are connected to the external reference 'EXT/2099/900015'?",
+      "category": "negative",
+      "answerable": false,
+      "expected_ids": []
+    },
+    {
+      "id": "NEG-017",
+      "query": "What records are connected to the external reference 'EXT/2099/900016'?",
+      "category": "negative",
+      "answerable": false,
+      "expected_ids": []
+    },
+    {
+      "id": "NEG-018",
+      "query": "What records are connected to the external reference 'EXT/2099/900017'?",
+      "category": "negative",
+      "answerable": false,
+      "expected_ids": []
+    },
+    {
+      "id": "NEG-019",
+      "query": "What records are connected to the external reference 'EXT/2099/900018'?",
+      "category": "negative",
+      "answerable": false,
+      "expected_ids": []
+    },
+    {
+      "id": "NEG-020",
+      "query": "What records are connected to the external reference 'EXT/2099/900019'?",
+      "category": "negative",
+      "answerable": false,
+      "expected_ids": []
+    }
+  ]
+}

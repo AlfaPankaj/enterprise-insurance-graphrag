@@ -37,7 +37,7 @@ def build_cache_key(**parts: object) -> str:
     return hashlib.sha256(body.encode("utf-8")).hexdigest()
 
 
-def graph_revision(driver) -> tuple[str, int] | None:
+def graph_revision(driver, tenant_id: str | None = None) -> tuple[str, int] | None:
     """(dataset name, revision) of the loaded graph; None when unreadable.
 
     ``rev`` is bumped by every write path (ingest/seed/CDC), so the cache key
@@ -45,10 +45,18 @@ def graph_revision(driver) -> tuple[str, int] | None:
     """
     try:
         with driver.session() as session:
-            row = session.run(
-                "MATCH (d:Dataset) RETURN d.name AS name, coalesce(d.rev, 0) AS rev "
-                "ORDER BY d.name LIMIT 1"
-            ).single()
+            if tenant_id and settings.TENANT_MODE == "column":
+                row = session.run(
+                    "MATCH (d:Dataset {tenant_id:$tenant}) "
+                    "RETURN d.name AS name, coalesce(d.rev,0) AS rev "
+                    "ORDER BY coalesce(d.updated_at, datetime({epochMillis:0})) DESC, d.name "
+                    "LIMIT 1", tenant=tenant_id,
+                ).single()
+            else:
+                row = session.run(
+                    "MATCH (d:Dataset) RETURN d.name AS name, coalesce(d.rev, 0) AS rev "
+                    "ORDER BY d.name LIMIT 1"
+                ).single()
         if not row:
             return None
         return (row["name"], int(row["rev"]))
@@ -56,12 +64,15 @@ def graph_revision(driver) -> tuple[str, int] | None:
         return None
 
 
-def bump_revision(runner) -> None:
-    """Increment the Dataset marker's rev (run inside a write transaction).
-
-    Any graph mutation calls this so cached answers cannot survive a write.
-    """
-    runner.run("MATCH (d:Dataset) SET d.rev = coalesce(d.rev, 0) + 1")
+def bump_revision(runner, tenant_id: str | None = None) -> None:
+    """Increment only the mutated tenant's Dataset marker revisions."""
+    if tenant_id and settings.TENANT_MODE == "column":
+        runner.run(
+            "MATCH (d:Dataset {tenant_id:$tenant}) "
+            "SET d.rev=coalesce(d.rev,0)+1", tenant=tenant_id,
+        )
+    else:
+        runner.run("MATCH (d:Dataset) SET d.rev = coalesce(d.rev, 0) + 1")
 
 
 class QueryCache:
